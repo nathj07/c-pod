@@ -1,0 +1,2 @@
+# Ignore RPMS - we never put these in GIT!
+*.rpm
