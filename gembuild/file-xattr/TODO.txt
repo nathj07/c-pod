@@ -1,0 +1,5 @@
+Things to complete:
+
+* Symbolic links are always followed, so attributes cannot be manipulated on links. In future some method of selecting this behaviour should be implemented.
+
+* <i>Create or Replace</i> semantics are currently in effect. The option to select <i>Create</i> or <i>Replace</i> as two separate cases should be provided.

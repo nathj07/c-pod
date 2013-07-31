@@ -1,0 +1,28 @@
+This Ruby library implements an interface to Extended Attributes. Support for this
+varies from OS to OS and Filesystem to Filesystem. This package has been coded and
+tested for Mac OS X (versions 10.4+) and Redhat Enterprise Linux 5.4+. It will probably
+not build on other platforms.
+
+This library inherits the limitations of the underlying filesystem EA support. 
+These limitations are on name length, name syntax and value length. There may 
+also be limitations on the total length of EA's. Providing you observe 'reasonable'
+limits you should be OK. Reasonable limits are:
+
+* Name lengths < 127 chars,
+* Name syntax: Always begin with 'user.'
+* Value length: < 2kB
+* Total length: < 4kB
+
+Check your FS documentation for specific details. This has been tested with:
+
+[XFS] Limits: Name 255, Individual 64k, Total ~250k. Requires 'user.' prefix.
+
+[EXT3] Limits: Name 255, Individual 4k, Total 4k. Requires 'user.' prefix.
+
+[HFS+] Limits: Name 127, Individual ~3k. Total ~11k. 'user.' prefix not required.
+
+[S3FS] Limits: Name ~127, Individual 2k, Total 2k.  'user.' prefix not required.
+
+[HGFS] VMwares filesystem does NOT support EAs
+
+*Note* In the above ~ denotes the largest value which tested successfully. The actual limit may be higher.
