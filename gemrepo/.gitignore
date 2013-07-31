@@ -1,0 +1,7 @@
+# This file here to allow git to keep this directory tree, but not to store any files.
+# The Gems and indices that go in here can be rebuilt from the gembuild directory
+# So we don't clutter up the repository with binaries.
+*
+!.gitignore
+!README.md
+!gems
