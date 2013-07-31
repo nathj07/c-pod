@@ -1,0 +1,13 @@
+require 'bundler'
+Bundler::GemHelper.install_tasks
+
+desc "install in Blurb's local gem repository and updates the gem index"
+task :install_repo => [:build] do
+  version = Deploynotify::VERSION
+  gemfile = "pkg/deploynotify-#{version}.gem"
+  destination = "../../gemrepo/gems"
+  
+  puts "copying #{gemfile} to #{destination}"
+  system "cp #{gemfile} #{destination}"
+  system "cd #{destination}/..; gem generate_index -d ."
+end

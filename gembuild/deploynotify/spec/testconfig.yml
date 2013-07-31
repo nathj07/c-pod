@@ -1,0 +1,21 @@
+dry_run: true
+
+project_name: bookify
+
+bugzilla:
+    user: deploy@blurb.com
+    passwd: depl0y
+    
+pivotal:
+    project_ids: 
+        - 62109
+        - 75805
+    api_token: e687354c0b3fe26c6b56299218e0566b
+
+jira:
+    user: deploy
+    passwd: phulst9334
+
+email:
+    from: deploy@blurb.com
+    notify_list: deployment-notification@blurb.com

@@ -1,0 +1,27 @@
+
+PREREQUISITES
+
+to install all gem dependencies, simply run 'bundle' in this directory
+
+
+BUILDING
+
+to build this gem, simply call
+rake build
+this should build the .gem file in the pkg directory
+
+or call 
+
+rake install 
+
+to install the gem in your local gem repository (for testing)
+
+before committing an updated version of the gem to the repo, you'll probably want to 
+increment the version number. This can be done in lib/deploynotify/version.rb
+
+Finally, to install in the repo, call 
+
+rake install_repo
+to put the gem in the right place in this repo repository and update the gem index. 
+
+
