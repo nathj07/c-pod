@@ -1,2 +1,32 @@
-# Ignore RPMS - we never put these in GIT!
-*.rpm
+# Ignoring all .DS_Store files
+.DS_Store
+
+# Ignoring all emacs files
+*\#*
+
+# Ignoring all idea files
+.idea/
+
+#Redcar
+.redcar/*
+
+# Ignore ctags file
+.tmtags
+tmtags
+tags
+
+# VIM editor swap and default backup files
+.*.swp
+
+#ignore other editor work
+*~
+
+# bundler files
+.bundle
+
+# ignore sass' cache
+sass-cache
+.sass-cache
+
+# Ignore textmate project files
+*.tmproj

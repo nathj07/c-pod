@@ -1,0 +1,12 @@
+#!/bin/bash
+# Create a configuration for the PXE boot
+# Incomplete - and abandoned! PXE not available here yet...
+#
+pxeos -a \
+-i "Centos VM" \
+-pHTTP \
+-D0 \
+-s system.repo.myco.com \
+-L rhel54dvd \
+-K http://system.repo.myco.com/downloads/centos-vm.ks \
+centos_64

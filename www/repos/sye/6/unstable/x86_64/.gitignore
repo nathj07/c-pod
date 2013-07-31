@@ -1,0 +1,4 @@
+# This file here to allow git to keep this directory tree, but not to store any files.
+# The RPMs that go in here can be rebuilt from the original tgz files and patches.
+# So we don't clutter up the repository with binaries.
+*.rpm

@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+#
+# Rebuild the yum and gem repository indexes
+#
+require 'fileutils'
+require 'optparse'
+
+def info msg
+    print "\033[32m#{msg}\033[0m"
+end
+
+OptionParser.new do |opts|
+    opts.banner = "Script to rebuild repo indexes"
+
+    opts.on( '-?', '--help', 'Display this screen' ) do
+        puts opts
+        exit
+    end
+    $force = nil
+    $verb = 'Updating'
+    opts.on('-f', '--force', "Force the metadata to be rebuilt") do
+        $force = true
+	$verb = 'Building'
+    end
+    opts.parse!
+    if ARGV.size > 0
+	puts opts.help 
+	exit 2
+    end
+end
+
+ENV['PATH'] ="/usr/local/bin:#{ENV['PATH']}"
+
+unless Process.euid == 0 
+    puts "Hey - you should run this as root"
+    exit 2
+end
+
+puts "Running Incremental Build - Use -f if you want to force rebuild" unless $force
+
+FileUtils.cd '/data/repo'
+repolist = { 
+	'Unstable Custom Centos 5 Packages'   => 'sye/5/unstable',
+	'Custom Centos 5 Packages'	    => 'sye/5/stable',
+	'Unstable Custom Centos 6 Packages'   => 'sye/6/unstable',
+	'Custom Centos 6 Packages'	    => 'sye/6/stable',
+}	
+repolist.each_pair do |desc, dir|
+    info "#{$verb} index for #{desc}\n"
+    flags = $force ? "": "-C"
+    system "createrepo #{flags} www/repos/#{dir}"
+    raise "createrepo command failed (#{$?.exitstatus}): Did you install the 'createrepo' package?" unless $?.exitstatus == 0
+    FileUtils.chown_R(nil, 'apache', "www/repos/#{dir}") rescue nil
+end
+info "#{$verb} SYE Custom Gem Index\n"
+flags = $force ? "": "--update"
+system "gem generate_index #{flags} -d gemrepo"
+FileUtils.chown_R(nil, 'apache', 'gemrepo') rescue nil
+
+info "Complete\n"
+
+# vim: set sts=4 sw=4 ts=8:

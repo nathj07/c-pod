@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# A short script to wget a specific version of the postgres packages
+# and add them to the repo
+
+VERSION=8.3.8-1PGDG.rhel5
+ARCH=x86_64
+URL=http://yum.pgsqlrpms.org/8.3/redhat/rhel-5-$ARCH
+WGET=wget
+
+pushd RPMS/$ARCH
+for p in postgresql-server postgresql-libs postgresql-devel postgresql-contrib postgresql; do
+	rm $p-[0-9]*
+	$WGET "$URL/$p-$VERSION.$ARCH.rpm"
+done 
+
+rm compat-postgresql-libs-4-*.rpm
+$WGET "$URL/compat-postgresql-libs-4-1PGDG.rhel5.$ARCH.rpm"
+
+popd
+
+createrepo RPMS

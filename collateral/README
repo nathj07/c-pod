@@ -1,0 +1,4 @@
+This directory contains things that are or maybe useful.
+ * setuppixie - Creating PXE boot tftp filetrees (not used)
+ * shrinkvmt - Creating a subset of the VMware tools
+ * ruby.macros - what you need to establish the rpm build environment for Ruby
