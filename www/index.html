@@ -7,18 +7,24 @@ This server hosts all things used in configuring our OS and application environm
 <li> <a href="/downloads">Downloads</a> for various things
 <li> <a href="ks/KICKSTART.html">Kickstart Configurations</a>
 <li> <a href="#gems">GEM Repository</a>
+<li> <a href="#yumrepos">YUM Repositories</a>
+<ul>
 <li> <a href="#stable">Stable RPMs</a> with our customizations
 <li> <a href="#unstable">Unstable RPMs</a> under testing
-<li> <a href="#centos_repo">CentOS Package Repository</a> from the Distribution DVD
-<li> <a href="#centos_dvd">CentOS Distribution DVD</a> for network installs
-<li> <a href="#sources">RPM Package Sources</a>
+<li> <a href="#sources">RPM Source Packages</a>
 </ul>
-Note that our current standard build of Centos is <b>5.8</b> but <b>6.2</b> is being tested now...
+<li> <a href="#centos">CentOS</a>
+<ul>
+<li> <a href="#centos_repo">CentOS Package Repository</a> for network installs
+<li> <a href="#centos_dvd">CentOS Distribution DVD</a> from the Distribution DVD
+</ul>
+</ul>
+Note that our current standard build of Centos is <b>5.9</b> but <b>6.4</b> is being tested now...
 
 <h2 id="downloads">Downloads</h2>
 There are <a href="downloads">other files</a> that we rely on. For example:
 <ul>
-<li> centosboot.iso - A minimal boot image (~10Mb). Download this and boot from it to obtain a prompt from which you can choose different types of install. For a networked kickstart install type <tt>linux ks=http://repo-st.oak.iparadigms.com/downloads/centos-vm.ks</tt> to perform a VM install. This file is symlinked to the current iParadigms SYE version specific file.
+<li> centosboot.iso - A minimal boot image (~10Mb). Download this and boot from it to obtain a prompt from which you can choose different types of install. For a networked kickstart install type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos-vm.ks</tt> to perform a VM install. This file is symlinked to the current SYE version specific file.
 <li> The latest copy of VMware tools
 <li> Git for Mac
 </ul>
@@ -26,63 +32,65 @@ There are <a href="downloads">other files</a> that we rely on. For example:
 <h2 id="gems">GEM Repository</h2>
 We have created some of our own GEMS, so a GEM repository has been setup. To use this add the <i>source</i> option to your GEM installs:
 <pre>
-gem install --source http://repo-st.oak.iparadigms.com/gem_repo <gem-name>
+gem install --source http://<!--#echo var="SERVER_NAME" -->/gem_repo <gem-name>
 </pre>
-Or you can <a href="/gems/">download them directly</a> and install locally. Most of our Gems are sourced from rubygems.org and cached by bundler, but we do keep some here in case.
+Or you can <a href="/gems/">download them directly</a> and install locally.
 <p>
-<h2 id="unstable">Unstable RPMs for Testing</h2>
+<h2 id="yumrepos">YUM Repositories</h2>
+
+<h3 id="stable">Custom RPMs (Stable)</h3>
+<p>
+In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/sye.repo</tt> with the following contents: 
+<pre>
+[sye]
+name=SYE Custom RPMs for Centos $releasever - $basearch
+baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/sye/$releasever/stable/
+enabled=1
+gpgcheck=0
+</pre>
+<p/>
+<a href="/repos/sye/5/stable/">Browse the SYE Custom RPMs</a>
+
+<h3 id="unstable">Unstable Custom RPMs for Testing</h3>
+<p>
+When developing a new release of a custom RPM this repository is used. This is because YUM repos don't readily support multiple versions.
 <p>
 In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/sye_unstable.repo</tt> with the following contents: 
 <pre>
 [sye_unstable]
 name=Unstable RPMs for Centos $releasever - $basearch
-baseurl=http://repo-st.oak.iparadigms.com/repos/sye/$releasever/unstable/
+baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/sye/$releasever/unstable/
 enabled=1
 gpgcheck=0
 </pre>
-<ul>
-<li><a href="/repos/sye/5/unstable/">Browse the Unstable RPMs</a>
-</ul>
-<h2 id="stable">Custom RPMs</h2>
-<p>
-In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/sye.repo</tt> with the following contents: 
-<pre>
-[sye]
-name=System Team Custom RPMs for Centos $releasever - $basearch
-baseurl=http://repo-st.oak.iparadigms.com/repos/sye/$releasever/stable/
-enabled=1
-gpgcheck=0
-</pre>
-<ul>
-<li><a href="/repos/sye/5/stable/">Browse the iParadigms SYE Stable RPMs</a>
-</ul>
-We have <a href="/srpms">Source Packages</a> for the following (among others):
-<ul>
-<li> ruby-enterprise-shadow - A rebuild of ruby-shadow to work with Enterprise Ruby. The path needs changing as do the dependencies.
-<li> ImageMagick-6.5.7 -  A rebuild that doesn't need the latest version of GLIBC
-<li> git - rpmbuild --rebuild --without docs the-src-rpm
-</ul>
-<h2 id="centos_repo">Centos Package Repository</h2>
-<p>
-In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/centosdvd.repo</tt> with the following contents: 
-<ul>
-<li><a href="/repos/centos/5/repo/">Browse the Distribution DVD Repository</a>
-</ul>
-<p>
-<h2 id="centos_repo">CentOS Package Repository</h2>
+<a href="/repos/sye/5/unstable/">Browse the SYE Unstable Custom RPMs</a>
+
+<h3 id="sources">Source Packages</h3>
+Here are all our <a href="/srpms">Source Packages</a>
+
+<h2 id="centos">CentOS</h2>
+We maintain the following here to save network bandwidth. TODO - ADD 5/6 SELECTORS
+<h3 id="centos_repo">CentOS Package Repository</h3>
 <p>
 In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/centosdvd.repo</tt> with the following contents: 
 <pre>
-[centosdvd]
+[centos_repo]
 name=CentOS Enterprise Linux Distribution DVD - x86_64
-baseurl=http://repo-st.oak.iparadigms.com/repos/centos/$releasever/repo/
+baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/centos/$releasever/repo/
 enabled=1
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5
 exclude=postgresql*
 </pre>
+<p>
+<a href="/repos/centos/5/repo/">Browse the Distribution DVD Repository</a>
+<p>
+<h2 id="centos_dvd">CentOS Distribution DVD</h2>
+We have mounted the latest DVD images for browsing:
+<p>
 <ul>
-<li><a href="/repos/centos/5/repo/">Browse the CentOS Distribution DVD Repository</a>
+<li><a href="/repos/centos/5/dvd/">CentOS 5 Distribution DVD</a>
+<li><a href="/repos/centos/6/dvd/">CentOS 6 Distribution DVD</a>
 </ul>
 </body>
 </html>

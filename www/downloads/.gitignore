@@ -1,3 +1,0 @@
-# We want this directory to exist in the tree but we don't want to store binaries in here
-*
-!.gitignore
