@@ -48,7 +48,7 @@ repolist = {
 repolist.each_pair do |desc, dir|
     info "#{$verb} index for #{desc}\n"
     flags = $force ? "": "-C"
-    system "createrepo #{flags} www/repos/#{dir}"
+    system "createrepo #{flags} -s sha www/repos/#{dir}"
     raise "createrepo command failed (#{$?.exitstatus}): Did you install the 'createrepo' package?" unless $?.exitstatus == 0
     FileUtils.chown_R(nil, 'apache', "www/repos/#{dir}") rescue nil
 end
