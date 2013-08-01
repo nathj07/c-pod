@@ -10,6 +10,6 @@ keyboard us
 firewall --disabled
 authconfig --enableshadow --enablemd5
 selinux --disabled
-# For RHEL 6 if we say --utc it assumes the given VMware fusion time is UTC and it is actually PST
+# For Centos 6 if we say --utc it assumes the given VMware fusion time is UTC and it is actually PST
 # so your clock winds up 5 hours behind!
 timezone --utc America/Los_Angeles

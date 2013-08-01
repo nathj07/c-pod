@@ -14,16 +14,4 @@ git
 nss-mdns
 pam_ldap
 nss-pam-ldapd
-ruby
-irb
 yum-plugin-priorities
-# These are for building new rubies (taken from rvm notes)
-gcc-c++
-patch
-readline
-readline-devel
-zlib
-zlib-devel
-libyaml-devel
-libffi-devel
-openssl-devel

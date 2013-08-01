@@ -1,2 +1,2 @@
-# Including constants for Kickstart configs from globals.ks
-<!--#set var="nameservers" value="10.10.30.70,10.0.1.70" -->
+# Constants for Kickstart configs from include/globals.ks
+<!--#set var="nameservers" value="174.47.2.240 67.203.111.173" -->

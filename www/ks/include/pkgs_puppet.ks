@@ -1,1 +1,0 @@
-pkgs_puppet-rhel5.ks

@@ -1,1 +1,0 @@
-ksrepo-rhel5.ks
