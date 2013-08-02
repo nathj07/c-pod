@@ -1,5 +1,5 @@
-Repository for Systems Team
-===========================
+Repo Repository 
+===============
 
 This GIT repository contains all the required packages for our software as well
 as the repository structure (both YUM and RubyGems) to distribute them.
@@ -40,7 +40,7 @@ Naming Conventions for YUM repos
 --------------------------------
 	
 The names of the YUM repositories are standardized so that we can use the $releasever variable.
-This enables us to have a single /etc/yum.repos.conf/sye.repo file that automatically
+This enables us to have a single /etc/yum.repos.conf/custom.repo file that automatically
 points to the correct place.
 
 The repo names are of the form:
@@ -51,9 +51,14 @@ Where:
 
 * OSNAME is one of:
 ** 'rhel', 'centos', 'fedora' etc.  (We only use centos right now)
-** 'sye' is used for our custom packages
+** 'custom' is used for our custom packages
 * $releasever is supplied by the OS - 6Server, 5Server (for RedHat), 5, 6 (for Centos) etc.
 * TYPE is:
 ** 'dvd' for the whole DVD, 'repo' for the original packages, 'updates' for updates. Note 
 the last two are not implemented - you can just go out to the web.
-** For the 'sye' packages we have 'stable' and 'unstable', corresponding to the environment.
+** For the 'custom' packages we have 'stable' and 'unstable', corresponding to the environment.
+=======
+repo
+====
+
+The repo for repo
