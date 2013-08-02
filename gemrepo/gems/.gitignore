@@ -1,2 +1,0 @@
-# We want this directory to exist in our tree, but not to store the gems it contains
-*.gem

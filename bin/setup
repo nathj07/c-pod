@@ -1,0 +1,19 @@
+# Setup as a web repo server
+#
+base=/data
+mkdir -p $data/gem_repo
+mkdir -p $data/gem_repo/gems
+mkdir -p $data/yum_repos/centos/5/dvd
+mkdir -p $data/yum_repos/centos/6/dvd
+mkdir -p $data/yum_repos/custom/5/unstable
+mkdir -p $data/yum_repos/custom/5/unstable/noarch
+mkdir -p $data/yum_repos/custom/5/unstable/x86_64
+ln -sf $data/yum_repos/custom/5Server
+mkdir -p $data/yum_repos/custom/6/stable
+mkdir -p $data/yum_repos/custom/6/stable/noarch
+mkdir -p $data/yum_repos/custom/6/stable/x86_64
+mkdir -p $data/yum_repos/custom/6/unstable
+mkdir -p $data/yum_repos/custom/6/unstable/noarch
+mkdir -p $data/yum_repos/custom/6/unstable/x86_64
+mkdir -p $data/yum_repos/custom/6Server
+

@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+#
+# Download and mount the disk images
+# Create appropriate links
+#
+require 'optparse'
+require 'fileutils'
+
+base = File.absolute_path('../..', File.dirname(__FILE__))
+arch = 'x86_64'
+mirror='http://centos.mirror.freedomvoice.com'
+force = false
+
+OptionParser.new do |opts|
+    opts.banner = "Script to download, mount and link OS distributions"
+
+    opts.on( '-?', '--help', 'Display this screen' ) do
+        puts opts
+        exit
+    end
+    opts.on('-f', '--[no]-force', "Remove and re-create existing links") do |m|
+	force = m
+    end
+    opts.on('-m', '--mirror', String, "The CentOS mirror site to use (default: #{mirror}") do |m|
+	mirror = m
+    end
+    opts.parse!
+    if ARGV.size > 0
+	puts opts.help 
+	exit 2
+    end
+end
+
+unless Process.euid == 0 
+    puts "Hey - you need to run this as root"
+    exit 2
+end
+
+versionset = {
+    '5.9' => { 'bin-DVD-1of2' => 1, 'bin-DVD-2of2' => 2, netinstall: 'net' },
+    '6.4' => { 'bin-DVD1' => 1, 'bin-DVD2' => 2, 'netinstall' => 'net', 'minimal' => 'min' }
+} 
+
+versionset.keys.each do |version|
+    versionset[version].each do |name,shortname|
+	imagefile = "CentOS-#{version}-#{arch}-#{name}.iso"
+	FileUtils.cd "#{base}/isos"
+	unless File.exist? imagefile
+		puts "Downloading #{imagefile}..."
+		`curl -O -# #{mirror}/#{version}/isos/#{arch}/#{imagefile}`
+	end
+	FileUtils.mkdir_p "#{base}/osdisks/centos#{version}-#{shortname}"
+	`mount -o loop -t iso9660 #{base}/isos/#{imagefile} #{base}/osdisks/centos#{version}-#{shortname}`
+    end
+end
+
+# vim: set sts=4 sw=4 ts=8:

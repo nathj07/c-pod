@@ -1,6 +1,9 @@
 # The repositories used during Kickstart
 # Note that these are not persisted after installation, for that
-# use the post-install 'sye_repo' fragment
+# use the post-install 'custom_repo' fragment
 
-repo  --name=sye_repo --baseurl="http://<!--#echo var=SERVER_ADDR -->/repos/sye/5/stable/"
-repo  --name=updates --baseurl="http://<!--#echo var=SERVER_ADDR -->/repos/centos/5/updates/"
+repo  --name=custom --baseurl="http://<!--#echo var=SERVER_ADDR -->/repos/custom/5/stable/"
+repo  --name=epel --baseurl="http://<!--#echo var=SERVER_ADDR -->/repos/epel/5/"
+
+# Don't download and host the updates
+# repo  --name=updates --baseurl="http://<!--#echo var=SERVER_ADDR -->/repos/centos/5/updates/"
