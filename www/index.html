@@ -24,7 +24,7 @@ Note that our current standard build of Centos is <b>5.9</b> but <b>6.4</b> is b
 <h2 id="downloads">Downloads</h2>
 There are <a href="downloads">other files</a> that we rely on. For example:
 <ul>
-<li> centosboot.iso - A minimal boot image (~10Mb). Download this and boot from it to obtain a prompt from which you can choose different types of install. For a networked kickstart install type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos-vm.ks</tt> to perform a VM install. This file is symlinked to the current SYE version specific file.
+<li> centosboot.iso - A minimal boot image (~10Mb). Download this and boot from it to obtain a prompt from which you can choose different types of install. For a networked kickstart install type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos-vm.ks</tt> to perform a VM install. This file is symlinked to the current Custom version specific file.
 <li> The latest copy of VMware tools
 <li> Git for Mac
 </ul>
@@ -40,30 +40,30 @@ Or you can <a href="/gems/">download them directly</a> and install locally.
 
 <h3 id="stable">Custom RPMs (Stable)</h3>
 <p>
-In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/sye.repo</tt> with the following contents: 
+In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/custom.repo</tt> with the following contents: 
 <pre>
-[sye]
-name=SYE Custom RPMs for Centos $releasever - $basearch
-baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/sye/$releasever/stable/
+[custom]
+name=Custom RPMs for Centos $releasever - $basearch
+baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/custom/$releasever/stable/
 enabled=1
 gpgcheck=0
 </pre>
 <p/>
-<a href="/repos/sye/5/stable/">Browse the SYE Custom RPMs</a>
+<a href="/repos/custom/5/stable/">Browse the Custom RPMs</a>
 
 <h3 id="unstable">Unstable Custom RPMs for Testing</h3>
 <p>
 When developing a new release of a custom RPM this repository is used. This is because YUM repos don't readily support multiple versions.
 <p>
-In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/sye_unstable.repo</tt> with the following contents: 
+In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/custom_unstable.repo</tt> with the following contents: 
 <pre>
-[sye_unstable]
+[custom_unstable]
 name=Unstable RPMs for Centos $releasever - $basearch
-baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/sye/$releasever/unstable/
+baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/custom/$releasever/unstable/
 enabled=1
 gpgcheck=0
 </pre>
-<a href="/repos/sye/5/unstable/">Browse the SYE Unstable Custom RPMs</a>
+<a href="/repos/custom/5/unstable/">Browse the Unstable Custom RPMs</a>
 
 <h3 id="sources">Source Packages</h3>
 Here are all our <a href="/srpms">Source Packages</a>
