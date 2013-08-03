@@ -44,12 +44,12 @@ In order to use this repository you will need to create the file <tt>/etc/yum.re
 <pre>
 [custom]
 name=Custom RPMs for Centos $releasever - $basearch
-baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/custom/$releasever/stable/
+baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/custom/$releasever/stable/
 enabled=1
 gpgcheck=0
 </pre>
 <p/>
-<a href="/repos/custom/5/stable/">Browse the Custom RPMs</a>
+<a href="/yum_repos/custom/5/stable/">Browse the Custom RPMs</a>
 
 <h3 id="unstable">Unstable Custom RPMs for Testing</h3>
 <p>
@@ -59,11 +59,11 @@ In order to use this repository you will need to create the file <tt>/etc/yum.re
 <pre>
 [custom_unstable]
 name=Unstable RPMs for Centos $releasever - $basearch
-baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/custom/$releasever/unstable/
+baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/custom/$releasever/unstable/
 enabled=1
 gpgcheck=0
 </pre>
-<a href="/repos/custom/5/unstable/">Browse the Unstable Custom RPMs</a>
+<a href="/yum_repos/custom/5/unstable/">Browse the Unstable Custom RPMs</a>
 
 <h3 id="sources">Source Packages</h3>
 Here are all our <a href="/srpms">Source Packages</a>
@@ -76,21 +76,21 @@ In order to use this repository you will need to create the file <tt>/etc/yum.re
 <pre>
 [centos_repo]
 name=CentOS Enterprise Linux Distribution DVD - x86_64
-baseurl=http://<!--#echo var="SERVER_NAME" -->/repos/centos/$releasever/repo/
+baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/centos/$releasever/repo/
 enabled=1
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5
 exclude=postgresql*
 </pre>
 <p>
-<a href="/repos/centos/5/repo/">Browse the Distribution DVD Repository</a>
+<a href="/yum_repos/centos/5/repo/">Browse the Distribution DVD Repository</a>
 <p>
 <h2 id="centos_dvd">CentOS Distribution DVD</h2>
 We have mounted the latest DVD images for browsing:
 <p>
 <ul>
-<li><a href="/repos/centos/5/dvd/">CentOS 5 Distribution DVD</a>
-<li><a href="/repos/centos/6/dvd/">CentOS 6 Distribution DVD</a>
+<li><a href="/yum_repos/centos/5/dvd/">CentOS 5 Distribution DVD</a>
+<li><a href="/yum_repos/centos/6/dvd/">CentOS 6 Distribution DVD</a>
 </ul>
 </body>
 </html>

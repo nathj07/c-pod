@@ -1,0 +1,3 @@
+# Don't want to keep any RPM build artifacts
+*
+!.gitignore
