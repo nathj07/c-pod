@@ -3,32 +3,31 @@
 <h1>Systems Team Repository</h1>
 This server hosts all things used in configuring our OS and application environments:
 <ul>
-<li> <a href="/dvds">DVD Images</a> for the operating systems we use
 <li> <a href="/downloads">Downloads</a> for various things
+<li> <a href="/isos">Installation Images</a> for the operating systems we use
 <li> <a href="ks/KICKSTART.html">Kickstart Configurations</a>
 <li> <a href="#gems">GEM Repository</a>
 <li> <a href="#yumrepos">YUM Repositories</a>
 <ul>
 <li> <a href="#stable">Stable RPMs</a> with our customizations
 <li> <a href="#unstable">Unstable RPMs</a> under testing
-<li> <a href="#sources">RPM Source Packages</a>
-</ul>
-<li> <a href="#centos">CentOS</a>
-<ul>
-<li> <a href="#centos_repo">CentOS Package Repository</a> for network installs
-<li> <a href="#centos_dvd">CentOS Distribution DVD</a> from the Distribution DVD
+<li> <a href="#centos_repo">CentOS Distribution</a> for network installs
 </ul>
 </ul>
 Note that our current standard build of Centos is <b>5.9</b> but <b>6.4</b> is being tested now...
 
 <h2 id="downloads">Downloads</h2>
-There are <a href="downloads">other files</a> that we rely on. For example:
+There are <a href="downloads">other files</a> that are useful. For example the latest copy of VMware tools <p>
+
+<h2 id="isos">Installation Images (ISOs)</h2>
+These <a href="isos">image files</a>are used by the <a href="ks/KICKSTART.html">Kickstart</a> installation process. For example:
 <ul>
-<li> centosboot.iso - A minimal boot image (~10Mb). Download this and boot from it to obtain a prompt from which you can choose different types of install. For a networked kickstart install type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos-vm.ks</tt> to perform a VM install. This file is symlinked to the current Custom version specific file.
-<li> The latest copy of VMware tools
-<li> Git for Mac
+<li> CentOS-5.9-x86_64-netinstall.iso - A minimal size boot image (~15Mb) that allows you to start a networked kickstart install.<p>Type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos5-vm.ks</tt> to begin.
+<li> CentOS-6.4-x86_64-netinstall.iso - A minimal size boot image (~240Mb) that allows you to start a networked kickstart install.<p>Type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos6-vm.ks</tt> to begin.
 </ul>
+Note: the 'minimal' CentOS 6.4 image is hardly small at 240Mb! It would be nice to find a smaller one.
 <p>
+These images are also all <a href="osdisks">mounted for browsing</a>
 <h2 id="gems">GEM Repository</h2>
 We have created some of our own GEMS, so a GEM repository has been setup. To use this add the <i>source</i> option to your GEM installs:
 <pre>
@@ -43,13 +42,13 @@ Or you can <a href="/gems/">download them directly</a> and install locally.
 In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/custom.repo</tt> with the following contents: 
 <pre>
 [custom]
-name=Custom RPMs for Centos $releasever - $basearch
+name=Custom RPMs for CentOS $releasever - $basearch
 baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/custom/$releasever/stable/
 enabled=1
 gpgcheck=0
 </pre>
-<p/>
-<a href="/yum_repos/custom/5/stable/">Browse the Custom RPMs</a>
+Browse the Custom RPMs for: <a href="/yum_repos/custom/5/stable/">CentOS 5</a> and 
+<a href="/yum_repos/custom/6/stable/">CentOS 6</a>
 
 <h3 id="unstable">Unstable Custom RPMs for Testing</h3>
 <p>
@@ -58,39 +57,27 @@ When developing a new release of a custom RPM this repository is used. This is b
 In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/custom_unstable.repo</tt> with the following contents: 
 <pre>
 [custom_unstable]
-name=Unstable RPMs for Centos $releasever - $basearch
+name=Unstable Custom RPMs for CentOS $releasever - $basearch
 baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/custom/$releasever/unstable/
 enabled=1
 gpgcheck=0
 </pre>
-<a href="/yum_repos/custom/5/unstable/">Browse the Unstable Custom RPMs</a>
+Browse the Unstable Custom RPMs for: <a href="/yum_repos/custom/5/unstable/">CentOS 5</a> or
+<a href="/yum_repos/custom/6/unstable/">CentOS 6</a>
 
-<h3 id="sources">Source Packages</h3>
-Here are all our <a href="/srpms">Source Packages</a>
-
-<h2 id="centos">CentOS</h2>
-We maintain the following here to save network bandwidth. TODO - ADD 5/6 SELECTORS
-<h3 id="centos_repo">CentOS Package Repository</h3>
+<h3 id="centos_repo">CentOS Distribution Package Repositories</h3>
 <p>
-In order to use this repository you will need to create the file <tt>/etc/yum.repos.d/centosdvd.repo</tt> with the following contents: 
+To save bandwidth and speed-up networked installs the Distribution repositories are available. In order to use them create the file <tt>/etc/yum.repos.d/centosdvd.repo</tt> with the following contents: 
 <pre>
 [centos_repo]
-name=CentOS Enterprise Linux Distribution DVD - x86_64
+name=CentOS $releasever Linux Distribution DVD - x86_64
 baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/centos/$releasever/repo/
 enabled=1
 gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5
-exclude=postgresql*
+gpgkey=http://<!--#echo var="SERVER_NAME" -->/RPM-GPG-KEY-CentOS-$releasever
 </pre>
 <p>
-<a href="/yum_repos/centos/5/repo/">Browse the Distribution DVD Repository</a>
+Browse the Distribution DVD Repository for: <a href="/yum_repos/centos/5/repo/">CentOS 5</a> and <a href="/yum_repos/centos/6/repo/">CentOS 6</a>
 <p>
-<h2 id="centos_dvd">CentOS Distribution DVD</h2>
-We have mounted the latest DVD images for browsing:
-<p>
-<ul>
-<li><a href="/yum_repos/centos/5/dvd/">CentOS 5 Distribution DVD</a>
-<li><a href="/yum_repos/centos/6/dvd/">CentOS 6 Distribution DVD</a>
-</ul>
 </body>
 </html>

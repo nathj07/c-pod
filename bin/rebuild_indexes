@@ -31,19 +31,14 @@ end
 
 ENV['PATH'] ="/usr/local/bin:#{ENV['PATH']}"
 
-unless Process.euid == 0 
-    puts "Hey - you should run this as root"
-    exit 2
-end
-
 puts "Running Incremental Build - Use -f if you want to force rebuild" unless $force
 base = File.absolute_path('../..', File.dirname(__FILE__))
 
-FileUtils.cd "#{base}/yumrepos"
+FileUtils.cd "#{base}/yum_repos"
 repolist = { 
-	'Unstable Custom CentOS 5 Packages'   => 'custom/5/unstable',
+	'Unstable Custom CentOS 5 Packages' => 'custom/5/unstable',
 	'Custom CentOS 5 Packages'	    => 'custom/5/stable',
-	'Unstable Custom CentOS 6 Packages'   => 'custom/6/unstable',
+	'Unstable Custom CentOS 6 Packages' => 'custom/6/unstable',
 	'Custom CentOS 6 Packages'	    => 'custom/6/stable',
 	'Epel CentOS 5 Packages'	    => 'epel/5',
 	'Epel CentOS 6 Packages'	    => 'epel/6',
@@ -55,11 +50,11 @@ repolist.each_pair do |desc, dir|
     raise "createrepo command failed (#{$?.exitstatus}): Did you install the 'createrepo' package?" unless $?.exitstatus == 0
     FileUtils.chown_R(nil, 'apache', dir) rescue nil
 end
-FileUtils.cd "#{base}/gemrepo"
+FileUtils.cd "#{base}/gem_repo"
 info "#{$verb} Custom Gem Index\n"
 flags = $force ? "": "--update"
 system "gem generate_index #{flags} -d ."
-FileUtils.chown_R(nil, 'apache', "#{base}/gemrepo") rescue nil
+FileUtils.chown_R(nil, 'apache', "#{base}/gem_repo") rescue nil
 
 info "Complete\n"
 
