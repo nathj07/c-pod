@@ -40,8 +40,8 @@ repolist = {
 	'Custom CentOS 5 Packages'	    => 'custom/5/stable',
 	'Unstable Custom CentOS 6 Packages' => 'custom/6/unstable',
 	'Custom CentOS 6 Packages'	    => 'custom/6/stable',
-	'Epel CentOS 5 Packages'	    => 'epel/5',
-	'Epel CentOS 6 Packages'	    => 'epel/6',
+	'Lifted CentOS 5 Packages'	    => 'lifted/5',
+	'Lifted CentOS 6 Packages'	    => 'lifted/6',
 }	
 repolist.each_pair do |desc, dir|
     info "#{$verb} index for #{desc}\n"

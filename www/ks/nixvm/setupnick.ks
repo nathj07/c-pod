@@ -1,23 +1,24 @@
-# Add Nick Townsend as the installation user (Note that the user kickstart option is useless as you can't specify gid!)
-
-groupadd -g 625 ntownsend
-useradd -c "Nick Townsend" -g 625 -u 625 -p '$1$ZjqgZlNs$mIqvBcMq6kcUCDsLjyH3I0' ntownsend
+# Add Nick Townsend
+# Note that the user kickstart option is useless as you can't specify gid!
+#
+groupadd -g 625 townsen
+useradd -c "Nick Townsend" -g 625 -u 625 -p '$1$ZjqgZlNs$mIqvBcMq6kcUCDsLjyH3I0' townsen
 
 # Add home mount entry for VMware tools
 
-mkdir /home/ntownsend/host
+mkdir /home/townsen/host
 
 ex /etc/fstab <<FSTAB
 $
 a
-.host:/ntownsend       /home/ntownsend/host     vmhgfs  rw,uid=625,gid=625
+.host:/townsen       /home/townsen/host     vmhgfs  rw,uid=625,gid=625
 .
 x
 FSTAB
 
 # Set my VIM profile
 
-ex /home/ntownsend/.vimrc <<VIMRC
+ex /home/townsen/.vimrc <<VIMRC
 $
 a
 " Nick's VIM settings
@@ -42,10 +43,10 @@ VIMRC
 
 # Set my bash profile
 
-ex /home/ntownsend/.bash_profile <<BASHPROFILE
+ex /home/townsen/.bash_profile <<BASHPROFILE
 $
 a
-set -o vi
+# replaced by inputrc
 .
 x
 BASHPROFILE
@@ -55,13 +56,26 @@ BASHPROFILE
 ex /etc/sudoers <<SUDOERS
 $
 a
-ntownsend ALL=(ALL) NOPASSWD: ALL
+townsen ALL=(ALL) NOPASSWD: ALL
 .
 x!
 SUDOERS
 
+# Add inputrc
+cat > /home/townsen/.inputrc <<INPUTRC
+# Can use set -o vi in bash, but this works for all readline programs
+set editing-mode vi
+
+# Need to do this for each vi keymap (easier than tput clear)
+set keymap vi-move
+Control-l: clear-screen
+
+set keymap vi-insert
+Control-l: clear-screen
+INPUTRC
+
 # Add gitconfig
-cat > /home/ntownsend/.gitconfig <<GITCONFIG
+cat > /home/townsen/.gitconfig <<GITCONFIG
 [user]
         name = Nick Townsend
         email = nick.townsend@mac.com
@@ -79,11 +93,11 @@ ssh-dss AAAAB3NzaC1kc3MAAACBAPdxDg22fWp3xwJgeUhHLThqkaKQoBZwbdcuAqEWER3ruDpgvQxJ
 SSHKEY
 chmod 600 /root/.ssh/authorized_keys
 
-mkdir /home/ntownsend/.ssh
-cp /root/.ssh/authorized_keys /home/ntownsend/.ssh/authorized_keys
-chmod 750 /home/ntownsend/.ssh
-chmod 600 /home/ntownsend/.ssh/authorized_keys
+mkdir /home/townsen/.ssh
+cp /root/.ssh/authorized_keys /home/townsen/.ssh/authorized_keys
+chmod 750 /home/townsen/.ssh
+chmod 600 /home/townsen/.ssh/authorized_keys
 
 # Set ownership
 
-chown -R ntownsend.ntownsend /home/ntownsend/{host,.bash*,.vimrc,.ssh,.gitconfig}
+chown -R townsen.townsen /home/townsen/{host,.bash*,.vimrc,.ssh,.gitconfig}

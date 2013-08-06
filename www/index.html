@@ -20,10 +20,10 @@ Note that our current standard build of Centos is <b>5.9</b> but <b>6.4</b> is b
 There are <a href="downloads">other files</a> that are useful. For example the latest copy of VMware tools <p>
 
 <h2 id="isos">Installation Images (ISOs)</h2>
-These <a href="isos">image files</a>are used by the <a href="ks/KICKSTART.html">Kickstart</a> installation process. For example:
+These <a href="isos">image files</a> are used by the <a href="ks/KICKSTART.html">Kickstart</a> installation process. For example:
 <ul>
-<li> CentOS-5.9-x86_64-netinstall.iso - A minimal size boot image (~15Mb) that allows you to start a networked kickstart install.<p>Type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos5-vm.ks</tt> to begin.
-<li> CentOS-6.4-x86_64-netinstall.iso - A minimal size boot image (~240Mb) that allows you to start a networked kickstart install.<p>Type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos6-vm.ks</tt> to begin.
+<li> CentOS-5.9-x86_64-netinstall.iso - A minimal size boot image (~15Mb) that allows you to start a networked kickstart install.<p>Type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos5-vm.ks?host=aname.local</tt> to begin.
+<li> CentOS-6.4-x86_64-netinstall.iso - A minimal size boot image (~240Mb) that allows you to start a networked kickstart install.<p>Type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos6-vm.ks?host=aname.local</tt> to begin.
 </ul>
 Note: the 'minimal' CentOS 6.4 image is hardly small at 240Mb! It would be nice to find a smaller one.
 <p>
@@ -71,7 +71,7 @@ To save bandwidth and speed-up networked installs the Distribution repositories 
 <pre>
 [centos_repo]
 name=CentOS $releasever Linux Distribution DVD - x86_64
-baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/centos/$releasever/repo/
+baseurl=http://<!--#echo var="SERVER_NAME" -->/osdisks/centos$releasever
 enabled=1
 gpgcheck=1
 gpgkey=http://<!--#echo var="SERVER_NAME" -->/RPM-GPG-KEY-CentOS-$releasever
