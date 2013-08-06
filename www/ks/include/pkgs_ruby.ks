@@ -18,10 +18,4 @@ augeas
 augeas-libs
 augeas-devel
 
-# Standard version of ruby - TODO install our own latest
 ruby
-ruby-irb
-ruby-libs
-ruby-rdoc
-ruby-devel
-rubygems

@@ -10,11 +10,12 @@ network --device eth0 <!--#exec cgi="/bin/netcfg.cgi" --> --nameserver <!--#echo
 <!--#include virtual="include/rootpw_secret.ks" -->
 <!--#include virtual="include/disk_lvm_single.ks" -->
 <!--#include virtual="include/ksrepo-centos6.ks" -->
+<!--#include virtual="include/epel6.ks" -->
 %packages
 <!--#include virtual="include/pkgs_min-centos6.ks" -->
 <!--#include virtual="include/pkgs_ruby.ks" -->
 %post --interpreter /bin/bash
-<!--#include virtual="include/sye_repo.ks" -->
+<!--#include virtual="include/custom_repo.ks" -->
 <!--#include virtual="include/multilibs.ks" -->
 <!--#include virtual="include/config_vm.ks" -->
 <!--#include virtual="include/setuproot.ks" -->
