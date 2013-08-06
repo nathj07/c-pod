@@ -66,6 +66,12 @@ The Gem and Yum repository trees are held outside the repo, and populated manual
 you need to copy the `.rpm` and `.gem` files into the appropriate directory after building them and then
 run the command `bin/rebuild_indexes`.
 
+Increase the number of loopback devices
+---------------------------------------
+
+Create the file `/etc/modprobe.d/loops.conf` with the line:
+    options loop max_loop=32
+
 Use for Build
 =============
 The Gem and RPM build trees are held within the repo and have `.gitignore` files to exclude the

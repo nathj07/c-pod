@@ -37,12 +37,13 @@ unless Process.euid == 0
 end
 
 versionset = {
-    '5.9' => { 'bin-DVD-1of2' => 1, 'bin-DVD-2of2' => 2, netinstall: 'net' },
-    '6.4' => { 'bin-DVD1' => 1, 'bin-DVD2' => 2, 'netinstall' => 'net', 'minimal' => 'min' }
+    '5.9' => { 1 => 'bin-DVD-1of2', 2 => 'bin-DVD-2of2', 'net' => 'netinstall' },
+#    '6.3' => { 1 => 'bin-DVD1', 2 => 'bin-DVD2', 'net' => 'netinstall', 'min' => 'minimal'},
+    '6.4' => { 1 => 'bin-DVD1', 2 => 'bin-DVD2', 'net' => 'netinstall', 'min' => 'minimal'}
 } 
 
 versionset.keys.each do |version|
-    versionset[version].each do |name,shortname|
+    versionset[version].each do |shortname,name|
 	imagefile = "CentOS-#{version}-#{arch}-#{name}.iso"
 	FileUtils.cd "#{base}/isos"
 	unless File.exist? imagefile
@@ -50,7 +51,22 @@ versionset.keys.each do |version|
 		`curl -O -# #{mirror}/#{version}/isos/#{arch}/#{imagefile}`
 	end
 	FileUtils.mkdir_p "#{base}/osdisks/centos#{version}-#{shortname}"
-	`mount -o loop -t iso9660 #{base}/isos/#{imagefile} #{base}/osdisks/centos#{version}-#{shortname}`
+	`mount -o loop -t iso9660 #{base}/isos/#{imagefile} #{base}/osdisks/centos#{version}-#{shortname}` unless shortname.is_a? Integer
+    end
+    # Now make the consolidated distribution directories
+
+    targetdir = "#{base}/osdisks/centos#{version}"
+    FileUtils.mkdir_p targetdir
+    versionset[version].keys.select{|k| k.is_a? Integer}.sort.each do |shortname|
+	name = versionset[version][shortname]
+	imagefile = "CentOS-#{version}-#{arch}-#{name}.iso"
+	srcdir = "#{base}/osdisks/centos#{version}-#{shortname}"
+	`mount -o loop -t iso9660 #{base}/isos/#{imagefile} #{srcdir}`
+	cmd = "rsync -rltd #{targetdir}-#{shortname}/* #{targetdir}"
+	puts cmd
+	res = `#{cmd}`
+	puts res if $? != 0
+	`umount #{srcdir}`
     end
 end
 

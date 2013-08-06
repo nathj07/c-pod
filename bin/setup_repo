@@ -51,11 +51,11 @@ begin
 
     FileUtils.chown_R(nil, 'apache', "/etc/httpd/conf.d/")
     FileUtils.chmod("g+w", "/etc/httpd/conf.d/_repo.conf")
-    FileUtils.chown_R(nil, 'apache', "#{base}/")
+    FileUtils.chown_R(nil, 'apache', "#{base}/") rescue nil
 
 rescue Exception => ex
     puts "Problem creating directories: #{ex.message}"
-    puts ex.backtrace[0..3].join("\n")
+    puts ex.backtrace.join("\n")
     exit 2
 end
 # vim: sts=4 sw=4 ts=8
