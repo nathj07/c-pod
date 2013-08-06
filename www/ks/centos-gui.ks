@@ -22,6 +22,6 @@ network --device eth0 --bootproto dhcp --hostname centos-vm.local
 @gnome-desktop
 
 %post --interpreter /bin/bash
-<!--#include virtual="include/sye_repo.ks" -->
+<!--#include virtual="include/custom_repo.ks" -->
 <!--#include virtual="include/multilibs.ks" -->
 <!--#include virtual="include/vmware_tools.ks" -->
