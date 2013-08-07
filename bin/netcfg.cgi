@@ -1,31 +1,24 @@
-#!/usr/bin/perl 
+#!/usr/bin/env ruby
 #
 # Script to return the network parameters given a hostname
 # TODO fix derivation of the default gateway from the IP address and netmask
 #
-use CGI;
-use strict;
-use warnings;
+require 'cgi'
 
-my $q = CGI->new;
-my $hostname = $q->param('host');
+q = CGI.new
+hostname = q.has_key?('host') ? q['host'] : "centos.local"
 
-$hostname = "centos.local" unless $hostname;
+q.out 'text/plain' do
+    if /\s+has\s+address\s+(?<ip>[0-9\.]+)$/ =~ `host #{hostname}`
+	fullhost = $`
+	aip = ip.split '.'
+	aip[3] = '1'
+	gw = aip.join '.'
+	netmask = '255.255.255.0'
+	"--bootproto static --ip #{ip} --netmask #{netmask} --gateway #{gw} --hostname #{fullhost}"
+    else # If can't find host then use DHCP
+	"--bootproto dhcp --hostname #{hostname}"
+    end
+end
 
-if (`host $hostname` =~ /\s+has\s+address\s+([0-9\.]+)$/) {
-	my $fullhost = $`;
-	my $ip = $1;
-	my @ip = split /\./,$ip;
-	$ip[3] = '1';
-	my $gw = join('.',@ip);
-
-	my $netmask = '255.255.255.0';
-
-	print $q->header('text/plain', '200');
-	print "--bootproto static --ip $ip --netmask $netmask --gateway $gw --hostname $fullhost";
-}
-else { # If can't find host then use DHCP 
-	print $q->header('text/plain', '200');
-	print "--bootproto dhcp --hostname $hostname";
-}
-
+# vim: sts=4 sw=4 ts=8
