@@ -1,27 +1,9 @@
-# Demo of chef solo: preparing a repo machine
-# (incomplete)
+# Default recipe just puts footprint...
 #
-package 'perl-CGI'
-
-package 'httpd' do
-    version "2.2.15-26.el6.centos"
-end
-
-directory '/data' do
-    user "apache"
-    group "apache"
-end
-
-git "/data/repo" do
-    repository "https://github.com/townsen/repo.git"
-    reference "master"
-    action :sync
-    user "apache"
-    group "apache"
-end
-
-service 'httpd' do
-  action :restart
+template '/etc/REPOCONF' do
+    action :create
+    user "root"
+    group "root"
 end
 
 # vim: sts=4 sw=4 ts=8
