@@ -100,4 +100,8 @@ chmod 600 /home/townsen/.ssh/authorized_keys
 
 # Set ownership
 
-chown -R townsen.townsen /home/townsen/{host,.bash*,.vimrc,.ssh,.gitconfig}
+chown -R townsen.townsen /home/townsen/{host,.bash*,.vimrc,.ssh,.gitconfig,.inputrc}
+
+# Install RVM
+
+su --login townsen -c 'curl -L https://get.rvm.io | bash -s stable'
