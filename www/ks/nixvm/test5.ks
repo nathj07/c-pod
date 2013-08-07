@@ -2,9 +2,7 @@
 #
 <!--#include virtual="/ks/include/opts_vm-centos5.ks" -->
 <!--#include virtual="/ks/include/dvdimage-centos5.ks" -->
-
-network --device eth0 --bootproto dhcp --hostname test5.local
-
+network --device eth0 <!--#exec cgi="/bin/netcfg.cgi" -->
 <!--#include virtual="/ks/include/rootpw_secret.ks" -->
 <!--#include virtual="/ks/include/disk_lvm_single.ks" -->
 <!--#include virtual="/ks/include/ksrepo-centos5.ks" -->
