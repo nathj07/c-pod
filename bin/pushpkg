@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+#
+# Push a package to the YUM repo
+# The server-side CGI rebuilds the yum indices
+#
+require 'fileutils'
+require 'optparse'
+require 'ostruct'
+
+def info msg
+    print "\033[32m#{msg}\033[0m"
+end
+
+opts = OpenStruct.new(status: 'unstable', debug: false, force: nil, repo: 'repo.local')
+
+OptionParser.new do |o|
+    o.banner = "Usage: pushpkg [options] pkg ..."
+    o.separator ""
+    o.separator "Push RPM packages to repo server and rebuild index"
+    o.separator "Options:"
+
+    o.on( '-?', '--help', 'Display this screen' ) do
+        puts o
+        exit
+    end
+    o.on('-d', '--debug', "Debug") do
+        opts.debug = true
+    end
+    o.on('-s', '--stable', "Use Stable Repo (default: unstable)") do
+        opts.status = 'stable'
+    end
+    o.on('-r', '--repo HOST', "Name of the repo server (default #{opts.repo})") do |n|
+        opts.repo = n
+    end
+    o.on('-f', '--force', "Force complete metadata rebuild") do
+        opts.force = true
+    end
+    o.parse!
+    if ARGV.size == 0
+	puts o.help 
+	exit 2
+    end
+end
+
+base = File.absolute_path('../..', File.dirname(__FILE__))
+curlopts = ["-F status=#{opts.status}"]
+curlopts.push "-F debug=yes" if opts.debug
+curlopts.push "-F force=yes" if opts.force
+
+ARGV.each do |f|
+    if File.exist? f
+	info "Uploading #{f}\n"
+	cmd = "curl -# -w ' %{http_code}' #{curlopts.join(' ')} -F rpmfile=@#{f} http://#{opts.repo}/bin/rx_rpm.cgi"
+	puts `#{cmd}`
+    else
+	puts "File #{f} not found"
+    end
+end
+
+# vim: sts=4 sw=4 ts=8
