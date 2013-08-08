@@ -46,6 +46,10 @@
     CustomLog logs/repo_access_log combined
     AddType text/plain .ks
     AddHandler server-parsed .ks .html
+
+    Action markdown /bin/markdown.cgi
+    AddHandler markdown .md
+
 </VirtualHost>
 
 # vim: sts=4 sw=4 ts=8:

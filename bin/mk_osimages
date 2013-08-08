@@ -62,7 +62,7 @@ versionset.keys.each do |version|
 	imagefile = "CentOS-#{version}-#{arch}-#{name}.iso"
 	srcdir = "#{base}/osdisks/centos#{version}-#{shortname}"
 	`mount -o loop -t iso9660 #{base}/isos/#{imagefile} #{srcdir}`
-	cmd = "rsync -rltd #{targetdir}-#{shortname}/* #{targetdir}"
+	cmd = "rsync -rltd --exclude='*.i[356]86.rpm' #{targetdir}-#{shortname}/* #{targetdir}"
 	puts cmd
 	res = `#{cmd}`
 	puts res if $? != 0
