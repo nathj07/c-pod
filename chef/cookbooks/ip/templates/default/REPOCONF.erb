@@ -2,6 +2,8 @@ This file was installed on <%= Time.now %>
 
 The machine name is <%= node[:fqdn] %> and it has kernel <%= node[:kernel][:release] %>
 
+The platform is <%= node[:platform] %> <%= node[:platform_version] %>
+
 <% if node[:virtualization][:system] == 'vmware' %>
   It's running as a VMware virtual machine
 <% else %>
