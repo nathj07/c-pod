@@ -11,6 +11,7 @@ network --device eth0 <!--#exec cgi="/bin/netcfg.cgi" -->
 %packages
 <!--#include virtual="/ks/include/pkgs_min-centos6.ks" -->
 <!--#include virtual="/ks/include/pkgs_ruby.ks" -->
+<!--#include virtual="/ks/include/pkgs_build.ks" -->
 %post --interpreter /bin/bash
 <!--#include virtual="/ks/include/custom_repo.ks" -->
 <!--#include virtual="/ks/include/multilibs.ks" -->

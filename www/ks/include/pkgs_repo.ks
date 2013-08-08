@@ -1,4 +1,4 @@
 # This fragment specifies additional packages for a repository host
 #
-perl-CGI
+ruby
 bind-utils
