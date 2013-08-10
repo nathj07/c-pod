@@ -53,6 +53,11 @@ begin
     FileUtils.chmod("g+w", "/etc/httpd/conf.d/_repo.conf")
     FileUtils.chown_R(nil, 'apache', "#{base}/") rescue nil
 
+    # Add GEMS
+    #
+    %w{redcarpet builder}.each do |name|
+	system "gem install #{name}" unless require name
+    end
 rescue Exception => ex
     puts "Problem creating directories: #{ex.message}"
     puts ex.backtrace.join("\n")
