@@ -3,6 +3,7 @@
 @admin-tools
 @base
 @core
+yum-priorities
 vim-enhanced
 emacs
 kexec-tools

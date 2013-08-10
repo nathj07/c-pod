@@ -160,3 +160,7 @@ Where:
 * TYPE is only used for the 'custom' packages:
     * 'stable': tested and 'in production'
     * 'unstable': under development/testing
+
+YUM Priorities
+--------------
+We use them. See: http://wiki.centos.org/PackageManagement/Yum/Priorities for a description.
