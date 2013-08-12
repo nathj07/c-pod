@@ -30,19 +30,20 @@ end
 q = CGI.new
 
 begin
+    raise "You must POST an rpmfile!" unless q['rpmfile']
+    t = q['rpmfile']
+    filename = t.original_filename
+    ofile = repopath(filename, q['status'])
     case q['rpmfile']
     when StringIO
-	t = q['rpmfile']
-	filename = t.original_filename
-	IO.copy_stream t, repopath(filename, q['status'])
+	IO.copy_stream t, ofile
     when Tempfile
-	t = q['rpmfile']
-	filename = t.original_filename
-	FileUtils.cp t.local_path, repopath(filename, q['status'])
+	FileUtils.cp t.local_path, ofile
 	t.unlink
     else
-	raise "You must POST an rpmfile! I got #{q['rpmfile'].inspect}"
+	raise "I unexpectedly got #{q['rpmfile'].inspect}"
     end
+    FileUtils.chmod 0660, ofile
     rebuild_opts = q['force'] == "yes" ? "-f": ""
     rebuild = `#{$base}/repo/bin/rebuild_indexes -t yum #{rebuild_opts}`
     raise "Rebuild failed: #{rebuild}" unless $?.success?
