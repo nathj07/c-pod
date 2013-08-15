@@ -13,6 +13,16 @@ def osver
     return node[:platform_version].to_r
 end
 
+# The same as the rpm dist macro so we can check exact packages
+# Needed as package version comparison in chef won't partial match
+# on the packaging piece: 1.0-13ip won't match log4cpp-1.0-13ip.el5
+# so recipes must have fully qualified names. Smells bad.
+#
+def dist
+    raise "Invalid distro #{node[:platform]}" unless platform_family? 'rhel'
+    return ".el#{node[:platform_version][0]}"
+end
+
 # like the built_in value_for_platform but allows selector to be number, regex, range
 #
 def value_for_version hash
