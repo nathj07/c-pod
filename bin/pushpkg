@@ -11,7 +11,9 @@ def info msg
     print "\033[32m#{msg}\033[0m"
 end
 
-opts = OpenStruct.new(status: 'unstable', debug: false, force: nil, repo: 'repo.local')
+types = [:stable, :unstable, :lifted]
+
+opts = OpenStruct.new(type: :unstable, debug: false, force: nil, repo: 'seu-repo.live.iparadigms.com')
 
 OptionParser.new do |o|
     o.banner = "Usage: pushpkg [options] pkg ..."
@@ -26,8 +28,8 @@ OptionParser.new do |o|
     o.on('-d', '--debug', "Debug") do
         opts.debug = true
     end
-    o.on('-s', '--stable', "Use Stable Repo (default: unstable)") do
-        opts.status = 'stable'
+    o.on('-t', '--type TYPE', types, "Type: #{types.join(', ')} (default: #{opts.type})") do |t|
+        opts.type = t
     end
     o.on('-r', '--repo HOST', "Name of the repo server (default #{opts.repo})") do |n|
         opts.repo = n
@@ -35,7 +37,7 @@ OptionParser.new do |o|
     o.on('-f', '--force', "Force complete metadata rebuild") do
         opts.force = true
     end
-    o.parse!
+    o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
     if ARGV.size == 0
 	puts o.help 
 	exit 2
@@ -43,7 +45,7 @@ OptionParser.new do |o|
 end
 
 base = File.absolute_path('../..', File.dirname(__FILE__))
-curlopts = ["-F status=#{opts.status}"]
+curlopts = ["-F type=#{opts.type}"]
 curlopts.push "-F debug=yes" if opts.debug
 curlopts.push "-F force=yes" if opts.force
 
