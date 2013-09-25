@@ -38,7 +38,7 @@ OptionParser.new do |o|
         opts.force = true
     end
     o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
-    if ARGV.size == 0
+    if ARGV.size == 0 and not opts.force
 	puts o.help 
 	exit 2
     end
@@ -49,14 +49,16 @@ curlopts = ["-F type=#{opts.type}"]
 curlopts.push "-F debug=yes" if opts.debug
 curlopts.push "-F force=yes" if opts.force
 
-ARGV.each do |f|
-    if File.exist? f
-	info "Uploading #{f}\n"
-	cmd = "curl -# -w ' %{http_code}' #{curlopts.join(' ')} -F rpmfile=@#{f} http://#{opts.repo}/bin/rx_rpm.cgi"
-	puts `#{cmd}`
-    else
-	puts "File #{f} not found"
-    end
+info "Using repository #{opts.repo}\n"
+files = ARGV.select { |f| File.exist?(f) ? true: ( puts "File #{f} not found"; false ) }
+files.each do |f|
+    info "Uploading #{f}\n"
+    cmd = "curl -f -# -w '%{http_code}' #{curlopts.join(' ')} -F rpmfile=@#{f} http://#{opts.repo}/bin/rx_rpm.cgi"
+    puts `#{cmd}`
 end
+
+info "Rebuilding Indices\n"
+curlopts.push("-F rebuild=yes")
+system("curl -f --silent #{curlopts.join(' ')} http://#{opts.repo}/bin/rx_rpm.cgi")
 
 # vim: sts=4 sw=4 ts=8
