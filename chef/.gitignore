@@ -1,0 +1,4 @@
+# Ignore theses artifacts (produced when using this directory to run chef-solo)
+#
+cache/
+recipes.tgz
