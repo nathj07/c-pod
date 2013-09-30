@@ -1,0 +1,73 @@
+#!/usr/bin/ruby
+#
+require 'optparse'
+
+outfile = "VMWaretools.tgz"
+
+OptionParser.new do |o|
+    o.banner = "Usage: shrinkvmt VMwaretoolsXXX.tgz"
+    o.separator ""
+    o.separator "Remove unwanted stuff from the VMware tools installation"
+
+    o.on( '-o', '--output FILE', "Name of output file (default #{outfile})" ) do |f|
+	outfile = f
+    end
+    o.on( '-?', '--help', 'Display this screen' ) do
+        puts o
+        exit
+    end
+    o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
+    if ARGV.size == 0
+	puts o.help 
+	exit 2
+    end
+end
+
+require 'tmpdir'
+
+dir = Dir.mktmpdir
+
+cmd = `tar -C #{dir} -xzf #{ARGV[0]}`
+
+unless $? == 0
+    puts "The command #{cmd} failed: #{$!}"
+    exit 2
+end
+
+base="#{dir}/vmware-tools-distrib";
+
+# Remove everything except for 64 bit RHEL 5+ kernels
+# (Although recent RHEL has these modules in the distribution)
+
+kernels = Dir.glob("#{base}/lib/modules/binary/*")
+
+kernels.each{|k| FileUtils.rm_rf k unless k =~ /-x86_64.*?-RHEL[5-9]/i}
+
+# Remove all the 32 bit stuff
+
+FileUtils.rm_rf "#{base}/lib/lib32"
+FileUtils.rm_rf "#{base}/lib/bin32"
+FileUtils.rm_rf "#{base}/lib/sbin32"
+FileUtils.rm_rf "#{base}/lib/plugins32"
+
+FileUtils.mkdir_p "#{base}/lib/bin32"
+FileUtils.touch "#{base}/lib/bin32/vmware-user-suid-wrapper"
+FileUtils.mkdir_p "#{base}/lib/sbin32"
+FileUtils.touch "#{base}/lib/sbin32/vmware-hgfsmounter"
+
+# Remove SDK fluff
+
+FileUtils.rm_rf "#{base}/GuestSDK"
+
+# Create the output file
+
+cmd = `tar -C #{dir} -czf #{outfile} vmware-tools-distrib`
+
+unless $? == 0
+    puts "The tar command failed: #{cmd} #{$!}"
+    exit 2
+end
+
+FileUtils.rm_rf dir
+
+# vim: ts=8 sw=4 sts=4:
