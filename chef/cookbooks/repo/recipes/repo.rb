@@ -12,6 +12,12 @@ gem_package 'builder'   # for gem building
 repo_owner_name = 'packager'
 repo_owner_id = 626
 
+group 'apache' do
+  action    :modify
+  members   repo_owner_name
+  append    true
+end
+
 group repo_owner_name do
   action :create
   gid repo_owner_id
