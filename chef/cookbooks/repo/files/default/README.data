@@ -1,0 +1,21 @@
+This directory stores the *data* required to run the Repository.
+
+If you want a complete backup of the Repository machine then backup this directory.
+
+It is the home directory for the user 'packager' which is the user that is used to manage the Repository server. This is a shared account accessed via .ssh/authorized keys.
+
+The subdirectory 'repo' is a Git repository containing the 'source', this
+does not contain any 'binary' artifacts, but it does contain everything that
+would be needed to create those artifacts. The artifacts are created in this
+directory (normally /data). The git repository is accessed by the same SSH key which should be made available to git using agent-forwarding on the SSH connection. Note that GitHub will track the actual user that commits to the repository based on the key although the commit messages will reflect the .gitconfig definition.
+
+If you are prepared to download ISO's and rebuild packages (downloading their original
+sources) then you can just clone 'repo'
+
+PERMISSIONS
+Since Apache is used to serve up the majority of this content, we use the 'apache' group to enable sharing:
+* The directories are setgid (so that the group ownership is inherited)
+* The binaries set umask 002 (so group rw is enabled)
+* The user 'packager' is a member of the 'apache' group
+
+Nick Townsend, October 2013

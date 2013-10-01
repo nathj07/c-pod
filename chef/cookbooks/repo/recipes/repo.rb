@@ -9,17 +9,51 @@ gem_package 'redcarpet' do # for markdown
 end
 gem_package 'builder'   # for gem building
 
+repo_owner_name = 'packager'
+repo_owner_id = 626
+
+group repo_owner_name do
+  action :create
+  gid repo_owner_id
+end
+
+user repo_owner_name do
+  action :create
+  comment "Repo user"
+  home '/data'
+  gid repo_owner_id
+  uid repo_owner_id
+  supports :manage_home => false
+end
+
 directory '/data' do
-    user "apache"
-    group "apache"
-    mode 02770		# need setgid so that all are apache group
+    user repo_owner_name
+    group repo_owner_name
+    mode 02755		# need setgid so that all are apache group
+end
+
+cookbook_file "/data/README" do
+    source  'README.data'
+    mode    0644
+    owner   repo_owner_name
+    group   repo_owner_name
+end
+
+template "/data/.gitconfig" do
+    action  :create
+    source  'gitconfig.erb'
+    mode    0644
+    owner   repo_owner_name
+    group   repo_owner_name
+    variables(
+	:useremail => 'nick.townsend@mac.com', :usergecos => 'Nick Townsend'
+    )
 end
 
 git "/data/repo" do
     repository "git@github.com:townsen/repo.git"
     reference "master"
-    action :sync
-#    user "apache"
+    action :checkout # don't sync - do this manually
     group "apache"
     notifies :run, "execute[repo_permissions]", :immediate
     notifies :run, "execute[setup_repo]", :immediate
@@ -40,7 +74,7 @@ end
 directory '/data/repo' do
     action :create
     mode 02770
-    user "apache"
+    user repo_owner_name
     group "apache"
     subscribes :create, "git[/data/repo]", :immediate
 end
