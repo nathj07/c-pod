@@ -45,7 +45,7 @@
     ErrorLog logs/repo_error_log
     CustomLog logs/repo_access_log combined
     AddType text/plain .ks
-    AddHandler server-parsed .ks .html
+    AddHandler server-parsed .ks .html .rb
 
     Action markdown /bin/markdown.cgi
     AddHandler markdown .md
