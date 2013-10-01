@@ -8,6 +8,7 @@ require 'fileutils'
 require 'erb'
 
 base = File.absolute_path('../..', File.dirname(__FILE__))
+File.umask(0002)
 
 begin
     # Setup the GEM repository directories
