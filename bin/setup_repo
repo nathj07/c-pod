@@ -18,10 +18,10 @@ begin
 
     # Setup the YUM repository directories
     #
-    FileUtils.mkdir_p "#{base}/yum_repos/epel/5/noarch"
-    FileUtils.mkdir_p "#{base}/yum_repos/epel/5/x86_64"
-    FileUtils.mkdir_p "#{base}/yum_repos/epel/6/noarch"
-    FileUtils.mkdir_p "#{base}/yum_repos/epel/6/x86_64"
+    FileUtils.mkdir_p "#{base}/yum_repos/lifted/5/noarch"
+    FileUtils.mkdir_p "#{base}/yum_repos/lifted/5/x86_64"
+    FileUtils.mkdir_p "#{base}/yum_repos/lifted/6/noarch"
+    FileUtils.mkdir_p "#{base}/yum_repos/lifted/6/x86_64"
 
     FileUtils.mkdir_p "#{base}/yum_repos/custom/5/stable/noarch"
     FileUtils.mkdir_p "#{base}/yum_repos/custom/5/stable/x86_64"

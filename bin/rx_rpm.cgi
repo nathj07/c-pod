@@ -7,6 +7,7 @@ require 'tempfile'
 require 'stringio'
 require 'fileutils'
 
+File.umask(0002)
 $base = File.absolute_path('../..', File.dirname(__FILE__))
 
 def repopath rpmname, type

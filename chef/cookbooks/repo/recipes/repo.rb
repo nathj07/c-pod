@@ -35,7 +35,6 @@ end
 execute "setup_repo" do
     action :nothing
     command "/data/repo/bin/setup_repo"
-    creates "/etc/httpd/conf.d/_repo.conf"
 end
 
 directory '/data/repo' do
