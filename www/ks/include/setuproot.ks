@@ -26,3 +26,13 @@ set -o vi
 .
 x
 BASHPROFILE
+
+# Don't install RubyGem documentation
+
+ex /etc/gemrc <<GEMRC
+$
+a
+gem: --no-rdoc --no-ri
+.
+x
+GEMRC
