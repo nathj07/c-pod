@@ -68,6 +68,7 @@ versionset.keys.each do |version|
 	res = `#{cmd}`
 	puts res if $? != 0
 	`umount #{srcdir}`
+	FileUtils.rmdir srcdir
     end
     FileUtils.ln_sf targetdir, "#{base}/osdisks/centos#{major}"
 end

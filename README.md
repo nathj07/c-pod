@@ -35,31 +35,28 @@ The subdirectories are:
     * `gems`: links to the raw Gem packages
     * `isos`: links to the OS distribution images
     * `ks`: Kickstart scripts
-    * `osdisks`: links to the mounted DVD images
+    * `osdisks`: consolidated DVD images
     * `yum_repos`: YUM Repositories
 
 Use as Webserver
 ================
 
-(It will shortly be possible to create this configuration using the 'repo' system itself.)
-
-In order to run this repo as a webserver you will need to check it out in a location accessible to the Apache user and group. 
-
-Required Packages
------------------
-With `yum install`:
-
-    httpd
-    createrepo
-    ruby
-
-With `gem install`:
-
-    builder
-    redcarpet
-
 Installation
 ------------
+Use the Chef recipe "repo" in the appropriate cookbook to configure the webserver.
+
+If you have an existing instance then use the remote recipe URL parameter:
+
+    chef-solo -c config.rb -j repo.json -r http://repo.local/bin/recipes.cgi
+
+Otherwise to bootstrap this clone the repository in /root, then:
+
+    cd /root/repo/chef
+    chef-solo -c config.rb -j repo.json
+
+Notes
+-----
+
 The following setup steps are automated in the script `bin/setup_repo`
 
 * Apache configuration is done with the Apache configuration file template `repo.conf.erb` which
@@ -75,14 +72,6 @@ You can create these links,  mount the images and create the osdisks using the `
 The Gem and Yum repository trees are held outside the repo, and populated manually. In other words
 you need to copy the `.rpm` and `.gem` files into the appropriate directory after building them and then
 run the command `bin/rebuild_indexes`. Note that the utility `bin/pushpkgs` will do this for custom RPMs.
-
-Increase the number of loopback devices
----------------------------------------
-
-[Note - this did not seem to work on CentOS 6.4 - tbi]
-
-Create the file `/etc/modprobe.d/loops.conf` with the line:
-    options loop max_loop=32
 
 Use for Build
 =============
