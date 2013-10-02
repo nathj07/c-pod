@@ -27,8 +27,6 @@ These <a href="isos">image files</a> are used by the <a href="ks/KICKSTART.html"
 <li> CentOS-6.4-x86_64-netinstall.iso - A minimal size boot image (~240Mb) that allows you to start a networked kickstart install.<p>Type <tt>linux ks=http://<!--#echo var="SERVER_NAME" -->/downloads/centos6-vm.ks?host=aname.local</tt> to begin.
 </ul>
 Note: the 'minimal' CentOS 6.4 image is hardly small at 240Mb! It would be nice to find a smaller one.
-<p>
-These images are also all <a href="osdisks">mounted for browsing</a>
 <h2 id="chef">Chef </h2>
 After the <a href="ks/KICKSTART.html">Kickstart</a> installation has completed use <a href="http://www.opscode.com/chef/">Chef</a> to configure the system. <i>chef-solo</i> is used together with simple recipes:
 <ul>
