@@ -15,5 +15,6 @@ network --device eth0 <!--#exec cgi="/bin/netcfg.cgi" -->
 <!--#include virtual="/ks/include/custom_repo.ks" -->
 <!--#include virtual="/ks/include/multilibs.ks" -->
 <!--#include virtual="/ks/include/config_vm.ks" -->
+<!--#include virtual="/ks/include/chef.ks" -->
 <!--#include virtual="setuproot.ks" -->
 <!--#include virtual="setupnick.ks" -->
