@@ -5,16 +5,17 @@ group 'townsen' do
     gid 625
 end
 
+homedir =  '/home/townsen'
+
 user 'townsen' do
     action :create
     comment "Nick Townsend"
+    home    homedir
     gid 625
     uid 625
     password '$1$ZjqgZlNs$mIqvBcMq6kcUCDsLjyH3I0'
     supports :manage_home => true
 end
-
-homedir =  node[:etc][:passwd][:townsen][:dir]
 
 cookbook_file "#{homedir}/.vimrc" do
     source  'vimrc'
