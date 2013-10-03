@@ -48,6 +48,13 @@ directory "#{homedir}/.ssh" do
     mode    0750
 end
 
+cookbook_file "#{homedir}/.ssh/config" do
+    source  'config.ssh'
+    mode    0644
+    owner   'townsen'
+    group   'townsen'
+end
+
 cookbook_file "#{homedir}/.ssh/authorized_keys" do
     source  'townsen.pub'
     mode    0644
