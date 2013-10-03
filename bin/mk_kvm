@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+#
+require 'optparse'
+require 'ostruct'
+
+def info msg
+    print "\033[32m#{msg}\033[0m"
+end
+
+types = [:'5', :'6']
+
+opts = OpenStruct.new(type: :'5', debug: false, force: nil, repo: 'seu-repo.live.iparadigms.com')
+
+
+OptionParser.new do |o|
+    o.banner = "Usage: mk_kvm [options] name"
+    o.separator ""
+    o.separator "Make a KVM virtual machine"
+    o.separator "Options:"
+
+    o.on( '-?', '--help', 'Display this screen' ) do
+        puts o
+        exit
+    end
+    o.on('-t', '--type TYPE', types, "Type: #{types.join(', ')} (default: #{opts.type})") do |t|
+        opts.type = t
+    end
+    o.on('-r', '--repo HOST', "Name of the repo server (default #{opts.repo})") do |n|
+        opts.repo = n
+    end
+    o.on('-f', '--force', "Delete if already exists") do
+        opts.force = true
+    end
+    o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
+    if ARGV.size == 0
+	puts o.help 
+	exit 2
+    end
+end
+
+variant = case opts.type
+	  when :'5' then '5.4'
+	  when :'6' then '6'
+	  else raise "Bad type"
+	  end
+
+ARGV.each do |name|
+  info "Createing Logical Volume"
+  lvcreate = "lvcreate --name #{name} -L 20G sys.00"
+  system lvcreate
+  mkvm = <<-MKVM
+    virt-install --name #{name} --ram 1024 \
+    --disk path=/dev/sys.00/#{name} \
+    --graphics none \
+    --network network=default \
+    --location http://#{opts.repo}/osdisks/centos#{opts.type} \
+    --extra-args="ks=http://#{opts.repo}/ks/centos#{opts.type}-kvm.ks?host=#{name}.local console=tty0 console=ttyS0,115200" \
+    --os-type=linux \
+    --os-variant=rhel#{variant}
+  MKVM
+  info "Building VM"
+  system mkvm
+end
+
+# vim: sts=2 sw=2 ts=8
