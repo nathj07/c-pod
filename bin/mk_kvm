@@ -44,13 +44,20 @@ variant = case opts.type
 	  else raise "Bad type"
 	  end
 
+VG = "sys.00"
+
 ARGV.each do |name|
-  info "Createing Logical Volume"
-  lvcreate = "lvcreate --name #{name} -L 20G sys.00"
+  info "Creating Logical Volume...\n"
+  lvcreate = "lvcreate --name #{name} -L 20G #{VG}"
   system lvcreate
+  if $? != 0 and not opts.force
+    info "The logical volume #{name} exists and -f not specified, exiting...\n"
+    exit 2
+  end
+  lvremove = "lvremove #{VG}/#{name}"
   mkvm = <<-MKVM
     virt-install --name #{name} --ram 1024 \
-    --disk path=/dev/sys.00/#{name} \
+    --disk path=/dev/#{VG}/#{name} \
     --graphics none \
     --network network=default \
     --location http://#{opts.repo}/osdisks/centos#{opts.type} \
@@ -58,7 +65,7 @@ ARGV.each do |name|
     --os-type=linux \
     --os-variant=rhel#{variant}
   MKVM
-  info "Building VM"
+  info "Building VM...\n"
   system mkvm
 end
 
