@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = %q{natpmp}
-  s.version = "0.50"
+  s.version = "0.61"
   s.required_ruby_version = ">=1.9.2"
   s.date = %q{2013-11-11}
   s.authors = ['Nick Townsend']

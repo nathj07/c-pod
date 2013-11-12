@@ -6,7 +6,7 @@ require 'optparse'
 
 types = [:tcp, :udp]
 
-opts = OpenStruct.new(port: nil, type: :tcp, verbose: 0, public: 0, ttl: 7200)
+opts = OpenStruct.new(port: nil, type: :tcp, verbose: false, public: 0, ttl: 7200)
 
 OptionParser.new do |o|
     o.banner = "Usage: natpmp [options] [command]"
@@ -24,8 +24,8 @@ OptionParser.new do |o|
     o.on('-p', '--port PORT', Integer, "Private port") do |n|
         opts.port = n
     end
-    o.on('-v', '--verbose', "Verbosity") do
-        opts.verbose += 1
+    o.on('-v', '--verbose', "Verbose") do
+        opts.verbose = true
     end
     o.on('--ttl TIME', Integer, "TTL in seconds (default #{opts.ttl})") do |n|
         opts.ttl = n
@@ -36,16 +36,22 @@ OptionParser.new do |o|
     o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
 end
 
+NATPMP.verbose opts.verbose
+
 unless opts.port
-  puts "External IP: #{NATPMP.addr}"
-  puts "Gateway: #{NATPMP::GW}" if opts.verbose > 0
+  begin
+    puts "Gateway: #{NATPMP.GW}" if opts.verbose
+    puts "External IP: #{NATPMP.addr}"
+  rescue
+    puts "Error: #{$!}"
+  end
   exit 0
 end
 
 if ARGV.size > 0
   command = ARGV.join(' ')
   NATPMP.map opts.port, opts.public, opts.ttl, opts.type do |map|
-    puts "#{NATPMP.addr}:#{map.mapped} expires in #{map.life} sec" if opts.verbose > 0
+    puts "#{NATPMP.addr}:#{map.mapped} expires in #{map.life} sec" if opts.verbose
     command.gsub! /(?<!%)%h/, NATPMP.addr
     command.gsub! /(?<!%)%p/, map.mapped.to_s
     puts "Executing: #{command}"
@@ -54,7 +60,7 @@ if ARGV.size > 0
 else
   map = NATPMP.map opts.port, opts.public, opts.ttl, opts.type
   puts "#{NATPMP.addr}:#{map.mapped} expires in #{map.life} sec"
-  puts map.inspect if opts.verbose > 0
+  puts map.inspect if opts.verbose
 end
 
 # vim: ft=ruby sts=2 sw=2 ts=8

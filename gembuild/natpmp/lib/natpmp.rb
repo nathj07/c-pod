@@ -4,8 +4,10 @@
 require 'socket'
 
 class NATPMP
+  VERSION = 0
   DEFAULT_LIFETIME  = 7200
-  RESPONSE_WAIT_TIME_MSEC = 250
+  DELAY_MSEC = 250
+  MAX_WAIT_SEC = 64
   SERVER_PORT = 5351
   CLIENT_PORT = 5350
 
@@ -13,35 +15,67 @@ class NATPMP
 
   # Return codes
   #
-  RET_SUCCESS = 0 # Success
-  RET_UNSUPPORTED = 1 # Unsupported Version
-  RET_REFUSED = 2 # Not Authorized/Refused (e.g., box supports mapping, but user has turned feature off)
-  RET_FAILED = 3 # Network Failure (e.g., NAT box itself has not obtained a DHCP lease)
-  RET_EXHAUSTED = 4 # Out of resources (NAT box cannot create any more mappings at this time)
-  RET_NOTSUPP = 5 # Unsupported opcode
+  RETCODE = { success: 0,     # Success
+	      unsupported: 1, # Unsupported Version
+	      refused: 2,     # Not Authorized/Refused (e.g., box supports mapping, but user has turned feature off)
+	      failed: 3,      # Network Failure (e.g., NAT box itself has not obtained a DHCP lease)
+	      exhausted: 4,   # Out of resources (NAT box cannot create any more mappings at this time)
+	      opnotsupp: 5    # Unsupported opcode
+	    }
 
-  GW = case RUBY_PLATFORM
-  when /darwin/
-    `netstat -nrf inet`.split("\n").select{|l| l=~/^default/}.first.split(/\s+/)[1]
-  when /linux/
-    `ip route list match 0.0.0.0`.split("\n").select{|l| l =~ /^default/}.first.split(/\s+/)[2]
-  else
-    raise "Platform not supported!"
+  # Determine the default gateway
+  #
+  def self.GW
+    return @gw if @gw
+    @gw = case RUBY_PLATFORM
+    when /darwin/
+      routes = `netstat -nrf inet`.split("\n").select{|l| l=~/^default/}
+      raise "Can't find default route" unless routes.size > 0
+      routes.first.split(/\s+/)[1]
+    when /linux/
+      routes = `ip route list match 0.0.0.0`.split("\n").select{|l| l =~ /^default/}
+      raise "Can't find default route" unless routes.size > 0
+      routes.first.split(/\s+/)[2]
+    else
+      raise "Platform not supported!"
+    end
+  end
+
+  def self.verbose flag = true
+    @verbose = flag
+  end
+
+  def self.verbose?
+    return @verbose
   end
 
   def self.send msg
     sop = msg.unpack("xC").first
     sock = UDPSocket.open
-    sock.connect(GW, SERVER_PORT)
-    sock.send(msg, 0)
-    (reply, sendinfo) = sock.recvfrom(16)
-    sender = Addrinfo.new sendinfo
-    raise "Being spoofed!" unless sender.ip_address == GW
-    (ver,op,res) = reply.unpack("CCn")
-    raise "Invalid version #{ver}" unless ver == 0
-    raise "Invalid reply opcode #{op}" unless op == 128 + sop
-    raise "Request failed (code #{res})" unless res == 0
-    return reply
+    sock.connect(NATPMP.GW, SERVER_PORT)
+    cb = sock.send(msg, 0)
+    raise "Couldn't send!" unless cb == msg.size
+    delay = DELAY_MSEC/1000.0
+    begin
+      (reply, sendinfo) = sock.recvfrom_nonblock(16)
+      sender = Addrinfo.new sendinfo
+      raise "Being spoofed!" unless sender.ip_address == NATPMP.GW
+      (ver,op,res) = reply.unpack("CCn")
+      raise "Invalid version #{ver}" unless ver == VERSION
+      raise "Invalid reply opcode #{op}" unless op == 128 + sop
+      raise "Request failed (code #{RETCODE.key(res)})" unless res == RETCODE[:success]
+      return reply
+    rescue IO::WaitReadable
+      sleep delay
+      delay *= 2
+      if delay < MAX_WAIT_SEC
+	puts "Retrying after #{delay}..." if NATPMP.verbose?
+	retry
+      end
+      raise "Waited too long, got no response"
+    rescue Errno::ECONNREFUSED
+      raise "Remote NATPMP server not found"
+    end
   end
 
   # Return the externally facing IPv4 address
@@ -82,7 +116,7 @@ class NATPMP
   end
 
   def inspect
-    "Actual: #{@mapped}->#{@type}:#{@priv} for #{@life} sec, Requested: #{@pub} for #{@maxlife} sec"
+    "Mapping: #{@mapped}->#{@type}:#{@priv} for #{@life} sec. Requested: #{@pub} for #{@maxlife} sec"
   end
 
   def self.map priv, pub, maxlife = DEFAULT_LIFETIME, type = :tcp, &block
