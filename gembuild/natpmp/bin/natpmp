@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-require 'nat-pmp'
+require 'natpmp'
 require 'ostruct'
 require 'optparse'
 
@@ -9,7 +9,7 @@ types = [:tcp, :udp]
 opts = OpenStruct.new(port: nil, type: :tcp, verbose: 0, public: 0, ttl: 7200)
 
 OptionParser.new do |o|
-    o.banner = "Usage: nat-pmp [options] name"
+    o.banner = "Usage: natpmp [options] [command]"
     o.separator ""
     o.separator "Open a port on a NAT gateway"
     o.separator "Options:"
@@ -34,19 +34,27 @@ OptionParser.new do |o|
         opts.public = n
     end
     o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
-    if ARGV.size > 0
-	puts o.help 
-	exit 2
-    end
 end
 
-if opts.port
-  map = NatPMP.map opts.port, opts.public, opts.ttl, opts.type
-  puts "#{NatPMP.addr}:#{map.mapped} expires in #{map.life} sec"
-  puts map.inspect if opts.verbose > 0
+unless opts.port
+  puts "External IP: #{NATPMP.addr}"
+  puts "Gateway: #{NATPMP::GW}" if opts.verbose > 0
+  exit 0
+end
+
+if ARGV.size > 0
+  command = ARGV.join(' ')
+  NATPMP.map opts.port, opts.public, opts.ttl, opts.type do |map|
+    puts "#{NATPMP.addr}:#{map.mapped} expires in #{map.life} sec" if opts.verbose > 0
+    command.gsub! /(?<!%)%h/, NATPMP.addr
+    command.gsub! /(?<!%)%p/, map.mapped.to_s
+    puts "Executing: #{command}"
+    system command
+  end
 else
-  puts "External IP: #{NatPMP.addr}"
-  puts "Gateway: #{NatPMP::GW}" if opts.verbose > 0
+  map = NATPMP.map opts.port, opts.public, opts.ttl, opts.type
+  puts "#{NATPMP.addr}:#{map.mapped} expires in #{map.life} sec"
+  puts map.inspect if opts.verbose > 0
 end
 
 # vim: ft=ruby sts=2 sw=2 ts=8

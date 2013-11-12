@@ -3,7 +3,7 @@
 #
 require 'socket'
 
-class NatPMP
+class NATPMP
   DEFAULT_LIFETIME  = 7200
   RESPONSE_WAIT_TIME_MSEC = 250
   SERVER_PORT = 5351
@@ -70,14 +70,14 @@ class NatPMP
 
   # See section 3.3
   def request!
-    rsp = NatPMP.send [0, OPCODE[@type], 0, @priv, @pub, @maxlife].pack("CCnnnN")
+    rsp = NATPMP.send [0, OPCODE[@type], 0, @priv, @pub, @maxlife].pack("CCnnnN")
     (sssoe, priv, @mapped, @life) = rsp.unpack("x4NnnN")
     raise "Port mismatch: requested #{@priv} received #{priv}" if @priv != priv
   end
 
   # See section 3.4
   def revoke!
-    rsp = NatPMP.send [0, @type, 0, @priv, 0, 0].pack("CCnnnN")
+    rsp = NATPMP.send [0, OPCODE[@type], 0, @priv, 0, 0].pack("CCnnnN")
     puts "Revoked mapping: #{inspect}"
   end
 
@@ -87,7 +87,7 @@ class NatPMP
 
   def self.map priv, pub, maxlife = DEFAULT_LIFETIME, type = :tcp, &block
 
-    map = NatPMP.new(priv, pub, maxlife, type)
+    map = NATPMP.new(priv, pub, maxlife, type)
     map.request!
     if block_given?
       begin
