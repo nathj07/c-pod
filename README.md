@@ -192,6 +192,15 @@ For the names that you wish to access, create entries in your local `.ssh/config
 
 The `nc` command is standard under MacOS - you may need to install it if using another OS.
 
+If you need to connect via a bastion host, then use a command like:
+
+    ssh -L 0.0.0.0:1080:<%= cgi.server_name%>:1080 -N bastion.host.com &
+
+with this in your SSH configuration:
+
+    ProxyCommand /usr/bin/nc -X 5 -x localhost:1080 %h %p
+
+
 ### Web Access
 
 A Proxy Access File (or 'pac' file) has been created that will direct your browser to use the SOCKS proxy for `.local` requests. Enable this by configuring your browser proxy to use:
