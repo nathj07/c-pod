@@ -36,14 +36,17 @@ end
 
 base="#{dir}/vmware-tools-distrib";
 
-# Remove everything except for 64 bit RHEL 5+ kernels
-# (Although recent RHEL has these modules in the distribution)
+klist = `find #{base}/lib/modules/binary/ -mindepth 1 -maxdepth 1 -print`
 
-kernels = Dir.glob("#{base}/lib/modules/binary/*")
+# Remove everything except for 64 bit RHEL 5+ and Ubuntu 9+ kernels
+# This takes it from 288M to 104M
 
-kernels.each{|k| FileUtils.rm_rf k unless k =~ /-x86_64.*?-RHEL[5-9]/i}
+kernels = klist.split.select{|k| k !~ /-x86_64.*?-(RHEL[5-9]|Ubuntu(9|1[0-9]))/}
+
+kernels.each{|k| FileUtils.rm_rf k}
 
 # Remove all the 32 bit stuff
+# Takes it from 104M to 66M
 
 FileUtils.rm_rf "#{base}/lib/lib32"
 FileUtils.rm_rf "#{base}/lib/bin32"

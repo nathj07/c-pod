@@ -1,22 +1,21 @@
-#!/bin/bash
+#!/bin/env ruby
 #
-# A short script to wget a specific version of the postgres packages
-# and add them to the repo
+# A short script to get a specific version of the postgres packages
 
-VERSION=8.3.8-1PGDG.rhel5
-ARCH=x86_64
-URL=http://yum.pgsqlrpms.org/8.3/redhat/rhel-5-$ARCH
-WGET=wget
+VERSION='9.2.5'
+RELEASE='1PGDG.rhel6'
+ARCH='x86_64'
+URL="http://yum.postgresql.org/9.2/redhat/rhel-6-#{ARCH}"
 
-pushd RPMS/$ARCH
-for p in postgresql-server postgresql-libs postgresql-devel postgresql-contrib postgresql; do
-	rm $p-[0-9]*
-	$WGET "$URL/$p-$VERSION.$ARCH.rpm"
-done 
+suffixes = %w{ server libs devel contrib }
+basename = 'postgresql92'
 
-rm compat-postgresql-libs-4-*.rpm
-$WGET "$URL/compat-postgresql-libs-4-1PGDG.rhel5.$ARCH.rpm"
+packages = [ basename, *suffixes.map{|s| "#{basename}-#{s}"}]
 
-popd
+packages.each do |p|
+    cmd = "curl -L -O #{URL}/#{p}-#{VERSION}-#{RELEASE}.#{ARCH}.rpm"
+    puts cmd
+    system cmd
+end
 
-createrepo RPMS
+# vim: set ft=ruby sts=4 sw=4 ts=8:

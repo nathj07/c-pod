@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+#
+# Update a local copy of the main repo
+#
+require 'optparse'
+
+base = File.absolute_path('../..', File.dirname(__FILE__))
+mainrepo=ENV['C-POD'] || 'c-pod.local'
+
+OptionParser.new do |opts|
+    opts.banner = "Script to update a local copy of the yum_repos from a remote C-POD"
+
+    opts.on( '-?', '--help', 'Display this screen' ) do
+        puts opts
+        exit
+    end
+    opts.on('-r', '--repo REPO', String, "The C-POD repo site to use (default: #{mainrepo})") do |m|
+	mainrepo = m
+    end
+    opts.parse!
+    if ARGV.size > 0
+	puts "You don't need arguments!"
+	puts opts.help 
+	exit 2
+    end
+end
+
+unless Process.euid == 0 
+    puts "Hey - you need to run this as root"
+    exit 2
+end
+
+puts "Updating GEM packages..."
+cmd = "rsync -avz --progress packager@#{mainrepo}:/data/gem_repo #{base}/"
+puts cmd
+system cmd
+puts ($? != 0) ? "Failed": "Done"
+puts "Updating RPM packages..."
+cmd = "rsync -avz --progress packager@#{mainrepo}:/data/yum_repos #{base}/"
+puts cmd
+system cmd
+puts ($? != 0) ? "Failed": "Done"
+puts "Updating Downloads packages..."
+cmd = "rsync -avz --progress packager@#{mainrepo}:/data/downloads #{base}/"
+puts cmd
+system cmd
+puts ($? != 0) ? "Failed": "Done"
+
+# vim: set sts=4 sw=4 ts=8:

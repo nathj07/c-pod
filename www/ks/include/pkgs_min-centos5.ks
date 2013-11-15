@@ -10,5 +10,10 @@ kexec-tools
 fipscheck
 screen
 lynx
-git
+
+# Require at package level to be sure
+
+avahi
 nss-mdns
+git
+ruby

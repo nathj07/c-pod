@@ -1,24 +1,43 @@
 #!/usr/bin/env ruby
 #
 # Script to return the network parameters given a hostname
-# TODO fix derivation of the default gateway from the IP address and netmask
+# TODO derivation of the netmask and gateway is inherently flaky
 #
 require 'cgi'
+require 'resolv'
+require 'ipaddr'
 
 q = CGI.new
-hostname = q.has_key?('host') ? q['host'] : "centos.local"
 
 q.out 'text/plain' do
-    if /\s+has\s+address\s+(?<ip>[0-9\.]+)$/ =~ `host #{hostname}`
-	fullhost = $`
-	aip = ip.split '.'
-	aip[3] = '1'
-	gw = aip.join '.'
-	netmask = '255.255.255.0'
-	"--bootproto static --ip #{ip} --netmask #{netmask} --gateway #{gw} --hostname #{fullhost}"
-    else # If can't find host then use DHCP
-	"--bootproto dhcp --hostname #{hostname}"
+
+    hostname = q.has_key?('host') ? q['host']: 'centos.local'
+    opts = ["--hostname #{hostname}"]
+
+    if hostname.end_with? '.local'
+	opts.unshift "--bootproto dhcp"
+    else
+	Resolv::DNS.open do |dns|
+	    dns.timeouts = 5
+	    addr = dns.getaddress(hostname).to_s rescue nil
+	    if addr
+		opts.unshift "--bootproto static"
+		ipaddr = IPAddr.new addr
+		netmask = case addr
+		    when /^10\./	then '255.0.0.0'
+		    when /^172\.16\./	then '255.240.0.0'
+		    when /^192\.168\./	then '255.255.255.0'
+		    else '255.255.255.0'
+		end
+		gw = ipaddr.mask(netmask).succ
+		opts.push "--ip #{addr} --netmask #{netmask} --gateway #{gw.to_s}"
+		opts.push "--nameservers #{ENV['nameservers']}" if ENV.include? 'nameservers'
+	    else
+		opts.unshift "--bootproto dhcp"
+	    end
+	end
     end
+    opts.join(' ')
 end
 
 # vim: sts=4 sw=4 ts=8

@@ -9,7 +9,16 @@ end
 
 types = [:'5', :'6']
 
-opts = OpenStruct.new(type: :'5', debug: false, force: nil, repo: 'seu-repo.live.iparadigms.com')
+opts = OpenStruct.new(
+    type: :'5',
+    vcpus: 2,
+    ram: 2,
+    disk: 20,
+    repo: ENV['C-POD'] || 'c-pod.local',
+    vg: 'sys.00',
+    force: nil,
+    verbose: false
+)
 
 
 OptionParser.new do |o|
@@ -22,18 +31,39 @@ OptionParser.new do |o|
         puts o
         exit
     end
-    o.on('-t', '--type TYPE', types, "Type: #{types.join(', ')} (default: #{opts.type})") do |t|
+    o.on('-t', '--type TYPE', types, "CentOS type: #{types.join(', ')} (default: #{opts.type})") do |t|
         opts.type = t
     end
-    o.on('-r', '--repo HOST', "Name of the repo server (default #{opts.repo})") do |n|
+    o.on('-r', '--ram GB', Integer, "Size of RAM in GB (default #{opts.ram})") do |n|
+        opts.ram = n
+    end
+    o.on('-c', '--vcpus N', Integer, "Number of CPUs (default #{opts.vcpus})") do |n|
+        opts.vcpus = n
+    end
+    o.on('-d', '--disk GB', Integer, "Size of disk in GB (default #{opts.disk})") do |n|
+        opts.disk = n
+    end
+    o.on('-s', '--server HOST', "Name of the repo server (default #{opts.repo})") do |n|
         opts.repo = n
+    end
+    o.on('--vg VOLUMEGROUP', "LVM volume group (default #{opts.vg})") do |n|
+        opts.vg = n
+    end
+    o.on('-v', '--verbose', "Enable console during build (default #{opts.verbose})") do |v|
+        opts.verbose = true
     end
     o.on('-f', '--force', "Delete if already exists") do
         opts.force = true
     end
     o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
     if ARGV.size == 0
-	puts o.help 
+	puts o.help
+	exit 2
+    end
+    `vgdisplay #{opts.vg}`
+    unless $? == 0
+	puts "Volume Group #{opts.vg} doesn't exist!"
+	puts o.help
 	exit 2
     end
 end
@@ -44,24 +74,43 @@ variant = case opts.type
 	  else raise "Bad type"
 	  end
 
-VG = "sys.00"
-
 ARGV.each do |name|
-  info "Creating Logical Volume...\n"
-  lvcreate = "lvcreate --name #{name} -L 20G #{VG}"
-  system lvcreate
-  if $? != 0 and not opts.force
-    info "The logical volume #{name} exists and -f not specified, exiting...\n"
-    exit 2
+  status = `virsh domstate #{name}`.strip
+  if $? == 0 and status != "shut off"
+    if opts.force
+      `virsh destroy #{name}`
+      `virsh undefine #{name}`
+      info "The machine #{name} has been shut down and undefined\n"
+    else
+      info "The machine #{name} exists and -f not specified, exiting...\n"
+      exit 2
+    end
   end
-  lvremove = "lvremove #{VG}/#{name}"
+  info "Creating Logical Volume...\n"
+  lvsize = `lvs --units g -o lv_size --noheadings #{opts.vg}/#{name}`.strip
+  if $? == 0
+    if opts.force
+      info "Reusing existing logical volume #{name} (size #{lvsize})\n"
+    else
+      info "The logical volume #{name} exists (size #{lvsize}) and -f not specified, exiting...\n"
+      exit 2
+    end
+  else
+    system "lvcreate --name #{name} -L #{opts.disk}G #{opts.vg}"
+  end
+  install_options = []
+  install_options << "--autostart"
+  install_options << "--noautoconsole" unless opts.verbose
   mkvm = <<-MKVM
-    virt-install --name #{name} --ram 1024 \
-    --disk path=/dev/#{VG}/#{name} \
+    virt-install --name #{name} \
+    --disk path=/dev/#{opts.vg}/#{name} \
+    --vcpus=#{opts.vcpus} \
+    --ram=#{(opts.ram*1024).to_s} \
     --graphics none \
+    #{install_options.join(' ')} \
     --network network=default \
     --location http://#{opts.repo}/osdisks/centos#{opts.type} \
-    --extra-args="ks=http://#{opts.repo}/ks/centos#{opts.type}-kvm.ks?host=#{name}.local console=tty0 console=ttyS0,115200" \
+    --extra-args="ks=http://#{opts.repo}/ks/c#{opts.type}-kvm.ks?host=#{name}.local console=tty0 console=ttyS0,115200" \
     --os-type=linux \
     --os-variant=rhel#{variant}
   MKVM

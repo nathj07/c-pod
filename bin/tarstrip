@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+# TODO - Gem::Package::TarWriter doesn't copy through the owners and times
+#
+require 'rubygems/package'
+require 'zlib'
+require 'optparse'
+
+strip = 0
+
+OptionParser.new do |o|
+    o.banner = "usage: #{o.program_name} [options]"
+    o.separator "A Unix filter to remove paths from a TGZ file. Options:"
+
+    o.on_tail( '-?', '--help', 'Display this screen' ) do
+        STDERR.puts o
+        exit
+    end
+    o.on('-s', '--strip-components NUM', Integer, "Directories to strip (default: #{strip})") do |t|
+        strip = t
+    end
+    o.parse! rescue (STDERR.puts "#{o.program_name}: #{$!}\n#{o.to_s}"; exit)
+    if ARGV.size > 0
+	STDERR.puts o.help
+	exit 2
+    end
+end
+
+zout = Zlib::GzipWriter.new(STDOUT)
+begin
+  zin = Zlib::GzipReader.new(STDIN)
+  Gem::Package::TarWriter.new(zout) do |tout|
+    tin = Gem::Package::TarReader.new(zin)
+    tin.each do |entry|
+      next unless entry.file? or entry.directory?
+      parts = entry.full_name.split('/')
+      next if parts.size < strip
+      name = parts.slice(strip..-1).join('/')
+      tout.add_file_simple(name, 0644, entry.header.size) { |fio| fio.write entry.read } if entry.file?
+      tout.mkdir(name, 0755) if entry.directory?
+    end
+    tin.close
+  end
+rescue
+  STDERR.puts "#{$!.backtrace.first.strip}: #{$!.message}"
+ensure
+  zin.close if zin
+  zout.close
+end
+
+# vim: set ts=8 sw=2 sts=2:

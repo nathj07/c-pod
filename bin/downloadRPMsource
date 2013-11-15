@@ -1,0 +1,65 @@
+#!/usr/bin/ruby
+#
+require 'optparse'
+require 'ostruct'
+require 'uri'
+
+opts = OpenStruct.new( :sourcedir => `rpm --eval='%_sourcedir'`.strip )
+
+OptionParser.new do |o|
+    o.banner = "Usage: downloadRPMsource specfile ..."
+    o.separator ""
+    o.separator "Read the RPM .spec file and download the sources"
+
+    o.on( '-o', '--output SOURCEDIR', "SOURCE directory (default #{opts.sourcedir})" ) do |d|
+	puts o unless File.is_dir? d
+	opts.sourcedir = d
+    end
+    o.on( '-?', '--help', 'Display this screen' ) do
+        puts o
+        exit
+    end
+    o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
+    if ARGV.size == 0
+	puts o.help 
+	exit 2
+    end
+end
+
+ARGV.each do |specfile|
+    unless File.exist? specfile
+	puts "Specfile #{specfile} not found" 
+	next
+    end
+    macros = {}
+    sources = []
+    File.foreach(specfile) do |line|
+	next if /^\s*#/ =~ line
+
+	if /^%define\s+(?<macro>\w+)\s+(?<value>.*)/ =~ line
+	    macros[macro] = value
+	    next
+	end
+	if /^Version:\s*(?<version>.*)$/ =~ line
+	    macros['version'] = version.gsub(/%{(\w+)}/) do |m|
+		macros[m.slice(2..-2)]
+	    end
+	    next
+	end
+	if /^Source(?<num>[0-9]*):\s*(?<srcurl>.*)$/ =~ line
+	    sources[num.to_i] = srcurl
+	    next
+	end
+    end
+    sources.each do |source|
+	source.gsub!(/%{(\w+)}/) do |m|
+	    macros[m.slice(2..-2)]
+	end
+	file = File.basename(URI.parse(source).path)
+	cmd = "cd #{opts.sourcedir} && curl -z #{file} -O -L #{source}"
+	puts cmd
+	system cmd
+    end
+end
+
+# vim: ts=8 sw=4 sts=4:

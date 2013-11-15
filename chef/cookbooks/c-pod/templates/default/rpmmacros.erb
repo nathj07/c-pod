@@ -1,0 +1,5 @@
+# RPM macros for building out of the repo
+<% /(?<maj>\d+)\.(?<min>\d+)$/ =~ node[:platform_version] -%>
+%_topdir <%= @homedir %>/c-pod/rpmbuild
+%dist .el<%= maj %>
+%centos <%= maj %>

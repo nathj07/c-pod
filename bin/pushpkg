@@ -13,12 +13,12 @@ end
 
 types = [:stable, :unstable, :lifted]
 
-opts = OpenStruct.new(type: :unstable, debug: false, force: nil, repo: 'seu-repo.live.iparadigms.com')
+opts = OpenStruct.new(type: :unstable, debug: false, force: nil, repo: ENV['CPOD'] || 'c-pod.local')
 
 OptionParser.new do |o|
     o.banner = "Usage: pushpkg [options] pkg ..."
     o.separator ""
-    o.separator "Push RPM packages to repo server and rebuild index"
+    o.separator "Push RPM and GEM packages to C-Pod server and rebuild indices"
     o.separator "Options:"
 
     o.on( '-?', '--help', 'Display this screen' ) do
@@ -31,7 +31,7 @@ OptionParser.new do |o|
     o.on('-t', '--type TYPE', types, "Type: #{types.join(', ')} (default: #{opts.type})") do |t|
         opts.type = t
     end
-    o.on('-r', '--repo HOST', "Name of the repo server (default #{opts.repo})") do |n|
+    o.on('-r', '--repo HOST', "The C-Pod server (default #{opts.repo})") do |n|
         opts.repo = n
     end
     o.on('-f', '--force', "Force complete metadata rebuild") do
@@ -49,16 +49,16 @@ curlopts = ["-F type=#{opts.type}"]
 curlopts.push "-F debug=yes" if opts.debug
 curlopts.push "-F force=yes" if opts.force
 
-info "Using repository #{opts.repo}\n"
+info "Using C-Pod #{opts.repo}\n"
 files = ARGV.select { |f| File.exist?(f) ? true: ( puts "File #{f} not found"; false ) }
 files.each do |f|
     info "Uploading #{f}\n"
-    cmd = "curl -f -# -w '%{http_code}' #{curlopts.join(' ')} -F rpmfile=@#{f} http://#{opts.repo}/bin/rx_rpm.cgi"
+    cmd = "curl -f -# -w '%{http_code}' #{curlopts.join(' ')} -F pkgfile=@#{f} http://#{opts.repo}/bin/rx_pkg.cgi"
     puts `#{cmd}`
 end
 
 info "Rebuilding Indices\n"
 curlopts.push("-F rebuild=yes")
-system("curl -f --silent #{curlopts.join(' ')} http://#{opts.repo}/bin/rx_rpm.cgi")
+system("curl -f --silent #{curlopts.join(' ')} http://#{opts.repo}/bin/rx_pkg.cgi")
 
 # vim: sts=4 sw=4 ts=8

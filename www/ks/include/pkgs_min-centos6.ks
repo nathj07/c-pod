@@ -1,17 +1,19 @@
 # This fragment specifies the bare minimum packages for a production machine
 #
-#@core
-#@base
-#@console-internet
-#@directory-client
-#@network-file-system-client
-#@system-admin-tools
-pkgconfig
-kexec-tools
-fipscheck
-screen
-lynx
-git
+# The grouplist could possibly be pared down TODO
+
+@Base
+@Console internet tools
+@System administration tools
+#@Compatibility libraries
+@Hardware monitoring utilities
+@Networking Tools
+@Performance Tools
+@Perl Support
+
+# Require at package level (to be sure)
+
 avahi
 nss-mdns
-yum-plugin-priorities
+git
+ruby

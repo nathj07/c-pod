@@ -1,0 +1,15 @@
+[c-pod_stable]
+name=Stable Custom Packages for CentOS Linux $releasever - $basearch
+baseurl=http://<%= @repo_host %>/yum_repos/custom/$releasever/stable/
+failovermethod=priority
+gpgcheck=0
+priority=10
+enabled=1
+
+[c-pod_lifted]
+name=Lifted Packages for CentOS Linux $releasever - $basearch
+baseurl=http://<%= @repo_host %>/yum_repos/lifted/$releasever/
+failovermethod=priority
+gpgcheck=0
+priority=15
+enabled=1

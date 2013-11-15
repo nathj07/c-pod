@@ -7,13 +7,13 @@
 require 'fileutils'
 require 'erb'
 
+repo = File.absolute_path('..', File.dirname(__FILE__))
 base = File.absolute_path('../..', File.dirname(__FILE__))
 File.umask(0002)
 
 begin
     # Setup the GEM repository directories
     #
-    FileUtils.mkdir_p "#{base}/gem_repo"
     FileUtils.mkdir_p "#{base}/gem_repo/gems"
 
     # Setup the YUM repository directories
@@ -28,14 +28,16 @@ begin
     FileUtils.mkdir_p "#{base}/yum_repos/custom/5/unstable/noarch"
     FileUtils.mkdir_p "#{base}/yum_repos/custom/5/unstable/x86_64"
 
-    FileUtils.ln_sf "#{base}/yum_repos/custom/5", "#{base}/yum_repos/custom/5Server"
+    FileUtils.ln_s("#{base}/yum_repos/custom/5", "#{base}/yum_repos/custom/5Server") \
+	    unless File.exist? "#{base}/yum_repos/custom/5Server"
 
     FileUtils.mkdir_p "#{base}/yum_repos/custom/6/stable/noarch"
     FileUtils.mkdir_p "#{base}/yum_repos/custom/6/stable/x86_64"
     FileUtils.mkdir_p "#{base}/yum_repos/custom/6/unstable/noarch"
     FileUtils.mkdir_p "#{base}/yum_repos/custom/6/unstable/x86_64"
 
-    FileUtils.ln_sf "#{base}/yum_repos/custom/6", "#{base}/yum_repos/custom/6Server"
+    FileUtils.ln_s "#{base}/yum_repos/custom/6", "#{base}/yum_repos/custom/6Server" \
+	    unless File.exist? "#{base}/yum_repos/custom/6Server"
 
     # Setup the other directories
     #
@@ -43,16 +45,23 @@ begin
     FileUtils.mkdir_p "#{base}/osdisks"
     FileUtils.mkdir_p "#{base}/isos"
 
-    # Link the Apache config
+    # Link the Apache config (unless already done by Chef)
     #
+    unless File.exist? "/etc/httpd/conf.d/_c-pod.conf"
+	erb = ERB.new(File.open("#{repo}/chef/cookbooks/c-pod/templates/default/_c-pod.conf.erb", "r", &:read))
+	File.open("/etc/httpd/conf.d/_c-pod.conf", "w") { |f| f.write erb.result(binding) }
 
-    comment = "Generated from the file #{base}/repo/repo.conf"
-    erb = ERB.new(File.open("#{base}/repo/repo.conf.erb", "r", &:read))
-    File.open("/etc/httpd/conf.d/_repo.conf", "w") { |f| f.write erb.result(binding) }
+	FileUtils.chown_R(nil, 'apache', "/etc/httpd/conf.d/")
+	FileUtils.chmod("g+w", "/etc/httpd/conf.d/_c-pod.conf")
+    end
 
-    FileUtils.chown_R(nil, 'apache', "/etc/httpd/conf.d/")
-    FileUtils.chmod("g+w", "/etc/httpd/conf.d/_repo.conf")
-    FileUtils.chown_R(nil, 'apache', "#{base}/") rescue nil
+    # Setup permissions
+    #
+    FileUtils.chown_R(nil, 'apache', "#{base}/*") rescue nil
+    FileUtils.chmod_R('g+rw', "#{base}/*") rescue nil
+    `find #{base}/yum_repos -type d -exec chmod 2770 {} \\;`
+    `find #{base}/yum_repos -type f -exec chmod 660 {} \\;`
+    `find #{base}/yum_repos -type f -exec chown apache {} \\;`
 
     # Add GEMS
     #

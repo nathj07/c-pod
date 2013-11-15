@@ -5,6 +5,8 @@
 require 'fileutils'
 require 'optparse'
 
+File.umask(0002)
+
 def info msg
     print "\033[32m#{msg}\033[0m"
 end

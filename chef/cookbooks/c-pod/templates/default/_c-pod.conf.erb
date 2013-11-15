@@ -1,0 +1,50 @@
+# Apache configuration fragment for the C-Pod server
+#
+<Directory "<%= @base %>/">
+    AllowOverride None
+    Order deny,allow
+    Deny from all
+</Directory>
+
+<Directory "<%= @base %>/c-pod/www">
+    Options Includes Indexes FollowSymLinks
+    IndexIgnore .htaccess *.bak *~ RCS
+    IndexOptions FancyIndexing FoldersFirst
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+<Directory "<%= @base %>/c-pod/bin/">
+    Options +ExecCGI
+    SetHandler cgi-script
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+#
+<VirtualHost *:80>
+
+#   Add this directive if multiple vhosts
+#   ServerName c-pod.myco.com:80
+
+    ScriptAlias /bin "<%= @base %>/c-pod/bin"
+
+    ServerAdmin nick.townsend@mac.com
+    IndexIgnore .htaccess *.bak *~ RCS
+    DocumentRoot "<%= @base %>/c-pod/www"
+    ErrorLog logs/c-pod_error_log
+    CustomLog logs/c-pod_access_log combined
+    AddType text/plain .ks
+    AddType application/x-ns-proxy-autoconfig .pac
+    AddHandler server-parsed .ks .html .pac
+    <Location /samples/>
+	ForceType text/plain
+	SetHandler server-parsed
+    </Location>
+    Action markdown /bin/markdown.cgi
+    AddHandler markdown .md
+
+</VirtualHost>
+
+# vim: sts=4 sw=4 ts=8:

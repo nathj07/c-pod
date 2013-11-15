@@ -1,5 +1,7 @@
 # Standard VM disk lay out for RedHat 6 on Vmware
 
+# Fix bug where clearpart prompts on new disk
+zerombr
 clearpart --all --drives=sda
 
 part /boot --fstype=ext4 --size 200
