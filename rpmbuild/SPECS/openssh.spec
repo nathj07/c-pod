@@ -1,5 +1,5 @@
 %define ver 6.3p1
-%define rel 3%{?dist}.ip
+%define rel 4%{?dist}.ip
 
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
@@ -78,6 +78,7 @@ Release: %{rel}
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: http://ftp5.usa.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
+Source1: openssh-pam-config
 Patch0: openssh-ip-config.patch
 %if ! %{no_x11_askpass}
 Source1: http://www.jmknoble.net/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
@@ -266,7 +267,7 @@ install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
 %if %{build6x}
-install -m644 contrib/redhat/sshd.pam.old $RPM_BUILD_ROOT/etc/pam.d/sshd
+install -m644 %{SOURCE1} $RPM_BUILD_ROOT/etc/pam.d/sshd
 %else
 install -m644 contrib/redhat/sshd.pam     $RPM_BUILD_ROOT/etc/pam.d/sshd
 %endif
@@ -416,6 +417,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 15 2013 Nick Townsend <ntownsend@iparadigms.com>
+- Updated patchlevel to 4 to fix mistake in specfile: PAM sshd config
+
 * Wed Nov 13 2013 Nick Townsend <ntownsend@iparadigms.com>
 - Updated patch for config to use PAM
 
