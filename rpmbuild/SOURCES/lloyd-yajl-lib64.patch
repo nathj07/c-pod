@@ -1,8 +1,8 @@
-diff -rup lloyd-yajl-45a1bdb.orig/src/CMakeLists.txt lloyd-yajl-45a1bdb.new/src/CMakeLists.txt
---- lloyd-yajl-45a1bdb.orig/src/CMakeLists.txt	2009-10-29 23:35:39.000000000 +0000
-+++ lloyd-yajl-45a1bdb.new/src/CMakeLists.txt	2009-12-07 17:20:20.000000000 +0000
-@@ -37,7 +37,7 @@ SET (PUB_HDRS api/yajl_parse.h api/yajl_
- #ADD_DEFINITIONS(-DYAJL_LEXER_DEBUG)
+diff -rup lloyd-yajl-9c15d72.orig/src/CMakeLists.txt lloyd-yajl-9c15d72/src/CMakeLists.txt
+--- lloyd-yajl-9c15d72.orig/src/CMakeLists.txt	2010-01-08 09:05:11.000000000 -0800
++++ lloyd-yajl-9c15d72/src/CMakeLists.txt	2013-08-16 16:24:36.614552143 -0700
+@@ -42,7 +42,7 @@ SET (PUB_HDRS api/yajl_parse.h api/yajl_
+ ADD_DEFINITIONS(-DYAJL_BUILD)
  
  # set up some paths
 -SET (libDir ${CMAKE_CURRENT_BINARY_DIR}/../${YAJL_DIST_NAME}/lib)
@@ -10,7 +10,7 @@ diff -rup lloyd-yajl-45a1bdb.orig/src/CMakeLists.txt lloyd-yajl-45a1bdb.new/src/
  SET (incDir ${CMAKE_CURRENT_BINARY_DIR}/../${YAJL_DIST_NAME}/include/yajl)
  
  # set the output path for libraries
-@@ -71,8 +71,8 @@ ENDFOREACH (header ${PUB_HDRS})
+@@ -77,8 +77,8 @@ ENDFOREACH (header ${PUB_HDRS})
  INCLUDE_DIRECTORIES(${incDir}/..)
  
  IF(NOT WIN32)

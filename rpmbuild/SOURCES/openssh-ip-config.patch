@@ -1,0 +1,26 @@
+--- sshd_config	2013-11-13 12:47:13.000000000 -0800
++++ sshd_config.new	2013-11-13 12:48:07.000000000 -0800
+@@ -35,6 +35,7 @@
+ # Logging
+ # obsoletes QuietMode and FascistLogging
+ #SyslogFacility AUTH
++SyslogFacility AUTHPRIV
+ #LogLevel INFO
+
+ # Authentication:
+@@ -94,6 +95,7 @@
+ # PAM authentication, then enable this but set PasswordAuthentication
+ # and ChallengeResponseAuthentication to 'no'.
+ #UsePAM no
++UsePAM yes
+
+ #AllowAgentForwarding yes
+ #AllowTcpForwarding yes
+@@ -111,6 +113,7 @@
+ #ClientAliveInterval 0
+ #ClientAliveCountMax 3
+ #UseDNS yes
++UseDNS no
+ #PidFile /var/run/sshd.pid
+ #MaxStartups 10:30:100
+ #PermitTunnel no

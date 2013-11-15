@@ -3,7 +3,7 @@
 
 Name:           ruby
 Version:        %{rubyver}%{rubyminorver}
-Release:        2%{?dist}
+Release:        2%{?dist}.ip
 License:        Ruby License/GPL - see COPYING
 URL:            http://www.ruby-lang.org/
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)

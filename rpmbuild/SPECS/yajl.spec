@@ -1,6 +1,6 @@
 Name: yajl
 Version: 1.0.9
-Release: 0
+Release: 1%{?dist}
 Summary: Yet Another JSON Library (YAJL)
 
 Group: Development/Libraries

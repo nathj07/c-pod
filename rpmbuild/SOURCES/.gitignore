@@ -1,3 +1,7 @@
 # We don't want to store the raw tgz in our repo, just our patches
+# (and some files shipped with various things)
 *.tgz
 *.tar.gz
+*.bz2
+*.zip
+seu-extras
