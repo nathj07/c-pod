@@ -3,7 +3,8 @@
 # Create a recipe tgz file for remote chef-solo installs
 # Note that the treeish required is passed as path info
 # Normally this will be a branch eg. 'production' but can
-# also be any valid tree-ish. It defaults to master
+# also be any valid tree-ish. If not passed then the current
+# working directory is used (which is handy for testing changes)
 #
 require 'cgi'
 require 'shellwords'
@@ -18,10 +19,10 @@ if /\/(?<pathinfo>.+)/ =~ cgi.path_info
 	end
 	exit 2
     end
+    cmd = "cd #{repo} && git archive --format=tgz #{treeish} chef 2>/dev/null | bin/tarstrip -s 1"
 else
-    treeish = 'master'
+    cmd = "tar -cz -f- -C #{repo}/chef cookbooks"
 end
-cmd = "cd #{repo} && git archive --format=tgz #{treeish} chef 2>/dev/null | bin/tarstrip -s 1"
 cgi.out('Content-Disposition' => 'attachment; filename=recipes.tgz',
 	'Content-Type' => 'application/octet-stream') do
   `#{cmd}`
