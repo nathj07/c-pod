@@ -1,3 +1,6 @@
 [submodule "chef/cookbooks/sysctl"]
 	path = chef/cookbooks/sysctl
 	url = https://github.com/onehealth-cookbooks/sysctl.git
+[submodule "chef/cookbooks/ulimit"]
+	path = chef/cookbooks/ulimit
+	url = https://github.com/bmhatfield/chef-ulimit.git
