@@ -24,7 +24,7 @@ cgi.out 'text/html' do
 	    rtoc = Redcarpet::Render::HTML_TOC.new()
 	    mdtoc = Redcarpet::Markdown.new(rtoc)
 	    rtxt = Redcarpet::Render::HTML.new(:with_toc_data => true)
-	    mdtxt = Redcarpet::Markdown.new(rtxt)
+	    mdtxt = Redcarpet::Markdown.new(rtxt, :fenced_code_blocks => true)
 	    mdtoc.render(text)+ mdtxt.render(text)
 	end
     end
