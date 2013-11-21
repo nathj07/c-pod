@@ -1,15 +1,18 @@
 # Passenger recipe
 #
+# TODO: When running this the `gem which phusion_passenger` is run at recipe compile
+# time prior to the gem install. This shows an error but is benign as it works
+#
 include_recipe 'c-pod::apache'
+
+yum_package 'curl-devel'
+yum_package 'apr-devel'
+yum_package 'httpd-devel'
 
 gem_package 'passenger' do
     options "--no-rdoc --no-ri"
     notifies :run, "execute[passenger-install]", :immediate
 end
-
-yum_package 'curl-devel'
-yum_package 'apr-devel'
-yum_package 'httpd-devel'
 
 execute 'passenger-install' do
     creates "/etc/httpd/conf.d/_passenger.conf"
