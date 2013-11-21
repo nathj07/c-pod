@@ -75,6 +75,10 @@ variant = case opts.type
 	  end
 
 ARGV.each do |name|
+  if /^(?<sname>\w+)\.local$/ =~ name
+    name = sname
+    info "Dropping the .local suffix on #{name} - not required\n"
+  end
   status = `virsh domstate #{name}`.strip
   if $? == 0 and status != "shut off"
     if opts.force
