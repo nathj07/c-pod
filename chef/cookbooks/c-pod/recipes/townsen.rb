@@ -24,6 +24,34 @@ cookbook_file "#{homedir}/.vimrc" do
     group   'townsen'
 end
 
+directory "#{homedir}/.vim" do
+    mode    0755
+    owner   'townsen'
+    group   'townsen'
+end
+directory "#{homedir}/.vim/autoload" do
+    mode    0755
+    owner   'townsen'
+    group   'townsen'
+end
+directory "#{homedir}/.vim/bundle" do
+    mode    0755
+    owner   'townsen'
+    group   'townsen'
+end
+
+remote_file "#{homedir}/.vim/autoload/pathogen.vim" do
+  source "https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim"
+end
+
+%w{ vim-fugitive vim-rails vim-bundler }.each do |ext|
+    git "#{homedir}/.vim/bundle/#{ext}" do
+	repository "git://github.com/tpope/#{ext}.git"
+	reference "master"
+	action :sync
+    end
+end
+
 template "#{homedir}/.rpmmacros" do
     action  :create
     source  'rpmmacros.erb'
@@ -88,4 +116,4 @@ user_ulimit "townsen" do
   filehandle_limit 8192
 end
 
-# vim: sts=4 sw=4 ts=8
+# vim: sts=4 sw=4 ts=8 et
