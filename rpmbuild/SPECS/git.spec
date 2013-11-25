@@ -48,7 +48,7 @@
 
 Name:           git
 Version:        1.8.2.1
-Release:        1%{?dist}.ip
+Release:        2%{?dist}.ip
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
@@ -70,6 +70,7 @@ Patch5:         0001-git-subtree-Use-gitexecdir-instead-of-libexecdir.patch
 # This fixes the build when python is enabled.  Needs discussion upstream to
 # find a proper solution.
 Patch6:         0001-Drop-DESTDIR-from-python-instlibdir.patch
+Patch7:         git-archive-recurse.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -270,6 +271,7 @@ Requires:       emacs-git = %{version}-%{release}
 
 %prep
 %setup -q
+%patch7 -p1
 %patch0 -p1
 %patch1 -p1
 %if %{emacs_old}
