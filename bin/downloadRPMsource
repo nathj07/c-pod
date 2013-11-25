@@ -40,14 +40,26 @@ ARGV.each do |specfile|
 	    macros[macro] = value
 	    next
 	end
+	if /^Name:\s*(?<name>.*)$/ =~ line
+	    macros['name'] = name.gsub(/%{(\w+)}/) do |m|
+		macros[m.slice(2..-2)]
+	    end
+	    next
+	end
 	if /^Version:\s*(?<version>.*)$/ =~ line
 	    macros['version'] = version.gsub(/%{(\w+)}/) do |m|
 		macros[m.slice(2..-2)]
 	    end
 	    next
 	end
+	if /^Release:\s*(?<release>.*)$/ =~ line
+	    macros['release'] = release.gsub(/%{(\w+)}/) do |m|
+		macros[m.slice(2..-2)]
+	    end
+	    next
+	end
 	if /^Source(?<num>[0-9]*):\s*(?<srcurl>.*)$/ =~ line
-	    sources[num.to_i] = srcurl
+	    sources << srcurl
 	    next
 	end
     end
@@ -55,10 +67,13 @@ ARGV.each do |specfile|
 	source.gsub!(/%{(\w+)}/) do |m|
 	    macros[m.slice(2..-2)]
 	end
-	file = File.basename(URI.parse(source).path)
-	cmd = "cd #{opts.sourcedir} && curl -z #{file} -O -L #{source}"
-	puts cmd
-	system cmd
+	uri = URI.parse(source)
+	if uri.scheme =~ /^(https?|ftp)$/
+	    file = File.basename(uri.path)
+	    cmd = "cd #{opts.sourcedir} && curl -z #{file} -O -L #{source}"
+	    puts cmd
+	    system cmd
+	end
     end
 end
 
