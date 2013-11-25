@@ -88,6 +88,7 @@ directory "#{homedir}/.ssh" do
 end
 
 cookbook_file "#{homedir}/.ssh/config" do
+    action  :create_if_missing
     source  'config.ssh'
     mode    0644
     owner   'townsen'
