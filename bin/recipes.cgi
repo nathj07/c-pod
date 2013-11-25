@@ -19,7 +19,7 @@ if /\/(?<pathinfo>.+)/ =~ cgi.path_info
 	end
 	exit 2
     end
-    cmd = "cd #{repo} && git archive --format=tgz #{treeish} chef 2>/dev/null | bin/tarstrip -s 1"
+    cmd = "cd #{repo} && git archive --recursive --format=tgz #{treeish}:chef 2>/dev/null"
 else
     cmd = "tar -cz -f- -C #{repo}/chef cookbooks"
 end
