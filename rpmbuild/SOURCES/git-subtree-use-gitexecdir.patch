@@ -9,12 +9,11 @@ gitexecdir instead of libexecdir respects the global settings more
 consistently.
 
 Remove the unused gitdir variable as well.
----
- contrib/subtree/Makefile |    5 ++---
- 1 files changed, 2 insertions(+), 3 deletions(-)
 
+Modified for 1.8.5 by nick.townsend@mac.com
+---
 diff --git a/contrib/subtree/Makefile b/contrib/subtree/Makefile
-index 36ae3e4..f87b945 100644
+index 4030a16..43aa190 100644
 --- a/contrib/subtree/Makefile
 +++ b/contrib/subtree/Makefile
 @@ -2,9 +2,8 @@
@@ -28,15 +27,14 @@ index 36ae3e4..f87b945 100644
  man1dir ?= $(mandir)/man1
  
  gitver ?= $(word 3,$(shell git --version))
-@@ -30,7 +29,7 @@ $(GIT_SUBTREE): $(GIT_SUBTREE_SH)
- doc: $(GIT_SUBTREE_DOC)
+@@ -31,8 +30,8 @@ $(GIT_SUBTREE): $(GIT_SUBTREE_SH)
+ doc: $(GIT_SUBTREE_DOC) $(GIT_SUBTREE_HTML)
  
  install: $(GIT_SUBTREE)
+-	$(INSTALL) -d -m 755 $(DESTDIR)$(libexecdir)
 -	$(INSTALL) -m 755 $(GIT_SUBTREE) $(DESTDIR)$(libexecdir)
++	$(INSTALL) -d -m 755 $(DESTDIR)$(gitexecdir)
 +	$(INSTALL) -m 755 $(GIT_SUBTREE) $(DESTDIR)$(gitexecdir)
  
  install-doc: install-man
  
--- 
-1.7.6
-

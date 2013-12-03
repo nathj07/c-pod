@@ -4,15 +4,15 @@ Date: Mon, 23 Mar 2009 00:03:36 -0400
 Subject: [PATCH] git-cvsimport: Ignore cvsps-2.2b1 Branches: output
 
 Signed-off-by: Todd Zullinger <tmz@pobox.com>
+
+Modified for 1.8.5 by nick.townsend@mac.com
 ---
- git-cvsimport.perl |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/git-cvsimport.perl b/git-cvsimport.perl
-index e439202..d020f1a 100755
+index 73d367c..0d2e48f 100755
 --- a/git-cvsimport.perl
 +++ b/git-cvsimport.perl
-@@ -952,7 +952,7 @@ while (<CVS>) {
+@@ -1116,7 +1116,7 @@ while (<CVS>) {
  	} elsif (/^-+$/) { # end of unknown-line processing
  		$state = 1;
  	} elsif ($state != 11) { # ignore stuff when skipping
@@ -21,6 +21,3 @@ index e439202..d020f1a 100755
  	}
  }
  commit() if $branch and $state != 11;
--- 
-1.6.2.2
-

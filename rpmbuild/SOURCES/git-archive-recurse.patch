@@ -1,35 +1,19 @@
-commit d9abaaac99c48e9b8e6d20c2c5584b6066c6a80f
-Author: Nick Townsend <nick.townsend@mac.com>
-Date:   Mon Nov 25 10:53:08 2013 -0800
-
-    Add --recurse-modules to git archive
-    
-    Not available for remote archives
-    Submodules must be init'd and update'd
-    Includes fix to doc on add_submodule_odb()
-    
-    Backported to v1.8.2.1 Conflicts:
-    	archive.h
-    	submodule.c
-    	submodule.h
-
 diff --git a/Documentation/git-archive.txt b/Documentation/git-archive.txt
-index b4c2e24..6e98d26 100644
+index b97aaab..6a94341 100644
 --- a/Documentation/git-archive.txt
 +++ b/Documentation/git-archive.txt
 @@ -11,6 +11,7 @@ SYNOPSIS
  [verse]
  'git archive' [--format=<fmt>] [--list] [--prefix=<prefix>/] [<extra>]
- 	      [-o | --output=<file>] [--worktree-attributes]
-+	      [--recursive|--recurse-submodules]
+ 	      [-o <file> | --output=<file>] [--worktree-attributes]
++	      [--recurse-submodules]
  	      [--remote=<repo> [--exec=<git-upload-archive>]] <tree-ish>
  	      [<path>...]
  
-@@ -51,6 +52,14 @@ OPTIONS
+@@ -51,6 +52,13 @@ OPTIONS
  --prefix=<prefix>/::
  	Prepend <prefix>/ to each filename in the archive.
  
-+--recursive::
 +--recurse-submodules::
 +	Archive entries in submodules. Errors occur if the submodules
 +	have not been initialized and updated.
@@ -41,7 +25,7 @@ index b4c2e24..6e98d26 100644
  --output=<file>::
  	Write the archive to <file> instead of stdout.
 diff --git a/Documentation/technical/api-ref-iteration.txt b/Documentation/technical/api-ref-iteration.txt
-index dbbea95..7cc467b 100644
+index aa1c50f..02adfd4 100644
 --- a/Documentation/technical/api-ref-iteration.txt
 +++ b/Documentation/technical/api-ref-iteration.txt
 @@ -50,10 +50,10 @@ submodules object database. You can do this by a code-snippet like
@@ -53,12 +37,12 @@ index dbbea95..7cc467b 100644
  		die("Error submodule '%s' not populated.", path);
  
 -`add_submodule_odb()` will return an non-zero value on success. If you
-+`add_submodule_odb()` will return a zero value on success. If you
++`add_submodule_odb()` will return zero on success. If you
  do not do this you will get an error for each ref that it does not point
  to a valid object.
  
 diff --git a/archive.c b/archive.c
-index d254fa5..c3024ba 100644
+index 346f3b2..3950eff 100644
 --- a/archive.c
 +++ b/archive.c
 @@ -5,6 +5,7 @@
@@ -69,51 +53,63 @@ index d254fa5..c3024ba 100644
  
  static char const * const archive_usage[] = {
  	N_("git archive [options] <tree-ish> [<path>...]"),
-@@ -131,13 +132,32 @@ static int write_archive_entry(const unsigned char *sha1, const char *base,
+@@ -130,19 +131,35 @@ static int write_archive_entry(const unsigned char *sha1, const char *base,
+ 			return 0;
  		args->convert = ATTR_TRUE(check[1].value);
  	}
- 
-+	if (S_ISGITLINK(mode) && args->recurse) {
+-
+-	if (S_ISDIR(mode) || S_ISGITLINK(mode)) {
+-		if (args->verbose)
+-			fprintf(stderr, "%.*s\n", (int)path.len, path.buf);
+-		err = write_entry(args, sha1, path.buf, path.len, mode);
+-		if (err)
+-			return err;
+-		return (S_ISDIR(mode) ? READ_TREE_RECURSIVE : 0);
+-	}
+-
+ 	if (args->verbose)
+ 		fprintf(stderr, "%.*s\n", (int)path.len, path.buf);
+-	return write_entry(args, sha1, path.buf, path.len, mode);
++	err = write_entry(args, sha1, path.buf, path.len, mode);
++	if (err)
++		return err;
++	if (S_ISDIR(mode))
++		return READ_TREE_RECURSIVE;
++	if (S_ISGITLINK(mode) && args->recurse_submodules) {
 +		const char *work_tree = get_git_work_tree();
-+		if (!work_tree) {
-+			  die("Can't go recursive when no work dir");
-+		}
-+		static struct strbuf dotgit = STRBUF_INIT;
-+		strbuf_reset(&dotgit);
-+		strbuf_grow(&dotgit, PATH_MAX);
++		if (!work_tree)
++			die(_("Can't recurse-submodules when no work dir"));
++		struct strbuf dotgit;
++		strbuf_init(&dotgit, PATH_MAX);
 +		strbuf_addstr(&dotgit, work_tree);
 +		strbuf_addch(&dotgit, '/');
 +		if (args->treepath) {
-+			  strbuf_addstr(&dotgit, args->treepath);
-+			  strbuf_addch(&dotgit, '/');
++			strbuf_addstr(&dotgit, args->treepath);
++			strbuf_addch(&dotgit, '/');
 +		}
-+		strbuf_add(&dotgit, path_without_prefix,strlen(path_without_prefix)-1);
-+		if (add_submodule_odb(dotgit.buf))
-+			  die("Can't add submodule: %s", dotgit.buf);
++		strbuf_add(&dotgit,
++			path_without_prefix,strlen(path_without_prefix)-1);
++		int found = !add_submodule_odb(dotgit.buf);
 +		strbuf_release(&dotgit);
++		if (found)
++			return READ_TREE_RECURSIVE;
++		warning(_("Can't recurse into submodule at %.*s"),
++			(int)(path.len - 1), path.buf);
 +	}
- 	if (S_ISDIR(mode) || S_ISGITLINK(mode)) {
- 		if (args->verbose)
- 			fprintf(stderr, "%.*s\n", (int)path.len, path.buf);
- 		err = write_entry(args, sha1, path.buf, path.len, mode);
- 		if (err)
- 			return err;
--		return (S_ISDIR(mode) ? READ_TREE_RECURSIVE : 0);
-+		return (S_ISGITLINK(mode) && !args->recurse) ? 0: READ_TREE_RECURSIVE;
- 	}
++	return 0;
+ }
  
- 	if (args->verbose)
-@@ -252,10 +272,16 @@ static void parse_treeish_arg(const char **argv,
+ int write_archive_entries(struct archiver_args *args,
+@@ -256,10 +273,15 @@ static void parse_treeish_arg(const char **argv,
  	const struct commit *commit;
  	unsigned char sha1[20];
  
 +	const char *colon = strchr(name, ':');
 +
-+	/* Store the path on the ref for later (required for --recursive) */
++	/* Store the path on the ref for later (required for --recurse-submodules) */
 +	char *treepath = NULL;
-+	if (colon) {
-+		treepath = strdup(colon+1);
-+	}
++	if (colon)
++		treepath = xstrdup(colon + 1);
  	/* Remotes are only allowed to fetch actual refs */
  	if (remote) {
  		char *ref = NULL;
@@ -121,7 +117,7 @@ index d254fa5..c3024ba 100644
  		int refnamelen = colon ? colon - name : strlen(name);
  
  		if (!dwim_ref(name, refnamelen, sha1, &ref))
-@@ -292,9 +318,11 @@ static void parse_treeish_arg(const char **argv,
+@@ -296,6 +318,7 @@ static void parse_treeish_arg(const char **argv,
  		tree = parse_tree_indirect(tree_sha1);
  	}
  	ar_args->tree = tree;
@@ -129,49 +125,44 @@ index d254fa5..c3024ba 100644
  	ar_args->commit_sha1 = commit_sha1;
  	ar_args->commit = commit;
  	ar_args->time = archive_time;
-+
- }
- 
- #define OPT__COMPR(s, v, h, p) \
-@@ -314,6 +342,7 @@ static int parse_archive_args(int argc, const char **argv,
+@@ -318,6 +341,7 @@ static int parse_archive_args(int argc, const char **argv,
  	const char *exec = NULL;
  	const char *output = NULL;
  	int compression_level = -1;
-+	int recurse = 0;
++	int recurse_submodules = 0;
  	int verbose = 0;
  	int i;
  	int list = 0;
-@@ -327,6 +356,8 @@ static int parse_archive_args(int argc, const char **argv,
+@@ -331,6 +355,7 @@ static int parse_archive_args(int argc, const char **argv,
  			N_("write the archive to this file")),
  		OPT_BOOL(0, "worktree-attributes", &worktree_attributes,
  			N_("read .gitattributes in working directory")),
-+		OPT_BOOL(0, "recursive", &recurse, N_("include submodules in archive")),
-+		OPT_BOOL(0, "recurse-submodules", &recurse, N_("include submodules in archive")),
++		OPT_BOOL(0, "recurse-submodules", &recurse_submodules, N_("include submodules in archive")),
  		OPT__VERBOSE(&verbose, N_("report archived files on stderr")),
  		OPT__COMPR('0', &compression_level, N_("store only"), 0),
  		OPT__COMPR('1', &compression_level, N_("compress faster"), 1),
-@@ -351,6 +382,8 @@ static int parse_archive_args(int argc, const char **argv,
+@@ -355,6 +380,8 @@ static int parse_archive_args(int argc, const char **argv,
  
  	argc = parse_options(argc, argv, NULL, opts, archive_usage, 0);
  
-+	if (is_remote && recurse)
-+		die("Cannot include submodules with option --remote");
++	if (is_remote && recurse_submodules)
++		die(_("Cannot recurse submodules with option --remote"));
  	if (remote)
  		die("Unexpected option --remote");
  	if (exec)
-@@ -389,6 +422,7 @@ static int parse_archive_args(int argc, const char **argv,
+@@ -393,6 +420,7 @@ static int parse_archive_args(int argc, const char **argv,
  					format, compression_level);
  		}
  	}
-+	args->recurse = recurse;
++	args->recurse_submodules = recurse_submodules;
  	args->verbose = verbose;
  	args->base = base;
  	args->baselen = strlen(base);
 diff --git a/archive.h b/archive.h
-index 895afcd..c8cf30f 100644
+index 4a791e1..180968f 100644
 --- a/archive.h
 +++ b/archive.h
-@@ -5,10 +5,12 @@ struct archiver_args {
+@@ -7,10 +7,12 @@ struct archiver_args {
  	const char *base;
  	size_t baselen;
  	struct tree *tree;
@@ -179,18 +170,18 @@ index 895afcd..c8cf30f 100644
  	const unsigned char *commit_sha1;
  	const struct commit *commit;
  	time_t time;
- 	const char **pathspec;
-+	unsigned int recurse : 1;
+ 	struct pathspec pathspec;
++	unsigned int recurse_submodules : 1;
  	unsigned int verbose : 1;
  	unsigned int worktree_attributes : 1;
  	unsigned int convert : 1;
 diff --git a/submodule.c b/submodule.c
-index 9ba1496..b17a982 100644
+index 1905d75..1ea46be 100644
 --- a/submodule.c
 +++ b/submodule.c
-@@ -30,7 +30,7 @@ static struct sha1_array ref_tips_after_fetch;
-  */
- static int gitmodules_is_unmerged;
+@@ -143,7 +143,7 @@ void stage_updated_gitmodules(void)
+ 		die(_("staging updated .gitmodules failed"));
+ }
  
 -static int add_submodule_odb(const char *path)
 +int add_submodule_odb(const char *path)
@@ -198,13 +189,108 @@ index 9ba1496..b17a982 100644
  	struct strbuf objects_directory = STRBUF_INIT;
  	struct alternate_object_database *alt_odb;
 diff --git a/submodule.h b/submodule.h
-index 3dc1b3f..23f0a4d 100644
+index 7beec48..3e3cdca 100644
 --- a/submodule.h
 +++ b/submodule.h
-@@ -35,5 +35,6 @@ int merge_submodule(unsigned char result[20], const char *path, const unsigned c
- int find_unpushed_submodules(unsigned char new_sha1[20], const char *remotes_name,
+@@ -41,5 +41,6 @@ int find_unpushed_submodules(unsigned char new_sha1[20], const char *remotes_nam
  		struct string_list *needs_pushing);
  int push_unpushed_submodules(unsigned char new_sha1[20], const char *remotes_name);
+ void connect_work_tree_and_git_dir(const char *work_tree, const char *git_dir);
 +int add_submodule_odb(const char *path);
  
  #endif
+diff --git a/t/t5005-archive-submodules.sh b/t/t5005-archive-submodules.sh
+new file mode 100755
+index 0000000..23f39df
+--- /dev/null
++++ b/t/t5005-archive-submodules.sh
+@@ -0,0 +1,89 @@
++#!/bin/sh
++
++test_description='test archive submodules of git-archive'
++. ./test-lib.sh
++
++# Basic sanity
++
++test_expect_success 'setup - initial commit' '
++	echo testfile >t &&
++	git add t &&
++	git commit -m "initial commit" &&
++	git branch initial
++'
++
++test_expect_success 'archive accepts recurse-submodules option' '
++	git archive --recurse-submodules HEAD >/dev/null
++'
++
++test_expect_success 'archive complains about recurse-submodules with remote' '
++	test_must_fail git archive --recurse-submodules --remote git@github.com:git/git.git >/dev/null
++'
++
++# Make a dir and clean it up afterwards
++make_dir() {
++	mkdir "$1" &&
++	test_when_finished "rm -rf '$1'"
++}
++
++# Check that the dir given in "$1" contains exactly the
++# set of paths given as arguments.
++check_dir() {
++	dir=$1; shift
++	{
++		echo "$dir" &&
++		for i in "$@"; do
++			echo "$dir/$i"
++		done
++	} | sort >expect &&
++	find "$dir" ! -name pax_global_header -print | sort >actual &&
++	test_cmp expect actual
++}
++
++submodurl=$(pwd -P)/mymodule
++
++test_expect_success 'setup - repository with submodule' '
++	mkdir mymodule &&
++	(
++		cd mymodule &&
++		git init &&
++		echo a >a &&
++		git add a &&
++		git commit -m "submodule commit 1" &&
++		git tag -a -m "rev-m1" rev-m1
++	) &&
++	mkdir myproject &&
++	(
++		cd myproject &&
++		git init &&
++		echo b >b &&
++		git add b &&
++		git commit -m "project commit 1" &&
++		git tag -a -m "rev-p1" rev-p1 &&
++		git submodule add "$submodurl" funcs &&
++		git commit -m "add submodule funcs"
++	)
++'
++
++test_expect_success 'tar archive preserves existing submodule behaviour' '
++	make_dir extract &&
++	(
++		cd myproject &&
++		git archive --format=tar HEAD >../submodule.tar 
++	) &&
++	"$TAR" xf submodule.tar -C extract &&
++	check_dir extract .gitmodules b funcs
++'
++
++test_expect_success 'tar archive includes submodule' '
++	make_dir extract &&
++	(
++		cd myproject &&
++		git archive --recurse-submodules --format=tar HEAD >../submodule.tar 
++	) &&
++	"$TAR" xf submodule.tar -C extract &&
++	check_dir extract .gitmodules b funcs funcs/a
++	test_cmp extract/funcs/a myproject/funcs/a
++'
++
++test_done

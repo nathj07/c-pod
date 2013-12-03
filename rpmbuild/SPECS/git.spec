@@ -47,8 +47,8 @@
 %endif
 
 Name:           git
-Version:        1.8.2.1
-Release:        2%{?dist}.ip
+Version:        1.8.5
+Release:        1%{?dist}.ip
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
@@ -61,15 +61,12 @@ Source5:        git-gui.desktop
 Source6:        gitweb.conf.in
 Source10:       http://git-core.googlecode.com/files/%{name}-manpages-%{version}.tar.gz
 Source11:       http://git-core.googlecode.com/files/%{name}-htmldocs-%{version}.tar.gz
-Patch0:         git-1.5-gitweb-home-link.patch
+Patch0:         gitweb-home-link.patch
 # https://bugzilla.redhat.com/490602
-Patch1:         git-cvsimport-Ignore-cvsps-2.2b1-Branches-output.patch
+Patch1:         git-cvsimport.patch
 # https://bugzilla.redhat.com/600411
 Patch3:         git-1.7-el5-emacs-support.patch
-Patch5:         0001-git-subtree-Use-gitexecdir-instead-of-libexecdir.patch
-# This fixes the build when python is enabled.  Needs discussion upstream to
-# find a proper solution.
-Patch6:         0001-Drop-DESTDIR-from-python-instlibdir.patch
+Patch5:         git-subtree-use-gitexecdir.patch
 Patch7:         git-archive-recurse.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -278,7 +275,6 @@ Requires:       emacs-git = %{version}-%{release}
 %patch3 -p1
 %endif
 %patch5 -p1
-%patch6 -p1
 
 %if %{use_prebuilt_docs}
 mkdir -p prebuilt_docs/{html,man}

@@ -1,0 +1,13 @@
+diff --git a/gitweb/gitweb.perl b/gitweb/gitweb.perl
+index 68c77f6..2d4354e 100755
+--- a/gitweb/gitweb.perl
++++ b/gitweb/gitweb.perl
+@@ -83,7 +83,7 @@ our $projectroot = "++GITWEB_PROJECTROOT++";
+ our $project_maxdepth = "++GITWEB_PROJECT_MAXDEPTH++";
+ 
+ # string of the home link on top of all pages
+-our $home_link_str = "++GITWEB_HOME_LINK_STR++";
++our $home_link_str = $ENV{'SERVER_NAME'} ? "git://" . $ENV{'SERVER_NAME'} : "projects";
+ 
+ # extra breadcrumbs preceding the home link
+ our @extra_breadcrumbs = ();
