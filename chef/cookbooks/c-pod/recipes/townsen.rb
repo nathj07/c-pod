@@ -1,43 +1,75 @@
 # A Recipe to setup Nick T.
 #
-group 'townsen' do
-    action :create
-    gid 625
-end
+case node[:platform_family]
+when "mac_os_x"
+    homedir = '/Users/townsen'
+    userid  = 'townsen'
+    groupid = 'staff'
+when "rhel"
+    homedir =  '/home/townsen'
+    userid  = 'townsen'
+    groupid = 'townsen'
 
-homedir =  '/home/townsen'
-
-user 'townsen' do
-    action :create
-    comment "Nick Townsend"
-    home    homedir
-    gid 625
-    uid 625
-    password '$1$ZjqgZlNs$mIqvBcMq6kcUCDsLjyH3I0'
-    supports :manage_home => true
+    group groupid do
+        action :create
+        gid 625
+    end
+    user userid do
+        action :create
+        comment "Nick Townsend"
+        home    homedir
+        gid 625
+        uid 625
+        password '$1$ZjqgZlNs$mIqvBcMq6kcUCDsLjyH3I0'
+        supports :manage_home => true
+    end
+    template "#{homedir}/.rpmmacros" do
+        action  :create
+        source  'rpmmacros.erb'
+        mode    0644
+        owner   userid
+        group   groupid
+        variables( 
+            :homedir => homedir
+        )
+    end
+    directory "/root/.ssh" do
+        mode    0700
+        owner   'root'
+        group   'root'
+    end
+    cookbook_file "/root/.ssh/authorized_keys" do
+        source  'townsen.pub'
+        mode    0644
+    end
+    user_ulimit "townsen" do
+      filehandle_limit 8192
+    end
+else
+    raise "Not supported on #{node[:platform]}"
 end
 
 cookbook_file "#{homedir}/.vimrc" do
     source  'townsen.vimrc'
     mode    0644
-    owner   'townsen'
-    group   'townsen'
+    owner   userid
+    group   groupid
 end
 
 directory "#{homedir}/.vim" do
     mode    0755
-    owner   'townsen'
-    group   'townsen'
+    owner   userid
+    group   groupid
 end
 directory "#{homedir}/.vim/autoload" do
     mode    0755
-    owner   'townsen'
-    group   'townsen'
+    owner   userid
+    group   groupid
 end
 directory "#{homedir}/.vim/bundle" do
     mode    0755
-    owner   'townsen'
-    group   'townsen'
+    owner   userid
+    group   groupid
 end
 
 remote_file "#{homedir}/.vim/autoload/pathogen.vim" do
@@ -52,23 +84,12 @@ end
     end
 end
 
-template "#{homedir}/.rpmmacros" do
-    action  :create
-    source  'rpmmacros.erb'
-    mode    0644
-    owner   'townsen'
-    group   'townsen'
-    variables( 
-	:homedir => homedir
-    )
-end
-
 template "#{homedir}/.gitconfig" do
     action  :create
     source  'gitconfig.erb'
     mode    0644
-    owner   'townsen'
-    group   'townsen'
+    owner   userid
+    group   groupid
     variables( 
 	:useremail => 'nick.townsend@mac.com', :usergecos => 'Nick Townsend' 
     )
@@ -77,13 +98,13 @@ end
 cookbook_file "#{homedir}/.inputrc" do
     source  'townsen.inputrc'
     mode    0644
-    owner   'townsen'
-    group   'townsen'
+    owner   userid
+    group   groupid
 end
 
 directory "#{homedir}/.ssh" do
-    owner   'townsen'
-    group   'townsen'
+    owner   userid
+    group   groupid
     mode    0750
 end
 
@@ -91,30 +112,15 @@ cookbook_file "#{homedir}/.ssh/config" do
     action  :create_if_missing
     source  'config.ssh'
     mode    0644
-    owner   'townsen'
-    group   'townsen'
+    owner   userid
+    group   groupid
 end
 
 remote_file "#{homedir}/.ssh/authorized_keys" do
     source "https://github.com/townsen.keys"
     mode    0644
-    owner   'townsen'
-    group   'townsen'
-end
-
-directory "/root/.ssh" do
-    mode    0700
-    owner   'root'
-    group   'root'
-end
-
-cookbook_file "/root/.ssh/authorized_keys" do
-    source  'townsen.pub'
-    mode    0644
-end
-
-user_ulimit "townsen" do
-  filehandle_limit 8192
+    owner   userid
+    group   groupid
 end
 
 # vim: sts=4 sw=4 ts=8 et
