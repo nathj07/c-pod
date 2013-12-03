@@ -95,8 +95,8 @@ cookbook_file "#{homedir}/.ssh/config" do
     group   'townsen'
 end
 
-cookbook_file "#{homedir}/.ssh/authorized_keys" do
-    source  'townsen.pub'
+remote_file "#{homedir}/.ssh/authorized_keys" do
+    source "https://github.com/townsen.keys"
     mode    0644
     owner   'townsen'
     group   'townsen'
