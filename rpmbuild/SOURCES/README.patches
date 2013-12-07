@@ -1,0 +1,78 @@
+Patches for Vim - Vi IMproved 7.4
+
+The files in this directory contain source code changes to fix problems
+in a released version of Vim.  Each file also contains an explanation of
+the problem that is fixed, like the message that was sent to the vim-dev
+maillist.
+
+The best is to apply the patches in sequence.  This avoids problems when
+a patch depends on a previous patch. 
+
+Before patching, change to the top Vim directory, where the "src" and
+"runtime" directories are located.
+Depending on the version of "patch" that you use, you may have add an
+argument to make it patch the right file:
+        patch -p < 7.4.001
+        patch -p0 < 7.4.001
+
+After applying a patch, you need to compile Vim.  There are no patches
+for binaries.
+
+Checksums for the patch files can be found in the file MD5.
+
+
+Individual patches for Vim 7.4:
+
+  SIZE  NAME     FIXES
+ 13179  7.4.001  'ic' doesn't work for patterns such as [a-z]
+  2522  7.4.002  pattern with two alternative look-behind matches doesn't match
+  2680  7.4.003  memory access error in Ruby syntax highlighting
+  7145  7.4.004  when closing a window fails ":bwipe" may hang
+  1391  7.4.005  "vaB" while 'virtualedit' is set selects the wrong area
+  1952  7.4.006  mkdir("foo/bar/", "p") gives an error message
+  2538  7.4.007  creating a preview window on startup messes up the screen
+  2176  7.4.008  new regexp engine can't be interrupted
+  2051  7.4.009  too easy to write a file was not decrypted (yet)
+  2307  7.4.010  (after 7.4.006) crash with invalid argument to mkdir()
+  2270  7.4.011  cannot find out if "acl" and "xpm" features are supported
+  6180  7.4.012  MS-Windows: resolving multi-bye shortcut does not work
+  2986  7.4.013  MS-Windows: File name buffer too small for utf-8
+  2671  7.4.014  MS-Windows: check for writing to device does not work
+  3135  7.4.015  MS-Windows: Detecting node type fails for multi-byte chars
+  5999  7.4.016  MS-Windows: File name completion has problem with Chinese
+  2319  7.4.017  ":help !!" does not find the "!!" tag in the help file
+  1400  7.4.018  when completing item becomes unselected
+  1948  7.4.019  file name completion fails with Chinese characters
+  2586  7.4.020  NFA engine matches too much with \@>
+  2806  7.4.021  NFA regexp: Using \ze may result in wrong end
+  4209  7.4.022  deadlock while exiting, because of allocating memory
+  1704  7.4.023  MS-Windows: warning for 64 bit type
+  1992  7.4.024  current user cannot always use the undo file he created
+  2074  7.4.025  reading before start of a string
+  1710  7.4.026  clang warning for int shift overflow
+  2815  7.4.027  valgrind error when using CTRL-X CTRL-F at start of the line
+ 27323  7.4.028  equivalence classes are not working for multi-byte characters
+  1837  7.4.029  an error in a pattern is reported twice
+  2724  7.4.030  the -mno-cygwin argument is no longer supported by Cygwin
+  1748  7.4.031  ":diffoff!" resets options even when 'diff' is not set
+  2629  7.4.032  NFA engine does not match the NUL character
+  3610  7.4.033  if terminal has 20 lines test 92 and 93 overwrite input file
+  5336  7.4.034  using "p" in Visual block mode only changes the first line
+  1696  7.4.035  MS-Windows: mouse pointer flickers when going to Normal mode
+  7996  7.4.036  NFA engine does not capture group correctly when using \@>
+  4274  7.4.037  "\ze" in a sub-pattern does set the end of the match
+  3579  7.4.038  Using "zw" and "zg" when 'spell' is off give confusing error
+  6108  7.4.039  MS-Windows: < MSCV10 can't handle symlinks to a directory
+  2320  7.4.040  error on exit when variable holds reference to a script scope
+  1695  7.4.041  Visual selection does not remain after being copied over
+  2104  7.4.042  after ":setlocal" 'spell'/'spellang' :spelldump doesn't work
+  2920  7.4.043  VMS can't handle long function names
+  2134  7.4.044  can't build with old MSVC
+  3167  7.4.045  substitute() has a problem with pattern starting with "\ze".
+  2147  7.4.046  can't use Tcl 8.6
+  1685  7.4.047  input() does not work in a function invoked by a mapping
+  4441  7.4.048  recent clang version complains about -fno-strength-reduce
+  2145  7.4.049  in Ex mode substitute prompt is wrong with line numbers
+  2605  7.4.050  "gn" may select too much when there are two matching lines
+  2068  7.4.051  syntax highlighting a Yaml file causes a crash
+  5890  7.4.052  cursor may end up in the wrong position when auto-formatting
