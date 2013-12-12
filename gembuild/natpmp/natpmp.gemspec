@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.summary = %q{Encapsulate NAT-PMP protocol}
   s.homepage = %q{https://github.com/townsen/c-pod/}
   s.has_rdoc = false
-  s.files = [ "lib/natpmp.rb", "bin/natpmp", "lib/natpmp/version.rb" ]
+  s.files = [ "README.md", "lib/natpmp.rb", "bin/natpmp", "lib/natpmp/version.rb" ]
   s.test_files = [ "test/test_natpmp.rb" ]
   s.description = "Interface to NAT-PMP. Portable between Mac OS X and CentOS 5+."
   s.executables << "natpmp"

@@ -41,7 +41,7 @@ class NATPMP
     end
   end
 
-  def self.verbose flag = true
+  def self.verbose flag
     @verbose = flag
   end
 
@@ -93,8 +93,8 @@ class NATPMP
     @priv = priv
     @pub = pub
     @maxlife = maxlife
-    raise "Time must be >= 0" if maxlife < 0
     @type = type
+    @renew = nil # Renewal thread
 
     # These are filled in when a request is made
     #
@@ -104,16 +104,18 @@ class NATPMP
 
   # See section 3.3
   def request!
-    rsp = NATPMP.send [0, OPCODE[@type], 0, @priv, @pub, @maxlife].pack("CCnnnN")
+    rsp = NATPMP.send [0, OPCODE[@type], 0, @priv, @pub, @maxlife||DEFAULT_LIFETIME].pack("CCnnnN")
     (sssoe, priv, @mapped, @life) = rsp.unpack("x4NnnN")
     raise "Port mismatch: requested #{@priv} received #{priv}" if @priv != priv
-    STDERR.puts "Mapped #{inspect}" if NATPMP.verbose
+    STDERR.puts "Mapped (at #{sssoe}) #{inspect}" if NATPMP.verbose?
+    schedule_renew! if @maxlife.nil?
   end
 
   # See section 3.4
   def revoke!
+    @renew.exit if @renew
     rsp = NATPMP.send [0, OPCODE[@type], 0, @priv, 0, 0].pack("CCnnnN")
-    STDERR.puts "Revoked #{inspect}" if NATPMP.verbose
+    STDERR.puts "Revoked #{inspect}" if NATPMP.verbose?
   end
 
   def inspect
@@ -122,7 +124,7 @@ class NATPMP
 
   def self.map priv, pub, maxlife = DEFAULT_LIFETIME, type = :tcp, &block
 
-    map = NATPMP.new(priv, pub, maxlife, type)
+    map = NATPMP.new(priv, pub, block_given? ? nil: maxlife, type)
     map.request!
     if block_given?
       begin
@@ -135,4 +137,22 @@ class NATPMP
     return map
 
   end
+
+  private
+
+  # As per section 3.3 re-issue the request using the actual mapped port
+  def schedule_renew!
+    Thread.abort_on_exception = true
+    # As per section 3.3 re-issue the request using the actual mapped port
+    @renew = Thread.new @life do |life|
+      wait_time = life/2
+      STDERR.puts "Renewal in #{wait_time} seconds" if NATPMP.verbose?
+      sleep wait_time
+      rsp = NATPMP.send [0, OPCODE[@type], 0, @priv, @mapped, @life].pack("CCnnnN")
+      (sssoe, priv, @mapped, @life) = rsp.unpack("x4NnnN")
+      STDERR.puts "Renewed (at #{sssoe}) #{inspect}" if NATPMP.verbose?
+      schedule_renew!
+    end
+  end
+
 end

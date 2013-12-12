@@ -5,9 +5,6 @@ require 'natpmp/version'
 require 'ostruct'
 require 'optparse'
 
-# TODO Extend the mapping if the command takes longer
-# than the timeout.
-
 types = [:tcp, :udp]
 
 opts = OpenStruct.new(port: nil, type: :tcp, verbose: false, public: 0, ttl: 7200)
@@ -69,7 +66,7 @@ end
 
 if ARGV.size > 0
   command = ARGV.join(' ')
-  NATPMP.map opts.port, opts.public, opts.ttl, opts.type do |map|
+  NATPMP.map opts.port, opts.public, nil, opts.type do |map|
     command.gsub! /(?<!%)%p/, map.priv.to_s
     command.gsub! /(?<!%)%h/, opts.localhost.to_s
     command.gsub! /(?<!%)%P/, map.mapped.to_s
@@ -79,7 +76,6 @@ if ARGV.size > 0
     system command
   end
 else
-  puts "noarg"
   map = NATPMP.map opts.port, opts.public, opts.ttl, opts.type
 end
 
