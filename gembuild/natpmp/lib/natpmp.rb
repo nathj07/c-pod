@@ -4,7 +4,7 @@
 require 'socket'
 
 class NATPMP
-  VERSION = 0
+  PMP_VERSION = 0
   DEFAULT_LIFETIME  = 7200
   DELAY_MSEC = 250
   MAX_WAIT_SEC = 64
@@ -57,19 +57,19 @@ class NATPMP
     raise "Couldn't send!" unless cb == msg.size
     delay = DELAY_MSEC/1000.0
     begin
+      sleep delay # to give time for the response to arrive!
       (reply, sendinfo) = sock.recvfrom_nonblock(16)
       sender = Addrinfo.new sendinfo
       raise "Being spoofed!" unless sender.ip_address == NATPMP.GW
       (ver,op,res) = reply.unpack("CCn")
-      raise "Invalid version #{ver}" unless ver == VERSION
+      raise "Invalid version #{ver}" unless ver == PMP_VERSION
       raise "Invalid reply opcode #{op}" unless op == 128 + sop
       raise "Request failed (code #{RETCODE.key(res)})" unless res == RETCODE[:success]
       return reply
     rescue IO::WaitReadable
-      sleep delay
-      delay *= 2
       if delay < MAX_WAIT_SEC
 	puts "Retrying after #{delay}..." if NATPMP.verbose?
+        delay *= 2
 	retry
       end
       raise "Waited too long, got no response"
@@ -107,16 +107,17 @@ class NATPMP
     rsp = NATPMP.send [0, OPCODE[@type], 0, @priv, @pub, @maxlife].pack("CCnnnN")
     (sssoe, priv, @mapped, @life) = rsp.unpack("x4NnnN")
     raise "Port mismatch: requested #{@priv} received #{priv}" if @priv != priv
+    STDERR.puts "Mapped #{inspect}" if NATPMP.verbose
   end
 
   # See section 3.4
   def revoke!
     rsp = NATPMP.send [0, OPCODE[@type], 0, @priv, 0, 0].pack("CCnnnN")
-    puts "Revoked mapping: #{inspect}"
+    STDERR.puts "Revoked #{inspect}" if NATPMP.verbose
   end
 
   def inspect
-    "Mapping: #{@mapped}->#{@type}:#{@priv} for #{@life} sec. Requested: #{@pub} for #{@maxlife} sec"
+    "#{NATPMP.GW}:#{@mapped}->#{@type}:#{@priv} (#{@life} sec)"
   end
 
   def self.map priv, pub, maxlife = DEFAULT_LIFETIME, type = :tcp, &block
@@ -128,10 +129,10 @@ class NATPMP
 	yield map
       ensure
 	map.revoke!
+        map = nil
       end
-    else
-      return map
     end
+    return map
 
   end
 end

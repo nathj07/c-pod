@@ -1,66 +1,86 @@
 #!/usr/bin/env ruby
 #
 require 'natpmp'
+require 'natpmp/version'
 require 'ostruct'
 require 'optparse'
+
+# TODO Extend the mapping if the command takes longer
+# than the timeout.
 
 types = [:tcp, :udp]
 
 opts = OpenStruct.new(port: nil, type: :tcp, verbose: false, public: 0, ttl: 7200)
 
 OptionParser.new do |o|
-    o.banner = "Usage: natpmp [options] [command]"
-    o.separator ""
-    o.separator "Open a port on a NAT gateway"
-    o.separator "Options:"
+    o.banner = "usage: #{o.program_name} [options] [command]"
+    o.separator "Open a port on a NAT-PMP gateway. Options:"
 
-    o.on( '-?', '--help', 'Display this screen' ) do
+    o.on_tail( '-?', '--help', 'Display this screen' ) do
         puts o
         exit
     end
     o.on('-t', '--type TYPE', types, "Type: #{types.join(', ')} (default: #{opts.type})") do |t|
         opts.type = t
     end
-    o.on('-p', '--port PORT', Integer, "Private port") do |n|
+    o.on('-p', '--port PORT', Integer, "Private port (default: auto)") do |n|
         opts.port = n
+    end
+    o.on('--ttl TIME', Integer, "TTL if no command (default #{opts.ttl} sec)") do |n|
+        opts.ttl = n
+    end
+    o.on('-P', '--public PUBPORT', Integer, "External port (default: auto)") do |n|
+        opts.public = n
     end
     o.on('-v', '--verbose', "Verbose") do
         opts.verbose = true
     end
-    o.on('--ttl TIME', Integer, "TTL in seconds (default #{opts.ttl})") do |n|
-        opts.ttl = n
+    o.on('--version', "Version") do
+        STDERR.puts "#{o.program_name}: Version #{NATPMP::VERSION}"
+        exit;
     end
-    o.on('--public PUBPORT', Integer, "External port (default: auto)") do |n|
-        opts.public = n
-    end
-    o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
+    o.separator "In the command string the following substitutions will be made:"
+    o.separator "  %p the local port"
+    o.separator "  %h the local IP address"
+    o.separator "  %P the gateway port"
+    o.separator "  %H the gateway IP address"
+    o.separator "(Use %% to avoid this)"
+    o.separator "The mapping will be closed on completion of the command"
+    o.parse! rescue (STDERR.puts "#{o.program_name}: #{$!}\n#{o.to_s}"; exit)
 end
 
 NATPMP.verbose opts.verbose
 
 unless opts.port
+  require 'socket'
+  p = Addrinfo.send(opts.type, "0.0.0.0", 0).bind
+  opts.localhost, opts.port = p.local_address.ip_unpack
+  STDERR.puts "Local port: #{opts.port}" if opts.verbose
+end
+
+if opts.verbose
   begin
-    puts "Gateway: #{NATPMP.GW}" if opts.verbose
-    puts "External IP: #{NATPMP.addr}"
+    STDERR.puts "Gateway: #{NATPMP.GW}"
+    STDERR.puts "External IP: #{NATPMP.addr}"
   rescue
-    puts "Error: #{$!}"
+    STDERR.puts "#{opts.programname}: Error #{$!}"
   end
-  exit 0
 end
 
 if ARGV.size > 0
   command = ARGV.join(' ')
   NATPMP.map opts.port, opts.public, opts.ttl, opts.type do |map|
-    puts "#{NATPMP.addr}:#{map.mapped} expires in #{map.life} sec" if opts.verbose
-    command.gsub! /(?<!%)%h/, NATPMP.addr
-    command.gsub! /(?<!%)%p/, map.mapped.to_s
-    puts "Executing: #{command}"
+    command.gsub! /(?<!%)%p/, map.priv.to_s
+    command.gsub! /(?<!%)%h/, opts.localhost.to_s
+    command.gsub! /(?<!%)%P/, map.mapped.to_s
+    command.gsub! /(?<!%)%H/, NATPMP.addr
+    command.gsub! /%%([hpHP])/,'%\\1' 
+    STDERR.puts "Executing: #{command}" if opts.verbose
     system command
   end
 else
+  puts "noarg"
   map = NATPMP.map opts.port, opts.public, opts.ttl, opts.type
-  puts "#{NATPMP.addr}:#{map.mapped} expires in #{map.life} sec"
-  puts map.inspect if opts.verbose
 end
 
 # vim: ft=ruby sts=2 sw=2 ts=8
