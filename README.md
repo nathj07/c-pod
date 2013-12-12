@@ -182,7 +182,7 @@ Then run the command `chef-solo` which will (using the above defaults) configure
 
 Alternatively use a non-default JSON file with the `-f` option.
 
-## Accessing via Proxy
+## Accessing Servers within the C-Pod
 The C-Pod configures a SOCKS5 Proxy via which you can get network access to the services.
 ### SSH Access
 For the names that you wish to access, create entries in your local `.ssh/config` file as follows:
@@ -208,6 +208,12 @@ A Proxy Access File (or 'pac' file) has been created that will direct your brows
     http://<%= cgi.server_name %>/c-pod.pac
 
 Safari, Firefox and Chrome have all be tested. Note that at time of writing Cisco AnyConnect VPN is incompatible with the native Mavericks proxy support. Use Firefox as a workaround.
+
+### Directly Accessing Server Ports from Outside the C-Pod
+
+The C-Pod server is configured as a NAT-PMP gateway. So if you have no ability to configure a system to use the SOCKS Proxy to access C-Pod then you can use NAT-PMP to do this. Upon request it can open either a UDP or TCP port on the C-Pod host and forward traffic to a specific cp-pod server. A suitable command line interface is available `gem install natpmp`. You should use at least version 0.8. Type `natpmp -?` for the syntax.
+
+(Note that this feature currently requires manual configuration of `stallone`)
 
 # Notes
 
