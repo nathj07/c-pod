@@ -6,9 +6,15 @@ when "mac_os_x"
     userid  = 'townsen'
     groupid = 'staff'
 when "rhel"
-    homedir =  '/home/townsen'
-    userid  = 'townsen'
-    groupid = 'townsen'
+    if node[:fqdn] =~ /^seu-build1/
+        homedir =  '/home/ntownsend'
+        userid  = 'ntownsend'
+        groupid = 'ntownsend'
+    else
+        homedir =  '/home/townsen'
+        userid  = 'townsen'
+        groupid = 'townsen'
+    end
 
     group groupid do
         action :create
@@ -121,6 +127,19 @@ remote_file "#{homedir}/.ssh/authorized_keys" do
     mode    0644
     owner   userid
     group   groupid
+end
+
+directory "#{homedir}/bin" do
+    owner   userid
+    group   groupid
+    mode    0750
+end
+
+remote_file "#{homedir}/bin/ack" do
+  source "http://beyondgrep.com/ack-2.12-single-file"
+  owner     userid
+  group     groupid
+  mode      0755
 end
 
 # vim: sts=4 sw=4 ts=8 et
