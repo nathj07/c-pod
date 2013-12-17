@@ -41,19 +41,19 @@ group 'apache' do
 end
 
 directory BASE do
-    user node[CPOD][:owner_name]
+    owner node[CPOD][:owner_name]
     group node[CPOD][:owner_name]
     mode 02755		# need setgid so that all are apache group
 end
 
-cookbook_file "/data/README" do
+cookbook_file "#{BASE}/README" do
     source  'README.data'
     mode    0644
     owner   node[CPOD][:owner_name]
     group   node[CPOD][:owner_name]
 end
 
-template "/data/.gitconfig" do
+template "#{BASE}/.gitconfig" do
     action  :create
     source  'gitconfig.erb'
     mode    0644
@@ -62,6 +62,20 @@ template "/data/.gitconfig" do
     variables(
 	:useremail => 'c-pod@sendium.net', :usergecos => 'C-Pod Repo User'
     )
+end
+
+directory "#{BASE}/.ssh" do
+    owner node[CPOD][:owner_name]
+    group node[CPOD][:owner_name]
+    mode 0750
+end
+
+remote_file "#{BASE}/.ssh/authorized_keys" do
+    action  :create_if_missing
+    source "https://github.com/townsen.keys"
+    mode    0644
+    owner   node[CPOD][:owner_name]
+    group   node[CPOD][:owner_name]
 end
 
 git "#{BASE}/c-pod" do
@@ -85,12 +99,12 @@ execute "setup_repo" do
     command "#{BASE}/c-pod/bin/setup_repo"
 end
 
-directory '/data/c-pod' do
+directory "/#{BASE}/c-pod" do
     action :create
     mode 02770
-    user node[CPOD][:owner_name]
+    owner node[CPOD][:owner_name]
     group "apache"
-    subscribes :create, "git[/data/c-pod]", :immediate
+    subscribes :create, "git[/#{BASE}/c-pod]", :immediate
 end
 
 template "/etc/httpd/conf.d/_c-pod.conf" do
