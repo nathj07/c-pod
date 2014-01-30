@@ -38,10 +38,6 @@ OptionParser.new do |o|
         opts.force = true
     end
     o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
-    if ARGV.size == 0 and not opts.force
-	puts o.help 
-	exit 2
-    end
 end
 
 base = File.absolute_path('../..', File.dirname(__FILE__))
