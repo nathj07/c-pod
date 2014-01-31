@@ -2,9 +2,15 @@
 #
 require 'optparse'
 require 'ostruct'
+require 'open-uri'
 require 'uri'
 
-opts = OpenStruct.new( :sourcedir => `rpm --eval='%_sourcedir'`.strip )
+sourcedir = `rpm --eval='%_sourcedir' 2>/dev/null`.strip
+if $? != 0
+    sourcedir = "."
+end
+
+opts = OpenStruct.new( :sourcedir => sourcedir )
 
 OptionParser.new do |o|
     o.banner = "Usage: downloadRPMsource specfile ..."
@@ -21,14 +27,14 @@ OptionParser.new do |o|
     end
     o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
     if ARGV.size == 0
-	puts o.help 
+	puts o.help
 	exit 2
     end
 end
 
 ARGV.each do |specfile|
     unless File.exist? specfile
-	puts "Specfile #{specfile} not found" 
+	puts "Specfile #{specfile} not found"
 	next
     end
     macros = {}
@@ -67,13 +73,32 @@ ARGV.each do |specfile|
 	source.gsub!(/%{(\w+)}/) do |m|
 	    macros[m.slice(2..-2)]
 	end
+        puts "Source: #{source}"
 	uri = URI.parse(source)
-	if uri.scheme =~ /^(https?|ftp)$/
-	    file = File.basename(uri.path)
-	    cmd = "cd #{opts.sourcedir} && curl -z #{file} -O -L #{source}"
-	    puts cmd
-	    system cmd
-	end
+        next unless uri.scheme =~ /^(https?|ftp)$/
+        filename = File.basename(uri.path)
+        open(source,"r") do |input|
+            size = input.meta['content-length'].to_i
+            # GitHub archive URL's don't have the filename as the basename
+            # This means the spec file has to be tweaked
+            if /filename=(\S+)/ =~ input.meta['content-disposition']
+                filename = $1
+            end
+            len = 0
+            print "     Downloading #{filename}..."
+            File.open("#{opts.sourcedir}/#{filename}","w") do |output|
+                while data = input.read(10240)
+                    if size > 0
+                        len += data.size
+                        per = len*100/size
+                        print "\r#{per}%"
+                        $stdout.flush
+                    end
+                    output.write(data)
+                end
+            end
+            puts ""
+        end
     end
 end
 
