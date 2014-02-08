@@ -2,6 +2,8 @@
 # Note use of setgid and apache group to allow sharing
 # Together with umask 0002
 #
+include_recipe 'c-pod::yum_repo_conf'
+
 yum_package 'httpd'
 yum_package 'createrepo'
 
@@ -15,14 +17,15 @@ gem_package 'builder'   # for gem building
 CPOD = 'c-pod'.to_sym
 
 node.default[CPOD][:base] = '/data'
-node.default[CPOD][:owner_name] = 'packager'
-node.default[CPOD][:owner_id] = 505
+node.default[CPOD][:owner_name] = 'c-pod'
+node.default[CPOD][:owner_id] = 606
 
 BASE=node[CPOD][:base]
 
 group node[CPOD][:owner_name] do
   action :create
   gid node[CPOD][:owner_id]
+  append true
 end
 
 user node[CPOD][:owner_name] do
@@ -43,7 +46,7 @@ end
 directory BASE do
     owner node[CPOD][:owner_name]
     group node[CPOD][:owner_name]
-    mode 02755		# need setgid so that all are apache group
+    mode 02775		# need setgid so that all are apache group
 end
 
 cookbook_file "#{BASE}/README" do
@@ -56,11 +59,11 @@ end
 template "#{BASE}/.gitconfig" do
     action  :create
     source  'gitconfig.erb'
-    mode    0644
+    mode    0664
     owner   node[CPOD][:owner_name]
     group   node[CPOD][:owner_name]
     variables(
-	:useremail => 'c-pod@sendium.net', :usergecos => 'C-Pod Repo User'
+        :useremail => 'c-pod@sendium.net', :usergecos => 'C-Pod User'
     )
 end
 
@@ -79,7 +82,7 @@ remote_file "#{BASE}/.ssh/authorized_keys" do
 end
 
 git "#{BASE}/c-pod" do
-    repository "git@github.com:iParadigms/c-pod.git"
+    repository "git@github.com:townsen/c-pod.git"
     reference "master"
     action :checkout # don't sync - do this manually
     group "apache"
@@ -91,20 +94,14 @@ end
 # Git repos come out 644 and 755 so fix group permissions
 execute "repo_permissions" do
     action :nothing
-    command "chmod -R g+w #{BASE}/c-pod"
+    command "chmod 02770 #{BASE}/c-pod && " \
+	    "chmod -R g+w #{BASE}/c-pod && " \
+	    "chown -R #{node[CPOD][:owner_name]}.apache #{BASE}/c-pod"
 end
 
 execute "setup_repo" do
     action :nothing
     command "#{BASE}/c-pod/bin/setup_repo"
-end
-
-directory "/#{BASE}/c-pod" do
-    action :create
-    mode 02770
-    owner node[CPOD][:owner_name]
-    group "apache"
-    subscribes :create, "git[/#{BASE}/c-pod]", :immediate
 end
 
 template "/etc/httpd/conf.d/_c-pod.conf" do
