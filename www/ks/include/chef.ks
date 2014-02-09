@@ -12,14 +12,13 @@ mkdir /etc/chef
 cat <<'CONFIG' > /etc/chef/solo.rb
 file_cache_path	'/var/chef/cache'
 cookbook_path	'/var/chef/cookbooks'
-# Fetch recipes from the master branch (this should be production for production machines)
-recipe_url	'http://<!--#echo var="SERVER_NAME" -->/bin/recipes.cgi/master'
-json_attribs	'/etc/chef/seu_runtime.json'
+recipe_url	'http://<!--#echo var="SERVER_NAME" -->/bin/recipes.cgi'
+json_attribs	'/etc/chef/default.json'
 # vim: ts=8 sw=4 sts=4
 CONFIG
 
-cat <<'JSON' > /etc/chef/seu_runtime.json
+cat <<'JSON' > /etc/chef/default.json
 {
-  "run_list": [ "recipe[ip::yum_repo_conf]", "recipe[ip::seu_runtime]" ]
+  "run_list": [ "recipe[c-pod::client_repo_conf]" ]
 }
 JSON
