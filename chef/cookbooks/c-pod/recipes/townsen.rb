@@ -5,8 +5,8 @@ when "mac_os_x"
     homedir = '/Users/townsen'
     userid  = 'townsen'
     groupid = 'staff'
-when "rhel"
-    if node[:fqdn] =~ /^seu-build1/
+else
+    if node[:fqdn] =~ /iparadigms\.com$/
         homedir =  '/home/ntownsend'
         userid  = 'ntownsend'
         groupid = 'ntownsend'
@@ -51,8 +51,6 @@ when "rhel"
     user_ulimit "townsen" do
       filehandle_limit 8192
     end
-else
-    raise "Not supported on #{node[:platform]}"
 end
 
 cookbook_file "#{homedir}/.vimrc" do
