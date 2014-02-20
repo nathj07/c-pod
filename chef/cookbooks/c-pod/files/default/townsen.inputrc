@@ -1,9 +1,0 @@
-# Can use set -o vi in bash, but this works for all readline programs
-set editing-mode vi
-
-# Need to do this for each vi keymap (easier than tput clear)
-set keymap vi-move
-Control-l: clear-screen
-
-set keymap vi-insert
-Control-l: clear-screen

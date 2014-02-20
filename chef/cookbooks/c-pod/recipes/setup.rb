@@ -19,6 +19,7 @@ CPOD = 'c-pod'.to_sym
 node.default[CPOD][:base] = '/data'
 node.default[CPOD][:owner_name] = 'c-pod'
 node.default[CPOD][:owner_id] = 606
+node.default[CPOD][:github_key] = 'townsen' # User to give public key access
 
 BASE=node[CPOD][:base]
 
@@ -75,7 +76,7 @@ end
 
 remote_file "#{BASE}/.ssh/authorized_keys" do
     action  :create_if_missing
-    source "https://github.com/townsen.keys"
+    source "https://github.com/#{node[CPOD][:github_key]}.keys"
     mode    0644
     owner   node[CPOD][:owner_name]
     group   node[CPOD][:owner_name]
