@@ -2,6 +2,7 @@
 #
 require 'optparse'
 require 'ostruct'
+require 'socket'
 
 def info msg
     print "\033[32m#{msg}\033[0m"
@@ -14,7 +15,7 @@ opts = OpenStruct.new(
     vcpus: 2,
     ram: 2,
     disk: 20,
-    repo: 'cpod.local',
+    repo: Socket.ip_address_list.detect{|intf| intf.ipv4_private?}.ip_address,
     vg: 'vg00',
     force: nil,
     verbose: false
