@@ -10,12 +10,12 @@ end
 types = [:'5', :'6']
 
 opts = OpenStruct.new(
-    type: :'5',
+    type: :'6',
     vcpus: 2,
     ram: 2,
     disk: 20,
-    repo: ENV['C-POD'] || 'c-pod.local',
-    vg: 'sys.00',
+    repo: 'cpod.local',
+    vg: 'vg00',
     force: nil,
     verbose: false
 )
