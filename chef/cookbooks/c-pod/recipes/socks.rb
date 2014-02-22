@@ -1,6 +1,6 @@
 # A Recipe to setup the Proxy server on a repo
 #
-yum_package 'dante-server'
+yum_package 'dante-server >= 1.4.0'
 
 template "/etc/sockd.conf" do
     action  :create
@@ -9,7 +9,8 @@ template "/etc/sockd.conf" do
     owner   'root'
     group   'root'
     variables( 
-	:interface => 'br0'
+	:public => 'eth0',
+	:private => 'virbr0'
     )
     notifies :restart, "service[sockd]", :delayed
 end

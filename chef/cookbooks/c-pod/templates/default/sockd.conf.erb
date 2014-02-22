@@ -1,35 +1,39 @@
-# Dante Socks server config for Repo
+# Dante Socks server config for C-Pod server
 #
 logoutput: /var/log/sockd.log
-internal: <%= @interface %> port = 1080
-external: 192.168.122.1
-method: none
-clientmethod: none
+internal: <%= @public %> port = 1080
+external: <%= @private %>
+socksmethod: none
 timeout.io: 0
 
-# Who do we let in?
+# Let in all the private addresses
 #
-client pass { # The office
-        from: 10.0.0.0/8 port 1-65535 to: 0.0.0.0/0
+client pass {
+        from: 10.0.0.0/8 port 1-65535 to: <%= @public %>
         log: connect
 }
-client pass { # The VPN
-        from: 192.168.40.0/24 to: 192.168.122.0/24
-        log: connect error
+client pass {
+        from: 172.16.0.0/12 to: <%= @public %>
+        log: connect
 }
-# Where can they go?
+client pass {
+        from: 192.168.0.0/16 to: <%= @public %>
+        log: connect
+}
+# Record everyone else and fail them
 #
-pass {
-        from: 10.0.0.0/8 to: 10.0.0.0/8
+client block {
+        from: 0.0.0.0/0 to: 0.0.0.0/0
         log: connect error
+}
+# Allow them to go to the KVM default network
+#
+socks pass {
+        from: 0.0.0.0/0 to: <%= node[:network][:interfaces][@private.to_sym][:routes].detect {|r| r[:family] == "inet"}[:destination] %>
+        log: error
         protocol: tcp udp
 }
-pass {
-        from: 10.0.0.0/8 to: 192.168.122.0/24
-        log: connect error
-        protocol: tcp udp
-}
-block {
+socks block {
         from: 0.0.0.0/0 to: 0.0.0.0/0
         log: connect error
 }
