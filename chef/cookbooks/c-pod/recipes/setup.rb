@@ -14,72 +14,70 @@ gem_package 'redcarpet' do # for markdown
 end
 gem_package 'builder'   # for gem building
 
-CPOD = 'c-pod'.to_sym
+node.default[:cpod][:base] = '/data'
+node.default[:cpod][:owner_name] = 'c-pod'
+node.default[:cpod][:owner_id] = 606
+node.default[:cpod][:github_key] = 'townsen' # User to give public key access
 
-node.default[CPOD][:base] = '/data'
-node.default[CPOD][:owner_name] = 'c-pod'
-node.default[CPOD][:owner_id] = 606
-node.default[CPOD][:github_key] = 'townsen' # User to give public key access
+BASE=node[:cpod][:base]
 
-BASE=node[CPOD][:base]
-
-group node[CPOD][:owner_name] do
+group node[:cpod][:owner_name] do
   action :create
-  gid node[CPOD][:owner_id]
+  gid node[:cpod][:owner_id]
   append true
 end
 
-user node[CPOD][:owner_name] do
+user node[:cpod][:owner_name] do
   action    :create
   comment   "C-Pod owner"
   home	    BASE
-  gid node[CPOD][:owner_id]
-  uid node[CPOD][:owner_id]
+  gid node[:cpod][:owner_id]
+  uid node[:cpod][:owner_id]
   supports :manage_home => false
 end
 
 group 'apache' do
   action    :modify
-  members   node[CPOD][:owner_name]
+  members   node[:cpod][:owner_name]
   append    true
 end
 
 directory BASE do
-    owner node[CPOD][:owner_name]
-    group node[CPOD][:owner_name]
+    owner node[:cpod][:owner_name]
+    group node[:cpod][:owner_name]
     mode 02775		# need setgid so that all are apache group
 end
 
 cookbook_file "#{BASE}/README" do
     source  'README.data'
     mode    0644
-    owner   node[CPOD][:owner_name]
-    group   node[CPOD][:owner_name]
+    owner   node[:cpod][:owner_name]
+    group   node[:cpod][:owner_name]
 end
 
 template "#{BASE}/.gitconfig" do
     action  :create
     source  'gitconfig.erb'
     mode    0664
-    owner   node[CPOD][:owner_name]
-    group   node[CPOD][:owner_name]
+    owner   node[:cpod][:owner_name]
+    group   node[:cpod][:owner_name]
     variables(
         :useremail => 'c-pod@sendium.net', :usergecos => 'C-Pod User'
     )
 end
 
 directory "#{BASE}/.ssh" do
-    owner node[CPOD][:owner_name]
-    group node[CPOD][:owner_name]
+    owner node[:cpod][:owner_name]
+    group node[:cpod][:owner_name]
     mode 0750
 end
 
 remote_file "#{BASE}/.ssh/authorized_keys" do
     action  :create_if_missing
-    source "https://github.com/#{node[CPOD][:github_key]}.keys"
+    source "https://github.com/#{node[:cpod][:github_key]}.keys"
     mode    0644
-    owner   node[CPOD][:owner_name]
-    group   node[CPOD][:owner_name]
+    owner   node[:cpod][:owner_name]
+    group   node[:cpod][:owner_name]
 end
 
 git "#{BASE}/c-pod" do
@@ -97,7 +95,7 @@ execute "repo_permissions" do
     action :nothing
     command "chmod 02770 #{BASE}/c-pod && " \
 	    "chmod -R g+w #{BASE}/c-pod && " \
-	    "chown -R #{node[CPOD][:owner_name]}.apache #{BASE}/c-pod"
+	    "chown -R #{node[:cpod][:owner_name]}.apache #{BASE}/c-pod"
 end
 
 execute "setup_repo" do
@@ -118,5 +116,7 @@ service 'httpd' do
     supports :restart => true, :reload => true
     action :enable
 end
+
+include_recipe 'c-pod::chef-solo'
 
 # vim: sts=4 sw=4 ts=8
