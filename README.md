@@ -80,7 +80,7 @@ To distinguish between packages such as ruby or openssh, which are simply repack
 
 Certain packages (such as, remarkably, *git*) have an EPEL version for CentOS 5 that is later than anything in CentOS 6. Since we would like to keep versions the same (as much as we can) for such important packages, we download the SRPM, tweak the SPECfile to contain an *.ip* release suffix and build our own RPMs. Note that the package release is dot-delimited to match they style of RPMforge and EPEL. If the *ip* was part of the release number that would signify that we actually changed something in the package.
 
-## Using Kickstart to install CentOS 5 or 6
+## Install Using Kickstart
 
 First download an image file to boot the OS for a networked install. These image files are available in the [downloads](/downloads/) directory for each supported OS:
 
@@ -121,7 +121,7 @@ This is for the current production version of internally developed or modified p
     enabled=1
     gpgcheck=0
 
-### Unstable Custom RPMs for Testing
+### Unstable Custom RPMs
 
 When developing a new release of a custom RPM this repository is used. Because YUM repos do not readily support multiple versions we use the yum priorities package to prioritize this repo over the stable one on test machines.
 
@@ -131,7 +131,7 @@ When developing a new release of a custom RPM this repository is used. Because Y
     enabled=1
     gpgcheck=0
 
-### RPMs lifted from other repositories
+### Lifted RPMs
 
 This repository contains RPMs normally found on other repositories, EPEL or RPM Forge for example. To avoid having to be connected to the Internet during installs these can be downloaded using `yumdownloader` and stored in this repository. It also contains packages that may not be customized or altered in any way, but are just built and deployed here. They are considered stable and are used as part of the base Kickstart builds.
 
@@ -141,7 +141,7 @@ This repository contains RPMs normally found on other repositories, EPEL or RPM 
     enabled=1
     gpgcheck=0
 
-## CentOS Distribution Package Repositories
+## CentOS Distribution
 
 To save bandwidth and speed-up networked installs the Distribution repositories are available. In order to use them create the file `/etc/yum.repos.d/centosdvd.repo` with the following contents:
     [centos_repo]
@@ -153,7 +153,14 @@ To save bandwidth and speed-up networked installs the Distribution repositories 
 
 ## Serving Chef Recipes
 
-You can create your own Chef cookbooks under the [chef](/chef) subdirectory. When configured as a webserver these definitions are available using the `bin/recipes.cgi` URL - this downloads the entire tree as a _tgz_ file for use by the `recipe_url` parameter of `chef-solo`. By default the definitions are downloaded from the master branch. You can select any desired branch by adding a Git tree-ish as additional path information, eg:
+This repository contains a Chef directory structure (in the [chef](/chef) subdirectory). You can create your own Chef cookbooks and recipes here for use with `chef-solo` either in local or remote mode. Use local mode when developing and testing and remote mode when using established definitions
+
+### Local Use
+Clone the repository and make the appropriate modification. Run `chef-solo` with a configuration file that points to the local filesystem. A working sample with instructions is in the file [solo.rb](/chef/solo.rb).
+Note that you should make changes to the repository using your real username (and SSH key) and run `chef-solo` as root if you are making system level changes.
+
+### Remote Serving
+When configured as a webserver the Chef definitions are available remotely using the `bin/recipes.cgi` URL - this downloads the entire tree as a _tgz_ file for use by the `recipe_url` parameter of `chef-solo`. By default the definitions are downloaded from the master branch. You can select any desired branch by adding a Git tree-ish as additional path information, eg:
 
     recipe_url      'http://<%= cgi.server_name %>/bin/recipes.cgi/production'
 
@@ -182,8 +189,9 @@ Then run the command `chef-solo` which will (using the above defaults) configure
 
 Alternatively use a non-default JSON file with the `-f` option.
 
-## Accessing Servers within the C-Pod
-The C-Pod configures a SOCKS5 Proxy via which you can get network access to the services.
+## Accessing Servers
+Since the C-Pod runs entirely on an RFC1918 private network inside the machine, network services are not normally available from the outside world. However, the C-Pod configures a SOCKS5 Proxy to overcome this.
+
 ### SSH Access
 For the names that you wish to access, create entries in your local `.ssh/config` file as follows:
 
@@ -209,20 +217,23 @@ A Proxy Access File (or 'pac' file) has been created that will direct your brows
 
 Safari, Firefox and Chrome have all be tested. Note that at time of writing Cisco AnyConnect VPN is incompatible with the native Mavericks proxy support. Use Firefox as a workaround.
 
-### Directly Accessing Server Ports from Outside the C-Pod
+### Server Port Access
+Directly Accessing Server Ports from Outside the C-Pod.
 
 The C-Pod server is configured as a NAT-PMP gateway. So if you have no ability to configure a system to use the SOCKS Proxy to access C-Pod then you can use NAT-PMP to do this. Upon request it can open either a UDP or TCP port on the C-Pod host and forward traffic to a specific cp-pod server. A suitable command line interface is available `gem install natpmp`. You should use at least version 0.8. Type `natpmp -?` for the syntax.
 
 (Note that this feature currently requires manual configuration of `stallone`)
 
-# Notes
+## Notes
 
-## Supported CentOS Versions
+### Supported OS Versions
 
 ONE point release of each major release of CentOS is supported at any given time.
 Currently these are Centos 5.9 and Centos 6.4
 
-## Naming Conventions for YUM repos
+Support for Ubuntu is being considered.
+
+### Naming Conventions for YUM repos
 
 The names of the YUM repositories are standardized so that we can use the $releasever variable.
 This enables us to have a single /etc/yum.repos.conf/custom.repo file that automatically
@@ -243,7 +254,7 @@ Where:
     * 'stable': tested and 'in production'
     * 'unstable': under development/testing
 
-## What to do when packages are missing
+### When Packages are Missing
 
 Neither EPEL nor RPMforge repos are automatically installed on the machines. This is to avoid dependency resolution just happening invisibly and pulling in unknown versions of new packages. All required packages (not shipped in the base or updates repos) should be in the _lifted_ repository for installs. If a package is not available, then activate either EPEL or RPMforge, download the required RPMs and place them in the _lifted_ repository. This is done as follows:
 
@@ -254,7 +265,7 @@ Neither EPEL nor RPMforge repos are automatically installed on the machines. Thi
 * `yum clean all` to install the new packages from _lifted_
 * `yum install <packages>`  to install the new packages from _lifted_
 
-## If the above gets tiresome
+### If the above gets tiresome
 
 Edit the file `/etc/yum.conf` to set `keepcache=1`. Enable EPEL and RPMforge then `yum install` packages as you need. When complete upload all the packages from the cache directory (`/var/cache/yum`) to the _lifted_ repo using something like the following on CentOS 5:
 
@@ -264,11 +275,11 @@ or, for CentOS 6:
 
     find /var/cache/yum/x86_64/6/{epel,rpmforge} | xargs /data/repo/bin/pushpkg -t lifted -f 
 
-## YUM Priorities
+### YUM Priorities
 
 See [YUM Priorities](http://wiki.centos.org/PackageManagement/Yum/Priorities) for a description. In order to allow unstable packages to be deployed in preference to stable ones, even when the version is the same, we define them to have the highest priority (of 10). The stable ones are 20.
 
-## Apache configuration
+### Apache Configuration
 
 The following setup steps are automated in the script `bin/setup_repo` executed as part of the recipe:
 
@@ -277,7 +288,7 @@ is processed by ERB to create the file `/etc/httpd/conf.d/_c-pod.conf`. The _Doc
 determined by the current repository location
 * Set the permissions of the tree to be owned by the Apache user: `chown -R apache.apache /data/c-pod`
 
-## Keeping large binaries out!
+### Large Binaries
 <a id=binaries></a>
 The large binary content required for OS installations are kept outside of the repository and accessed
 via symbolic links. These links are coded to link to immediate peer directories of the main repo with 

@@ -1,7 +1,9 @@
-/* Adapted from http://static.opensuse.org/css/mirrorbrain.css */
+/* Adapted from http://static.opensuse.org/css/mirrorbrain.css
+ * Incorporated stuff from Tocible
+ */
 
 body {
-	margin: 50px;
+	margin: 10px;
 	padding: 0;
 	background: #FFFFFF;
 	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
@@ -56,7 +58,7 @@ p {
 }
 
 pre {
-	font-size: 1.2em;
+	font-size: 1.0em;
 }
 
 blockquote {
@@ -136,115 +138,38 @@ img.right {
 	color: #333333;
 }
 
-/* Search */
+/* Tocible */
 
-#search {
-	float: right;
-	width: 300px;
-	padding: 150px 0 0 0;
+#section_wrapper {
+    background:#FAFAFA;
+    padding:20px 0;
+    box-shadow:0 0 0 10px rgba(0, 0, 0, 0.2);
+    margin-top:10px;
+    font-size:16px;
+    line-height:26px;
+    position:relative;
+    overflow:auto;
 }
-
-#search legend {
-	display: none;
+#section_wrapper article {
+    width:920px;
+    overflow:hidden;
+    margin-left:310px;
 }
-
-#searchfield {
-	width: 200px;
+#section_wrapper h2 {
+    font-size:30px;
+    font-weight:normal;
+    margin-top:12px;
+    margin:28px 0 10px 0;
 }
-
-#searchsubmit {
-	width: 80px;
+#section_wrapper h3 {
+    font-size:22px;
+    margin:15px 0 10px 0;
+    font-weight:normal;
 }
-
-/* Page */
-
-#page {
-	width: 980px;
-	margin: 0 auto;
-	padding: 20px 0;
+#tocible {
+    background:#CCC;
+    position:absolute;
+    left:10px;
+    width:250px;
 }
-
-/* Content */
-
-#content {
-	float: right;
-	width: 650px;
-}
-
-.post {
-	padding: 12px 50px;
-	background: url(images/img04.jpg) no-repeat;
-}
-
-.post .title {
-	letter-spacing: -1px;
-	font-size: 2.4em;
-	color: #356AA0;
-}
-
-.post .meta {
-	margin: 0 0 20px 0;
-	padding: 0 0 20px 0;
-	border-bottom: 1px solid #EFEFEF;
-	line-height: normal;
-	color: #666666;
-}
-
-/* Sidebar */
-
-#sidebar {
-	float: left;
-	width: 300px;
-}
-
-#sidebar ul {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-#sidebar li {
-	margin-bottom: 10px;
-	padding: 10px 20px;
-	background: url(images/img03.jpg) no-repeat;
-}
-
-#sidebar li ul {
-	line-height: 2em;
-}
-
-#sidebar li li {
-	margin: 0;
-	padding: 0;
-	background: none;
-	border-bottom: 1px solid #EFEFEF;
-}
-
-#sidebar h2 {
-	margin-bottom: 10px;
-	text-transform: lowercase;
-	letter-spacing: -1px;
-	color: #CC0000;
-}
-
-#sidebar a {
-	border: none;
-}
-
-/* Footer */
-
-#footer {
-	clear: both;
-	padding: 30px 0;
-	border-top: 10px solid #DDDDDD;
-	background: #EFEFEF;
-}
-
-#footer p {
-	margin: 0;
-	padding: 10px 0 0 0;
-	text-align: center;
-	line-height: normal;
-}
-
 /* vim: set ft=css: */
