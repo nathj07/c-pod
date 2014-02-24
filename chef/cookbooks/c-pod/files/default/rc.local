@@ -1,0 +1,21 @@
+#!/bin/sh
+# This script will be executed *after* all the other init scripts.
+
+# After a reboot the C-Pod networking is broken:
+# 1. libvirtd comes up after sockd
+# 2. this causes sockd to fail to start as virbr0 is not yet available
+# 3. libvirtd installs iptables rules for the default network
+# 4. these rules don't permit sockd to connect.
+# 
+# The solution involves chef'ing the libvirtd network config. We should also
+# sort out the manually-done stallone install for nat-pmp at the same time.
+# In the meantime this script is a workaround, note the sleep hack to 
+# overcome the async nature of startup. I wanted to write an Upstart script
+# but that's being replaced by systemd soon so no point:
+
+PATH=/sbin:/bin:/usr/bin:$PATH
+sleep 10
+logger -p user.notice -s "Disabling iptables and starting the SOCKS server..."
+service iptables stop
+service sockd restart
+touch /var/lock/subsys/local

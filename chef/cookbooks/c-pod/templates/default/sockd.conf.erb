@@ -10,15 +10,12 @@ timeout.io: 0
 #
 client pass {
         from: 10.0.0.0/8 port 1-65535 to: <%= @public %>
-        log: connect
 }
 client pass {
         from: 172.16.0.0/12 to: <%= @public %>
-        log: connect
 }
 client pass {
         from: 192.168.0.0/16 to: <%= @public %>
-        log: connect
 }
 # Record everyone else and fail them
 #
@@ -30,10 +27,10 @@ client block {
 #
 socks pass {
         from: 0.0.0.0/0 to: <%= node[:network][:interfaces][@private.to_sym][:routes].detect {|r| r[:family] == "inet"}[:destination] %>
-        log: error
+        log: connect disconnect
         protocol: tcp udp
 }
 socks block {
         from: 0.0.0.0/0 to: 0.0.0.0/0
-        log: connect error
+        log: connect
 }

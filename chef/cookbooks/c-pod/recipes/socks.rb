@@ -15,9 +15,16 @@ template "/etc/sockd.conf" do
     notifies :restart, "service[sockd]", :delayed
 end
 
+cookbook_file "/etc/rc.local" do
+    action  :create
+    mode    0755
+    owner   'root'
+    group   'root'
+end
+
 service 'sockd' do
     supports :restart => true, :reload => true
-    action :enable
+    action [:disable, :start]
 end
 
 # vim: sts=4 sw=4 ts=8
