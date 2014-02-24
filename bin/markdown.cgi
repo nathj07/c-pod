@@ -15,7 +15,7 @@ cgi.out 'text/html' do
 	    cgi.title('C-Pod') +
 	    cgi.link(rel: "stylesheet", href: "/assets/cpod.css", type: "text/css") +
             cgi.link(rel: "stylesheet", href: "/assets/tocible.css", type: "text/css") +
-            cgi.script(src: "http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js") +
+            cgi.script(src: "/assets/jquery-2.1.0.min.js") +
             cgi.script(src: "/assets/jquery.tocible.js")
 	end +
 	cgi.body do
