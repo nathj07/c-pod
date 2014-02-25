@@ -15,7 +15,7 @@ template "/etc/sockd.conf" do
     notifies :restart, "service[sockd]", :delayed
 end
 
-cookbook_file "/etc/rc.local" do
+cookbook_file "/etc/rc.d/rc.local" do
     action  :create
     mode    0755
     owner   'root'

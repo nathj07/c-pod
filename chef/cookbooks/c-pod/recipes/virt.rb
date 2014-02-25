@@ -1,4 +1,4 @@
-# A Recipe to setup the Proxy server on a repo
+# A Recipe to setup KVM virtualization
 #
 %w{
     kvm libvirt virt-manager virt-viewer libguestfs-tools

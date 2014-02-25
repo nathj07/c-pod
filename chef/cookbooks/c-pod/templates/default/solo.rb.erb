@@ -1,8 +1,7 @@
-# chef-solo config for developing locally
-# Usage: chef-solo -c config.rb -o recipe[acookbook::arecipe]
-# See: http://docs.opscode.com/config_rb_solo.html
+# Default chef-solo config for a C-Pod server
 #
 cookbook_path '<%= @base %>/c-pod/chef/cookbooks'
+json_attribs  '/etc/chef/c-pod.json'
 
 # Let the remaining paths default (/var/chef)
 root = '/var/chef'

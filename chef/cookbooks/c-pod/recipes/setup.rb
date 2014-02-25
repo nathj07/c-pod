@@ -117,6 +117,9 @@ service 'httpd' do
     action :enable
 end
 
+include_recipe 'c-pod::virt'
+include_recipe 'c-pod::socks'
+
 include_recipe 'c-pod::chef-solo'
 
 # vim: sts=4 sw=4 ts=8

@@ -1,4 +1,5 @@
 # Setup the yum definitions we need for the C-Pod itself
+# These include EPEL and RPMForge
 # Note that a client system has it's own recipe: client_repo.conf
 #
 

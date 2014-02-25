@@ -2,12 +2,19 @@
 #
 
 directory "/etc/chef" do
-    mode 0750
+    mode 2770
+    group   node[:cpod][:owner_name]
+end
+
+cookbook_file "/etc/chef/c-pod.json" do
+    mode    0664
+    group   node[:cpod][:owner_name]
 end
 
 template "/etc/chef/solo.rb" do
     action  :create
-    mode    0644
+    mode    0664
+    group   node[:cpod][:owner_name]
     variables( :base => node[:cpod][:base] )
 end
 
