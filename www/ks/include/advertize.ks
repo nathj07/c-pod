@@ -1,4 +1,5 @@
 # Advertize SSH to make it easy to connect
+# Note that as of CentOS 6.5 this is supplied by default
 
 cat > /etc/avahi/services/ssh.service <<SERVICE
 <?xml version="1.0" standalone='no'?><!--*-nxml-*-->

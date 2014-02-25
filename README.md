@@ -110,7 +110,7 @@ Or you can [download them directly](/gems) and install locally.
 
 ## YUM Repositories
 
-We have created YUM repositories to contain all the required packages 'locally'. In order to use them you will need to create the file /etc/yum.repos.d/c-pod.repo with a named section for each one, as described below.
+We have created YUM repositories to contain all the required packages 'locally'. During Kickstart the standard install repositories (beginning with _CentOS-_) are moved to `/root/saved.repos.d/`) and the following repositories are automatically created in the file `/etc/yum.repos.d/c-pod.repo`:
 
 ### Custom RPMs (Stable)
 This is for the current production version of internally developed or modified packages.
@@ -120,6 +120,7 @@ This is for the current production version of internally developed or modified p
     baseurl=http://<%= cgi.server_name %>/yum_repos/custom/$releasever/stable/
     enabled=1
     gpgcheck=0
+    priority=20
 
 ### Unstable Custom RPMs
 
@@ -130,6 +131,7 @@ When developing a new release of a custom RPM this repository is used. Because Y
     baseurl=http://<%= cgi.server_name %>/yum_repos/custom/$releasever/unstable/
     enabled=1
     gpgcheck=0
+    priority=10
 
 ### Lifted RPMs
 
@@ -140,35 +142,45 @@ This repository contains RPMs normally found on other repositories, EPEL or RPM 
     baseurl=http://<%= cgi.server_name %>/yum_repos/lifted/$releasever/
     enabled=1
     gpgcheck=0
+    priority=30
 
 ## CentOS Distribution
 
-To save bandwidth and speed-up networked installs the Distribution repositories are available. In order to use them create the file `/etc/yum.repos.d/centosdvd.repo` with the following contents:
-    [centos_repo]
+To save bandwidth and speed-up networked installs the Distribution repositories are available. The file `/etc/yum.repos.d/centos.repo` is created by the Kickstart process with the following contents:
+
+    [centos]
     name=CentOS $releasever Linux Distribution DVD - x86_64
     baseurl=http://<%= cgi.server_name %>/osdisks/centos$releasever
     enabled=1
     gpgcheck=1
     gpgkey=http://<%= cgi.server_name %>/RPM-GPG-KEY-CentOS-$releasever
+    priority=40
 
-## Serving Chef Recipes
+## Chef
 
-This repository contains a Chef directory structure (in the [chef](/chef) subdirectory). You can create your own Chef cookbooks and recipes here for use with `chef-solo` either in local or remote mode. Use local mode when developing and testing and remote mode when using established definitions
+This repository contains a Chef directory structure (in the [chef](/chef) subdirectory). You can create your own Chef cookbooks and recipes here for use with `chef-solo` either in local or remote mode. Local mode is typically used when developing and testing recipes and remote mode when configuring machines with existing recipes. To facilitate the latter case the Kickstart process automatically installs a stable binary version of `chef` on a new machine together with all the necessary configuration files to retrieve recipes from the C-Pod server.
 
-### Local Use
+### Using Recipes Locally
 Clone the repository and make the appropriate modification. Run `chef-solo` with a configuration file that points to the local filesystem. A working sample with instructions is in the file [solo.rb](/chef/solo.rb).
 Note that you should make changes to the repository using your real username (and SSH key) and run `chef-solo` as root if you are making system level changes.
 
-### Remote Serving
+### Serving Recipes Remotely
 When configured as a webserver the Chef definitions are available remotely using the `bin/recipes.cgi` URL - this downloads the entire tree as a _tgz_ file for use by the `recipe_url` parameter of `chef-solo`. By default the definitions are downloaded from the master branch. You can select any desired branch by adding a Git tree-ish as additional path information, eg:
 
     recipe_url      'http://<%= cgi.server_name %>/bin/recipes.cgi/production'
 
-To use chef on a new machine, simply `gem install chef` (this takes a while - it is a big package!). Create the following configuration file [/etc/gemrc](/samples/gemrc) to search our local gem repository:
+Note that this functionality requires a patched version of Git. Contact the author for information.
 
-    gem: -N --clear-sources --source http://<%= cgi.server_name %>/gem_repo
+### Manual Installation or Upgrade
+Since chef has many GEM dependencies that are binary and require compilation you will need to firstly install development tools. Then modify `/etc/gemrc` to allow access to Rubyforge as the default [/etc/gemrc](/samples/gemrc) created by Kickstart restricts you to the C-Pod GEM repository:
 
-Then create a configuration file [/etc/chef/solo.rb](/samples/solo.rb):
+    gem: --no-document --source http://<%= cgi.server_name %>/gem_repo
+
+Install the GEM, note that this takes a while - it is a big package!
+
+    gem install chef
+
+Create a configuration file [/etc/chef/solo.rb](/samples/solo.rb):
 
     file_cache_path '/var/chef/cache'
     cookbook_path   '/var/chef/cookbooks'
@@ -177,17 +189,19 @@ Then create a configuration file [/etc/chef/solo.rb](/samples/solo.rb):
     recipe_url      'http://<%= cgi.server_name %>/bin/recipes.cgi/master'
     json_attribs    '/etc/chef/runtime.json'
 
-Then a simple JSON configuration file [/etc/chef/runtime.json](/samples/runtime.json):
+Create a simple JSON configuration file [/etc/chef/runtime.json](/samples/runtime.json):
 
     {
-        "run_list": [ "recipe[c-pod::yum_repo_conf]", "recipe[c-pod::default]" ]
+        "run_list": [ "recipe[c-pod::client]" ]
     }
 
-Then run the command `chef-solo` which will (using the above defaults) configure the SEU runtime. To add your own recipes you can run a command like:
+### Running Chef Solo
+
+Then run the command `chef-solo` which will (using the above defaults) configure the C-Pod default client. To add your own recipes you can run a command like:
 
     chef-solo -o recipe[c-pod::townsen],recipe[c-pod::mediawiki]
 
-Alternatively use a non-default JSON file with the `-f` option.
+Alternatively use a non-default JSON file with the `-f` option. Set the 'run_list' value appropriately.
 
 ## Accessing Servers
 Since the C-Pod runs entirely on an RFC1918 private network inside the machine, network services are not normally available from the outside world. However, the C-Pod configures a SOCKS5 Proxy to overcome this.
@@ -195,7 +209,7 @@ Since the C-Pod runs entirely on an RFC1918 private network inside the machine, 
 ### SSH Access
 For the names that you wish to access, create entries in your local `.ssh/config` file as follows:
 
-    Host nixvm*.local nvm*.local kvm*.local dvm*.local tvm*.local cvm*.local
+    Host ds*.local cpod*.local
     ProxyCommand /usr/bin/nc -X 5 -x <%= cgi.server_name %>:1080 %h %p
 
 The `nc` command is standard under MacOS - you may need to install it if using another OS.
@@ -260,7 +274,7 @@ Neither EPEL nor RPMforge repos are automatically installed on the machines. Thi
 
 * `yum install epel-release rpmforge-release`
 * `yumdownloader <packages>` to obtain local copies
-* `/data/repo/bin/pushpkg -f -t lifted <packages>` which uploads them to the lifted repo
+* `/data/c-pod/bin/pushpkg -f -t lifted <packages>` which uploads them to the lifted repo
 * disable the epel and rpmforge repositories by either `rpm -e epel-release rpmforge-release`, or edit the `/etc/yum.repos.d/{epel,rpmforge}.repo` files and set `enabled=0`
 * `yum clean all` to install the new packages from _lifted_
 * `yum install <packages>`  to install the new packages from _lifted_
@@ -269,11 +283,11 @@ Neither EPEL nor RPMforge repos are automatically installed on the machines. Thi
 
 Edit the file `/etc/yum.conf` to set `keepcache=1`. Enable EPEL and RPMforge then `yum install` packages as you need. When complete upload all the packages from the cache directory (`/var/cache/yum`) to the _lifted_ repo using something like the following on CentOS 5:
 
-    find /var/cache/yum/{epel,rpmforge} | xargs /data/repo/bin/pushpkg -t lifted -f 
+    find /var/cache/yum/{epel,rpmforge} | xargs /data/c-pod/bin/pushpkg -t lifted -f 
 
 or, for CentOS 6:
 
-    find /var/cache/yum/x86_64/6/{epel,rpmforge} | xargs /data/repo/bin/pushpkg -t lifted -f 
+    find /var/cache/yum/x86_64/6/{epel,rpmforge} | xargs /data/c-pod/bin/pushpkg -t lifted -f 
 
 ### YUM Priorities
 

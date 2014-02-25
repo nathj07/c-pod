@@ -13,6 +13,7 @@
 
 # Require at package level (to be sure)
 
+yum-plugin-priorities
 avahi
 nss-mdns
 git

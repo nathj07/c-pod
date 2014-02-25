@@ -31,7 +31,8 @@ q.out 'text/plain' do
 		end
 		gw = ipaddr.mask(netmask).succ
 		opts.push "--ip #{addr} --netmask #{netmask} --gateway #{gw.to_s}"
-		opts.push "--nameservers #{ENV['nameservers']}" if ENV.include? 'nameservers'
+                nameservers = dns.instance_variable_get(:@config).nameserver_port.map(&:first)
+		opts.push "--nameservers #{nameservers.join(',')}" if nameservers
 	    else
 		opts.unshift "--bootproto dhcp"
 	    end

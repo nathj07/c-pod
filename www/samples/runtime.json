@@ -1,3 +1,3 @@
 {
-  "run_list": [ "recipe[c-pod::yum_repo_conf]", "recipe[c-pod::default]" ]
+  "run_list": [ "recipe[c-pod::client]" ]
 }
