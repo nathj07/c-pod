@@ -3,24 +3,28 @@
 # Update a local copy of the main repo
 #
 require 'optparse'
+require 'ostruct'
 
 base = File.absolute_path('../..', File.dirname(__FILE__))
-mainrepo=ENV['C-POD'] || 'c-pod.local'
+opts = OpenStruct.new( repo: (ENV['C-POD'] || 'c-pod.local'), user: 'c-pod' )
 
-OptionParser.new do |opts|
-    opts.banner = "Script to update a local copy of the yum_repos from a remote C-POD"
+OptionParser.new do |o|
+    o.banner = "Script to update a local copy of the yum_repos from a remote C-POD"
 
-    opts.on( '-?', '--help', 'Display this screen' ) do
-        puts opts
+    o.on( '-?', '--help', 'Display this screen' ) do
+        puts o
         exit
     end
-    opts.on('-r', '--repo REPO', String, "The C-POD repo site to use (default: #{mainrepo})") do |m|
-	mainrepo = m
+    o.on('-u', '--user USER', String, "The user to use (default: #{opts.user})") do |u|
+	opts.user = u
     end
-    opts.parse!
+    o.on('-r', '--repo REPO', String, "The C-POD repo site to use (default: #{opts.repo})") do |m|
+	opts.repo = m
+    end
+    o.parse!
     if ARGV.size > 0
 	puts "You don't need arguments!"
-	puts opts.help 
+	puts o.help 
 	exit 2
     end
 end
@@ -31,17 +35,17 @@ unless Process.euid == 0
 end
 
 puts "Updating GEM packages..."
-cmd = "rsync -avz --progress packager@#{mainrepo}:/data/gem_repo #{base}/"
+cmd = "rsync -avz --progress #{opts.user}@#{opts.repo}:/data/gem_repo #{base}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"
 puts "Updating RPM packages..."
-cmd = "rsync -avz --progress packager@#{mainrepo}:/data/yum_repos #{base}/"
+cmd = "rsync -avz --progress #{opts.user}@#{opts.repo}:/data/yum_repos #{base}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"
 puts "Updating Downloads packages..."
-cmd = "rsync -avz --progress packager@#{mainrepo}:/data/downloads #{base}/"
+cmd = "rsync -avz --progress #{opts.user}@#{opts.repo}:/data/downloads #{base}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"
