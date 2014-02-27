@@ -288,8 +288,11 @@ or, for CentOS 6:
 
 ## Chef
 
-This repository contains a Chef directory structure (in the [chef](/chef)
-subdirectory). You can create your own Chef cookbooks and recipes here for use
+This repository contains a Chef cookbook (in the [chef](/chef)
+subdirectory) that is used to configure and setup a C-Pod and it's clients.
+This cookbook (_c-pod_) is symbolically linked into a directory named `cookbooks`
+at the same level as the repository. You should create your own Chef cookbooks
+and recipes there (and not in the main repository). From there they may be used
 with `chef-solo` either in local or remote mode. Local mode is typically used
 when developing and testing recipes and remote mode when configuring machines
 with existing recipes. To facilitate the latter case the Kickstart process
@@ -309,14 +312,7 @@ changes to the repository using your real username (and SSH key) but then run
 
 When configured as a webserver the Chef definitions are available remotely using
 the `bin/recipes.cgi` URL - this downloads the entire tree as a _tgz_ file for
-use by the `recipe_url` parameter of `chef-solo`. By default the definitions are
-downloaded from the master branch.  You can select any desired branch by adding
-a Git tree-ish as additional path information, eg:
-
-    recipe_url      'http://<%= cgi.server_name %>/bin/recipes.cgi/production'
-
-Note that this functionality requires a patched version of Git. Contact the
-author for information.
+use by the `recipe_url` parameter of `chef-solo`.
 
 <a name="chef_install"></a>
 ### Manual Installation
@@ -333,12 +329,10 @@ Create a configuration file [/etc/chef/solo.rb](/samples/solo.rb):
 ``` ruby
     file_cache_path '/var/chef/cache'
     cookbook_path   '/var/chef/cookbooks'
-    # By default fetch recipes from the master (development) branch.
-    # This should be changed to production on production machines.
-    recipe_url      'http://<%= cgi.server_name %>/bin/recipes.cgi/master'
-    json_attribs '/etc/chef/runtime.json'
+    recipe_url      'http://<%= cgi.server_name %>/bin/recipes.cgi'
+    json_attribs '/etc/chef/default.json'
 ```
-Create a simple JSON configuration file [/etc/chef/runtime.json](/samples/runtime.json):
+Create a simple JSON configuration file [/etc/chef/default.json](/samples/default.json):
 
 ``` json
     { "run_list": [ "recipe[c-pod::client]" ] }

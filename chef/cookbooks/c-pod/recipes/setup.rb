@@ -90,6 +90,20 @@ git "#{BASE}/c-pod" do
     notifies :restart, "service[httpd]", :delayed
 end
 
+git "#{BASE}/cookbooks/sysctl" do
+    repository "https://github.com/onehealth-cookbooks/sysctl.git"
+    reference "master"
+    action :checkout
+    group "apache"
+end
+
+git "#{BASE}/cookbooks/ulimit" do
+    repository "https://github.com/bmhatfield/chef-ulimit.git"
+    reference "master"
+    action :checkout
+    group "apache"
+end
+
 # Git repos come out 644 and 755 so fix group permissions
 execute "repo_permissions" do
     action :nothing

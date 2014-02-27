@@ -41,6 +41,8 @@ begin
 
     # Setup the other directories
     #
+    FileUtils.mkdir_p "#{base}/cookbooks"
+    FileUtils.ln_sf "#{base}/c-pod/chef/cookbooks/c-pod", "#{base}/cookbooks/c-pod"
     FileUtils.mkdir_p "#{base}/downloads"
     FileUtils.mkdir_p "#{base}/osdisks"
     FileUtils.mkdir_p "#{base}/isos"

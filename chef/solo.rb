@@ -1,5 +1,6 @@
-# chef-solo config for developing locally
-# Usage: chef-solo -c config.rb -o recipe[acookbook::arecipe]
+# chef-solo config for developing locally using definitions
+# in this repository.
+# Usage: chef-solo -c solo.rb -o recipe[acookbook::arecipe]
 # See: http://docs.opscode.com/config_rb_solo.html
 #
 base = File.absolute_path(File.dirname(__FILE__))
