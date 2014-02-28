@@ -59,8 +59,8 @@ begin
 
     # Setup permissions
     #
-    FileUtils.chown_R(nil, 'apache', "#{base}/*") rescue nil
-    FileUtils.chmod_R('g+rw', "#{base}/*") rescue nil
+    FileUtils.chown_R(nil, 'apache', "#{base}")
+    FileUtils.chmod_R('g+rw', "#{base}")
     `find #{base}/yum_repos -type d -exec chmod 2770 {} \\;`
     `find #{base}/yum_repos -type f -exec chmod 660 {} \\;`
     `find #{base}/yum_repos -type f -exec chown apache {} \\;`

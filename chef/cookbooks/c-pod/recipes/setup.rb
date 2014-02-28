@@ -45,7 +45,10 @@ end
 directory BASE do
     owner node[:cpod][:owner_name]
     group node[:cpod][:owner_name]
-    mode 02775		# need setgid so that all are apache group
+    # Permissions:
+    # * Don't make group writeable as stops ssh keys working
+    # * setgid so that all subdirs are created in the apache group
+    mode 02755
 end
 
 cookbook_file "#{BASE}/README" do
