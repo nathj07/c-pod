@@ -7,7 +7,7 @@ require 'cgi'
 
 base = File.absolute_path('../..', File.dirname(__FILE__))
 cgi = CGI.new
-cmd = "/bin/tar -chz -f- -C #{base} cookbooks"
+cmd = "/bin/tar -chz --exclude='*/.git' -C #{base} -f- cookbooks"
 cgi.out('Content-Disposition' => 'attachment; filename=recipes.tgz',
 	'Content-Type' => 'application/octet-stream') do
   `#{cmd}`
