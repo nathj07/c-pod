@@ -15,7 +15,6 @@
 
 PATH=/sbin:/bin:/usr/bin:$PATH
 sleep 10
-logger -p user.notice -s "Disabling iptables and starting the SOCKS server..."
-service iptables stop
+logger -t rc.local -p user.notice -s "Delayed start of SOCKS server to ensure virbr0 up..."
 service sockd restart
 touch /var/lock/subsys/local
