@@ -35,12 +35,12 @@ unless Process.euid == 0
 end
 
 puts "Updating GEM packages..."
-cmd = "rsync -avz --progress #{opts.user}@#{opts.repo}:/data/gem_repo #{base}/"
+cmd = "rsync -avz --delete --progress #{opts.user}@#{opts.repo}:/data/gem_repo #{base}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"
 puts "Updating RPM packages..."
-cmd = "rsync -avz --progress #{opts.user}@#{opts.repo}:/data/yum_repos #{base}/"
+cmd = "rsync -avz --delete --progress #{opts.user}@#{opts.repo}:/data/yum_repos #{base}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"
