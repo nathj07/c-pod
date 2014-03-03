@@ -17,4 +17,5 @@ PATH=/sbin:/bin:/usr/bin:$PATH
 sleep 10
 logger -t rc.local -p user.notice -s "Delayed start of SOCKS server to ensure virbr0 up..."
 service sockd restart
+stallone -i eth0 -s -D
 touch /var/lock/subsys/local

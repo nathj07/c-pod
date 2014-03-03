@@ -407,9 +407,11 @@ to configure a system to use the SOCKS Proxy to access C-Pod then you can use
 NAT-PMP to do this. Upon request it can open either a UDP or TCP port on the
 C-Pod host and forward traffic to a specific cp-pod server. A suitable command
 line interface is available `gem install natpmp`. You should use at least
-version 0.8. Type `natpmp -?` for the syntax.
+version 0.9. Type `natpmp -?` for the syntax.
 
-(Note that this feature currently requires manual configuration of `stallone`)
+The C-Pod socks setup recipe will install and configure `stallone` for this purpose.
+An appropriate RPM is available in the lifted repository for this. This has been
+built with changes appropriate to the C-Pod's use of libvirtd's network setup.
 
 ## Notes
 
