@@ -94,7 +94,7 @@ git "#{BASE}/c-pod" do
 end
 
 git "#{BASE}/cookbooks/sysctl" do
-    repository "https://github.com/onehealth-cookbooks/sysctl.git"
+    repository "https://github.com/Youscribe/sysctl-cookbook.git"
     reference "master"
     action :checkout
     group "apache"

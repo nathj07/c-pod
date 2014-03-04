@@ -11,10 +11,8 @@ service 'libvirtd' do
     action [:enable, :start]
 end
 
-include_recipe 'sysctl' # This is needed to persist sysctl settings
-
-sysctl_param 'net.ipv4.ip_forward' do
-    value 1
+sysctl 'net.ipv4.ip_forward' do
+    value '1'
 end
 
 # vim: sts=4 sw=4 ts=8
