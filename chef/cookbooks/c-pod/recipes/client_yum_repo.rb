@@ -21,13 +21,15 @@ case osver
     yum_package 'yum-plugin-priorities'
 end
 
-template '/etc/yum.repos.d/c-pod.repo' do
+# Create the Yum repository configuration for the C-Pod server
+# from the server itself.
+# The primary definition of this is in the samples directory
+# served by the C-Pod server and used during Kickstart.
+# Keep things DRY: Don't put it in a template
+#
+remote_file '/etc/yum.repos.d/c-pod.repo' do
     action :create
-    variables({
-	:repo_host => "c-pod.sendium.net"
-    })
-    user "root"
-    group "root"
+    source 'http://localhost/samples/c-pod.repo'
     notifies :run, "execute[create-yum-cache]", :immediately
     notifies :create, "ruby_block[reload-internal-yum-cache]", :immediately
 end
