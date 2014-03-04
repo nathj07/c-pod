@@ -3,7 +3,7 @@
 logoutput: /var/log/sockd.log
 internal: <%= @public %> port = 1080
 external: <%= @private %>
-socksmethod: none
+method: none
 timeout.io: 0
 
 # Let in all the private addresses
@@ -25,12 +25,12 @@ client block {
 }
 # Allow them to go to the KVM default network
 #
-socks pass {
+pass {
         from: 0.0.0.0/0 to: <%= node[:network][:interfaces][@private.to_sym][:routes].detect {|r| r[:family] == "inet"}[:destination] %>
         log: connect disconnect
         protocol: tcp udp
 }
-socks block {
+block {
         from: 0.0.0.0/0 to: 0.0.0.0/0
         log: connect
 }
