@@ -18,4 +18,7 @@ sleep 10
 logger -t rc.local -p user.notice -s "Delayed start of SOCKS server to ensure virbr0 up..."
 service sockd restart
 stallone -i eth0 -s -D
+# Fix the libvirt bug that masquerades all traffic even to 224.0.0.251
+# Causing avahi-daemon[17165]: Received response from host 192.168.122.1 with invalid source port 1049 on interface 'virbr0.0'
+iptables -t nat -I POSTROUTING 1 -m udp -p udp --sport 5353 --dport 5353 -j ACCEPT
 touch /var/lock/subsys/local
