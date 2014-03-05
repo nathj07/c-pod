@@ -1,7 +1,11 @@
 # A Recipe to setup the Proxy server on a repo
 # Also adds the NATPMP facility
 #
-yum_package 'dante-server >= 1.4.0'
+yum_package 'dante-server >= 1.4.0' do
+    action  :upgrade
+    allow_downgrade true
+end
+
 yum_package 'stallone >= 0.4.0'
 
 template "/etc/sockd.conf" do
