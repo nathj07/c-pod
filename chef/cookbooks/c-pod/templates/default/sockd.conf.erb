@@ -1,6 +1,6 @@
 # Dante Socks server config for C-Pod server
 #
-logoutput: /var/log/sockd.log
+logoutput: syslog/daemon
 internal: <%= @public %> port = 1080
 external: <%= @private %>
 socksmethod: none
