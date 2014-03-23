@@ -16,6 +16,7 @@ zlib-devel
 openssl-devel
 libtool-ltdl
 libtool-ltdl-devel
+man-pages
 }.each { |pkg| yum_package pkg }
 
 case osver

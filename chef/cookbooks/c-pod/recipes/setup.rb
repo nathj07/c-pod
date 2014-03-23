@@ -6,6 +6,7 @@ include_recipe 'c-pod::yum_repo_conf'
 
 yum_package 'httpd'
 yum_package 'createrepo'
+yum_package 'yum-utils'
 
 include_recipe 'c-pod::devtools'
 
