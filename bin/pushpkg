@@ -16,13 +16,11 @@ types = [:stable, :unstable, :lifted]
 opts = OpenStruct.new(type: :unstable, debug: false, force: nil, repo: ENV['CPOD'] || 'c-pod.local')
 
 OptionParser.new do |o|
-    o.banner = "Usage: pushpkg [options] pkg ..."
-    o.separator ""
-    o.separator "Push RPM and GEM packages to C-Pod server and rebuild indices"
-    o.separator "Options:"
+    o.banner = "usage: #{o.program_name} [options] pkg ..."
+    o.separator "Push RPM and GEM packages to C-Pod server and rebuild indices. Options:"
 
     o.on( '-?', '--help', 'Display this screen' ) do
-        puts o
+        STDERR.puts o
         exit
     end
     o.on('-d', '--debug', "Debug") do
@@ -38,6 +36,10 @@ OptionParser.new do |o|
         opts.force = true
     end
     o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
+    if ARGV.size == 0 and not opts.force
+        STDERR.puts o
+        exit
+    end
 end
 
 base = File.absolute_path('../..', File.dirname(__FILE__))
