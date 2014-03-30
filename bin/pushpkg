@@ -6,6 +6,7 @@
 require 'fileutils'
 require 'optparse'
 require 'ostruct'
+require 'resolv'
 
 def info msg
     print "\033[32m#{msg}\033[0m"
@@ -38,6 +39,18 @@ OptionParser.new do |o|
     o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
     if ARGV.size == 0 and not opts.force
         STDERR.puts o
+        exit
+    end
+end
+
+if opts.repo.end_with? '.local'
+    mdns = Resolv::MDNS.new rescue nil
+    if mdns
+        mdns.each_address(opts.repo) do |a|
+            opts.repo = a.to_s if a.is_a? Resolv::IPv4
+        end
+    else
+        puts "You need Ruby 2.1 for .local names to work!"
         exit
     end
 end
