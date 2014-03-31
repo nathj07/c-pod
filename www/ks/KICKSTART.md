@@ -2,7 +2,7 @@
 
 You can use kickstart to build a VM very quickly by downloading a network boot image appropriate to the release of CentOS you want to install. Attach it as a CDrom ISO image to your Virtual Machine and boot off it. You then start an unattended network install by typing the following line at the `boot:` prompt:
 
-    linux ks=http://<%= q.server_name %>/ks/<file>.ks
+    linux ks=http://<%= cgi.server_name %>/ks/<file>.ks
 
 Where `<file>` is the name of the machine type you want to create. This will remote boot and install a bare system, with Ruby, Chef and Git installed.
 
