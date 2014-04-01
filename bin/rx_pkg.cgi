@@ -19,9 +19,9 @@ def repopath pkgname, type
     case suffix
     when 'rpm'
 	arch = pkgparts.pop
-	rel = if pkgparts.select { |c| c =~ /^(rh)?el5$/ }.size > 0
+	rel = if pkgparts.select { |c| c =~ /^(rh)?el5(_.*)?$/ }.size > 0
 		   '5'
-	       elsif pkgparts.select { |c| c =~ /^(rh)?el6$/ }.size > 0
+	       elsif pkgparts.select { |c| c =~ /^(rh)?el6(_.*)?/ }.size > 0
 		   '6'
 	       else
 		   '5' # put unlabelled ones in 5
