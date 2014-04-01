@@ -41,7 +41,7 @@ end
 q = CGI.new
 
 begin
-    q.print q.http_header('text/plain')
+    q.print q.header('text/plain') # TODO replace header with http_header for Ruby 2+
     if q.include?('pkgfile')
 	t = q['pkgfile']
 	filename = t.original_filename
