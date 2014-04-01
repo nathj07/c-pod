@@ -72,4 +72,4 @@ info "Rebuilding Indices\n"
 curlopts.push("-F rebuild=yes")
 system("curl -f --silent #{curlopts.join(' ')} http://#{opts.repo}/bin/rx_pkg.cgi")
 
-# vim: sts=4 sw=4 ts=8
+# vim: ft=ruby sts=4 sw=4 ts=8

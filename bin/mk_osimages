@@ -70,7 +70,8 @@ versionset.keys.each do |version|
 	`umount #{srcdir}`
 	FileUtils.rmdir srcdir
     end
-    FileUtils.ln_sf targetdir, "#{base}/osdisks/centos#{major}"
+    FileUtils.cd "#{base}/osdisks"
+    FileUtils.ln_sf "centos#{version}", "centos#{major}"
 end
 
 # vim: set sts=4 sw=4 ts=8:
