@@ -38,6 +38,10 @@ execute "initdb" do
     notifies :start, "service[postgresql-9.2]", :immediate
 end
 
+user_ulimit node[:postgres][:user] do
+    filehandle_limit 2048
+end
+
 service 'postgresql-9.2' do
     supports :restart => true, :reload => true
     action :enable
