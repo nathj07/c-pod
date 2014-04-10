@@ -20,15 +20,18 @@ node.default[:cpod][:owner_name] = 'c-pod'
 node.default[:cpod][:owner_id] = 606
 node.default[:cpod][:github_key] = 'townsen' # User to give public key access
 
+cpod_user = node[:cpod][:owner_name]
+
 BASE=node[:cpod][:base]
 
-group node[:cpod][:owner_name] do
+group cpod_user do
   action :create
   gid node[:cpod][:owner_id]
+  members 'apache'
   append true
 end
 
-user node[:cpod][:owner_name] do
+user cpod_user do
   action    :create
   comment   "C-Pod owner"
   home	    BASE
@@ -37,15 +40,9 @@ user node[:cpod][:owner_name] do
   supports :manage_home => false
 end
 
-group 'apache' do
-  action    :modify
-  members   node[:cpod][:owner_name]
-  append    true
-end
-
 directory BASE do
-    owner node[:cpod][:owner_name]
-    group node[:cpod][:owner_name]
+    owner cpod_user
+    group cpod_user
     # Permissions:
     # * Don't make group writeable as stops ssh keys working
     # * setgid so that all subdirs are created in the apache group
@@ -55,24 +52,24 @@ end
 cookbook_file "#{BASE}/README" do
     source  'README.data'
     mode    0644
-    owner   node[:cpod][:owner_name]
-    group   node[:cpod][:owner_name]
+    owner   cpod_user
+    group   cpod_user
 end
 
 template "#{BASE}/.gitconfig" do
     action  :create
     source  'gitconfig.erb'
     mode    0664
-    owner   node[:cpod][:owner_name]
-    group   node[:cpod][:owner_name]
+    owner   cpod_user
+    group   cpod_user
     variables(
         :useremail => 'c-pod@sendium.net', :usergecos => 'C-Pod User'
     )
 end
 
 directory "#{BASE}/.ssh" do
-    owner node[:cpod][:owner_name]
-    group node[:cpod][:owner_name]
+    owner cpod_user
+    group cpod_user
     mode 0750
 end
 
@@ -80,8 +77,8 @@ remote_file "#{BASE}/.ssh/authorized_keys" do
     action  :create_if_missing
     source "https://github.com/#{node[:cpod][:github_key]}.keys"
     mode    0644
-    owner   node[:cpod][:owner_name]
-    group   node[:cpod][:owner_name]
+    owner   cpod_user
+    group   cpod_user
 end
 
 git "#{BASE}/c-pod" do
@@ -113,7 +110,7 @@ execute "repo_permissions" do
     action :nothing
     command "chmod 02770 #{BASE}/c-pod && " \
 	    "chmod -R g+w #{BASE}/c-pod && " \
-	    "chown -R #{node[:cpod][:owner_name]}.apache #{BASE}/c-pod"
+	    "chown -R #{cpod_user}.#{cpod_user} #{BASE}/c-pod"
 end
 
 execute "setup_repo" do

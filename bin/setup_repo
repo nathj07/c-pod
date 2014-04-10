@@ -11,6 +11,11 @@ repo = File.absolute_path('..', File.dirname(__FILE__))
 base = File.absolute_path('../..', File.dirname(__FILE__))
 File.umask(0002)
 
+unless Process.euid == 0
+    puts "Hey - you need to run this as root"
+    exit 2
+end
+
 begin
     # Setup the GEM repository directories
     #
@@ -42,7 +47,7 @@ begin
     # Setup the other directories
     #
     FileUtils.mkdir_p "#{base}/cookbooks"
-    FileUtils.ln_sf "#{base}/c-pod/chef/cookbooks/c-pod", "#{base}/cookbooks/c-pod"
+    FileUtils.ln_sf   "#{base}/c-pod/chef/cookbooks/c-pod", "#{base}/cookbooks/c-pod" unless File.exist? "#{base}/cookbooks/c-pod"
     FileUtils.mkdir_p "#{base}/downloads"
     FileUtils.mkdir_p "#{base}/osdisks"
     FileUtils.mkdir_p "#{base}/isos"
@@ -59,11 +64,10 @@ begin
 
     # Setup permissions
     #
-    FileUtils.chown_R(nil, 'apache', base)
+    FileUtils.chown_R('c-pod', 'c-pod', base)
     `chmod -R g+rw #{base}/*`
     `find #{base}/yum_repos -type d -exec chmod 2770 {} \\;`
     `find #{base}/yum_repos -type f -exec chmod 660 {} \\;`
-    `find #{base}/yum_repos -type f -exec chown apache {} \\;`
 
     # Add GEMS
     #
