@@ -54,8 +54,10 @@ q.out 'text/plain' do
     case os
     when 'ubuntu'
         <<-DEB.gsub(/^\s+/,'')
-            d-i netcfg/get_hostname string #{host}
             d-i netcfg/get_domain string #{domain}
+            d-i netcfg/get_hostname string #{host}
+            d-i netcfg/hostname string #{host}
+            d-i netcfg/dhcp_hostname string #{host}
         DEB
     when 'centos'
         args = ["--hostname #{opts[:hostname]}"]

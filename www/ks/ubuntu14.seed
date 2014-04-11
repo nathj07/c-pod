@@ -1,17 +1,25 @@
-# After loading the file redo network config
-d-i preseed/early_command string killall.sh; netcfg
-
 # Network
+# Although the recommended way of redoing network config is to
+# load the preseed then restart netcfg, like so:
+# d-i preseed/early_command string /bin/killall.sh; /bin/netcfg
+# It seems that hostname on the kernel boot line does the trick
+#
 <!--#exec cgi="/bin/netcfg.ubuntu.cgi" -->
+base-installer  base-installer/kernel/override-image    string linux-generic
+base-installer  base-installer/kernel/image     select  linux-generic
 
-# Automatically partition with LVM
-d-i partman-auto/init_automatically_partition select some_device_lvm
+# Fix modules confirm dialog
+d-i anna/no_kernel_modules boolean true
+
+# Automatically partition the first 10GB with LVM
 d-i partman-auto partman-auto/disk string
-d-i partman-auto/method string lvm
-d-i partman-lvm/device_remove_lvm boolean true
-d-i partman-lvm/confirm boolean true
-d-i partman-auto-lvm/guided_size string max
+d-i partman-auto-lvm/guided_size string 10GB
 d-i partman-auto/choose_recipe select atomic
+d-i partman-auto/init_automatically_partition select some_device_lvm
+d-i partman-auto/method string lvm
+d-i partman-lvm/confirm boolean true
+d-i partman-lvm/confirm_nooverwrite boolean true
+d-i partman-lvm/device_remove_lvm boolean true
 d-i partman-partitioning/confirm_write_new_label boolean true
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
@@ -27,6 +35,8 @@ d-i debian-installer/splash boolean false
 # Setup
 d-i debian-installer/locale string en_US
 d-i console-setup/ask_detect boolean false
+d-i time/zone string America/Los_Angeles
+d-i keyboard-configuration/variant select English (US)
 
 # Wait for two seconds in grub
 d-i grub-installer/timeout string 2
@@ -37,11 +47,13 @@ d-i passwd/root-password-crypted password $1$Ih5pLngr$/boiJHqKbQm9AP/QQyq0b1
 d-i passwd/make-user boolean false
 
 # Mirror
-#d-i mirror/protocol string http
-d-i mirror/protocol select http
-d-i mirror/country string us
-d-i mirror/http/hostname string <!--#echo var=SERVER_ADDR -->
-d-i mirror/http/directory string /ubuntu
+d-i debian-installer/allow_unauthenticated boolean true
+d-i mirror/protocol string http
+d-i mirror/country string US
+#d-i mirror/country string manual
+#d-i mirror/http/hostname string <!--#echo var=SERVER_ADDR -->
+#d-i mirror/http/directory string /osdisks/ubuntu14/ubuntu/
+d-i mirror/udeb/components multiselect main, restricted
 
 # Only install basic language packs. Let tasksel ask about tasks.
 d-i pkgsel/language-pack-patterns string

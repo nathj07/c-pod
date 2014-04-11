@@ -20,13 +20,29 @@ user --disabled
 install
 #Use CDROM installation media
 #cdrom
-url --url http://<!--#echo var=SERVER_ADDR -->/osdisks/ubuntu14.04
+url --url http://<!--#echo var=SERVER_ADDR -->/osdisks/ubuntu14/ubuntu
 
-network --device eth0 <!--#exec cgi="/bin/netcfg.cgi" -->
+network --device eth0 <!--#exec cgi="/bin/netcfg.centos.cgi" -->
+
+# Disk Setup
+
 #Clear the Master Boot Record
+
 zerombr yes
-#Partition clearing information
-clearpart --linux
+clearpart --all --drives=vda --initlabel msdos
+part /boot --fstype ext3 --size=150
+part pv.01 --size=1 --grow
+volgroup vg00 pv.01
+logvol  /  --vgname=vg00  --size=4096  --grow --name=lv_root
+logvol  swap --vgname=vg00 --size=2048 --name=lv_swap
+bootloader --location=mbr --driveorder=vda --append="console=tty0 console=ttyS0,115200"
+
+#Firewall configuration
+firewall --disabled --trust=eth0 --ssh
+
+#Do not configure the X Window System
+skipx
+
 #Package install information
 %packages
 accountsservice

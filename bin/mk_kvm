@@ -103,10 +103,16 @@ ARGV.each do |name|
   install_options << "--autostart"
   install_options << "--noautoconsole" unless opts.verbose
   case opts.type
-  when :centos5, :centos6
+  when :centos5
+    variant = 'rhel5.4'
+    extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{name}.local"
+  when :centos6
+    variant = 'rhel6'
     extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{name}.local"
   when :ubuntu14
-    extra_args="auto=true priority=critical url=http://#{opts.repo}/ks/#{opts.type}.seed?host=#{name}.local"
+    variant = 'ubuntutrusty'
+    extra_args="auto=true hostname=#{name}.local priority=critical url=http://#{opts.repo}/ks/./#{opts.type}.seed?host=#{name}.local"
+    #extra_args="ks=http://#{opts.repo}/ks/#{opts.type}.ks?host=#{name}.local"
   end
   mkvm = <<-MKVM.gsub(/\s+/,' ')
     virt-install --name #{name}
@@ -119,6 +125,7 @@ ARGV.each do |name|
     --location http://#{opts.repo}/osdisks/#{opts.type}
     --extra-args="#{extra_args} console=tty0 console=ttyS0,115200"
     --os-type=linux
+    --os-variant=#{variant}
   MKVM
   info "Building VM...\n"
   puts "Command:\n#{mkvm}"
