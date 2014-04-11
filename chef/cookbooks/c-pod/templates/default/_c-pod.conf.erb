@@ -35,9 +35,9 @@
     DocumentRoot "<%= @base %>/c-pod/www"
     ErrorLog logs/c-pod_error_log
     CustomLog logs/c-pod_access_log combined
-    AddType text/plain .ks
+    AddType text/plain .ks .seed
     AddType application/x-ns-proxy-autoconfig .pac
-    AddHandler server-parsed .ks .html .pac
+    AddHandler server-parsed .ks .seed .html .pac
     <Location /samples/>
 	ForceType text/plain
 	SetHandler server-parsed

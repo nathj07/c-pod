@@ -5,7 +5,7 @@
 #
 <!--#include virtual="include/opts_vm-centos6.ks" -->
 <!--#include virtual="include/dvdimage-centos6.ks" -->
-network --device eth0 <!--#exec cgi="/bin/netcfg.cgi" -->
+network --device eth0 <!--#exec cgi="/bin/netcfg.centos.cgi" -->
 
 <!--#include virtual="include/rootpw_secret.ks" -->
 # Fix bug where clearpart prompts on new disk

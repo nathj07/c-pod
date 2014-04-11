@@ -5,7 +5,7 @@
 #
 <!--#include virtual="include/opts_vm-centos5.ks" -->
 <!--#include virtual="include/dvdimage-centos5.ks" -->
-network --device eth0 <!--#exec cgi="/bin/netcfg.cgi" -->
+network --device eth0 <!--#exec cgi="/bin/netcfg.centos.cgi" -->
 
 <!--#include virtual="include/rootpw_secret.ks" -->
 <!--#include virtual="include/disk_lvm_single.ks" -->

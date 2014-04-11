@@ -1,0 +1,62 @@
+# After loading the file redo network config
+d-i preseed/early_command string killall.sh; netcfg
+
+# Network
+<!--#exec cgi="/bin/netcfg.ubuntu.cgi" -->
+
+# Automatically partition with LVM
+d-i partman-auto/init_automatically_partition select some_device_lvm
+d-i partman-auto partman-auto/disk string
+d-i partman-auto/method string lvm
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-lvm/confirm boolean true
+d-i partman-auto-lvm/guided_size string max
+d-i partman-auto/choose_recipe select atomic
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+# Only ask the UTC question if there are other operating systems installed.
+d-i clock-setup/utc-auto boolean true
+
+# Verbose output and no boot splash screen.
+d-i debian-installer/quiet boolean false
+d-i debian-installer/splash boolean false
+
+# Setup
+d-i debian-installer/locale string en_US
+d-i console-setup/ask_detect boolean false
+
+# Wait for two seconds in grub
+d-i grub-installer/timeout string 2
+
+# Users
+d-i passwd/root-login boolean true
+d-i passwd/root-password-crypted password $1$Ih5pLngr$/boiJHqKbQm9AP/QQyq0b1
+d-i passwd/make-user boolean false
+
+# Mirror
+#d-i mirror/protocol string http
+d-i mirror/protocol select http
+d-i mirror/country string us
+d-i mirror/http/hostname string <!--#echo var=SERVER_ADDR -->
+d-i mirror/http/directory string /ubuntu
+
+# Only install basic language packs. Let tasksel ask about tasks.
+d-i pkgsel/language-pack-patterns string
+
+# No language support packages.
+d-i pkgsel/install-language-support boolean false
+d-i pkgsel/update-policy select none
+# Packages
+d-i pkgsel/include string avahi-daemon openssh-server build-essential vim
+
+# Too slow to updatedb
+d-i pkgsel/updatedb boolean false
+
+# Just before the install finishes update the sshd config to allow secret login
+d-i preseed/late_command string in-target sed -i /^PermitRootLogin/s/without-password/yes/ /etc/ssh/sshd_config
+
+# Reboot immediately
+d-i finish-install/reboot_in_progress note

@@ -8,10 +8,10 @@ def info msg
     print "\033[32m#{msg}\033[0m"
 end
 
-types = [:'5', :'6']
+types = [:centos5, :centos6, :ubuntu14]
 
 opts = OpenStruct.new(
-    type: :'6',
+    type: :centos6,
     vcpus: 2,
     ram: 2,
     disk: 20,
@@ -32,7 +32,7 @@ OptionParser.new do |o|
         puts o
         exit
     end
-    o.on('-t', '--type TYPE', types, "CentOS type: #{types.join(', ')} (default: #{opts.type})") do |t|
+    o.on('-t', '--type TYPE', types, "OS type: #{types.join(', ')} (default: #{opts.type})") do |t|
         opts.type = t
     end
     o.on('-r', '--ram GB', Integer, "Size of RAM in GB (default #{opts.ram})") do |n|
@@ -69,11 +69,7 @@ OptionParser.new do |o|
     end
 end
 
-variant = case opts.type
-	  when :'5' then '5.4'
-	  when :'6' then '6'
-	  else raise "Bad type"
-	  end
+base = File.absolute_path('../..', File.dirname(__FILE__))
 
 ARGV.each do |name|
   if /^(?<sname>\w+)\.local$/ =~ name
@@ -106,20 +102,26 @@ ARGV.each do |name|
   install_options = []
   install_options << "--autostart"
   install_options << "--noautoconsole" unless opts.verbose
-  mkvm = <<-MKVM
-    virt-install --name #{name} \
-    --disk path=/dev/#{opts.vg}/#{name} \
-    --vcpus=#{opts.vcpus} \
-    --ram=#{(opts.ram*1024).to_s} \
-    --graphics none \
-    #{install_options.join(' ')} \
-    --network network=default \
-    --location http://#{opts.repo}/osdisks/centos#{opts.type} \
-    --extra-args="ks=http://#{opts.repo}/ks/c#{opts.type}-kvm.ks?host=#{name}.local console=tty0 console=ttyS0,115200" \
-    --os-type=linux \
-    --os-variant=rhel#{variant}
+  case opts.type
+  when :centos5, :centos6
+    extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{name}.local"
+  when :ubuntu14
+    extra_args="auto=true priority=critical url=http://#{opts.repo}/ks/#{opts.type}.seed?host=#{name}.local"
+  end
+  mkvm = <<-MKVM.gsub(/\s+/,' ')
+    virt-install --name #{name}
+    --disk path=/dev/#{opts.vg}/#{name}
+    --vcpus=#{opts.vcpus}
+    --ram=#{(opts.ram*1024).to_s}
+    --graphics none
+    #{install_options.join(' ')}
+    --network network=default
+    --location http://#{opts.repo}/osdisks/#{opts.type}
+    --extra-args="#{extra_args} console=tty0 console=ttyS0,115200"
+    --os-type=linux
   MKVM
   info "Building VM...\n"
+  puts "Command:\n#{mkvm}"
   system mkvm
 end
 
