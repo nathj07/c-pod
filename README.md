@@ -398,6 +398,42 @@ Safari, Firefox and Chrome have all be tested. Note that at time of writing
 Cisco AnyConnect VPN is incompatible with the native Mavericks proxy support.
 Use Firefox as a workaround.
 
+
+### Advanced Web Proxying
+
+If you are an 'advanced' user and wish to access multiple servers across C-Pods,
+or proxy to many locations, then you should create and maintain your own PAC file.
+Here is a sample:
+
+```js
+function FindProxyForURL(url, host) {
+  recpod = /(ds.*|ub\d+)\.local/;
+  if (recpod.test(host)) {
+      return "SOCKS5 cpod.local:1080 ; SOCKS cpod.local:1080 ";
+  }
+  rebuild2 = /bs\d+\.local/;
+  if (rebuild2.test(host)) {
+      return "SOCKS5 ip-cpod2.oak.iparadigms.com:1080 ; SOCKS ip-cpod2.oak.iparadigms.com:1080 ";
+  }
+  if (dnsDomainIs(host, ".netflix.com")) {
+    return "PROXY quithutu.proxysolutions.net:40004";
+  }
+  return "DIRECT";
+}
+```
+
+Since Safari on Mac OSX will only accept _http_ hosted PAC files, install it on the Apache
+server built into Mac OSX (Paths for Mavericks)
+
+```bash
+sudo cp <pacfile.pac> /Library/WebServer/Documents
+sudo apachectl start
+```
+
+Then you can configure the proxy file as 'http://localhost/pacfile.pac'. Note:
+* Use the file extension `.pac` for the PAC file to correctly set the mime-type
+* Safari requires a restart to pick up changes to this.
+
 ### Server Port Access
 
 Directly Accessing Server Ports from Outside the C-Pod.
