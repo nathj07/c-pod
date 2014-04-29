@@ -44,7 +44,7 @@ OptionParser.new do |o|
     o.on('-d', '--disk GB', Integer, "Size of disk in GB (default #{opts.disk})") do |n|
         opts.disk = n
     end
-    o.on('-s', '--server HOST', "Name of the repo server (default #{opts.repo})") do |n|
+    o.on('--cpod CPOD', "CPOD server for Kickstart (default #{opts.repo})") do |n|
         opts.repo = n
     end
     o.on('--vg VOLUMEGROUP', "LVM volume group (default #{opts.vg})") do |n|
@@ -104,15 +104,20 @@ ARGV.each do |name|
   install_options << "--noautoconsole" unless opts.verbose
   case opts.type
   when :centos5
-    variant = 'rhel5.4'
+    variant = '--os-variant=rhel5.4'
     extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{name}.local"
+    boot = "--location http://#{opts.repo}/osdisks/#{opts.type}"
   when :centos6
-    variant = 'rhel6'
+    variant = '--os-variant=rhel6'
     extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{name}.local"
+    boot = "--location http://#{opts.repo}/osdisks/#{opts.type}"
   when :ubuntu14
-    variant = 'ubuntutrusty'
+    variant = ''
+    iso = "#{base}/isos/ubuntu-14.04-server-amd64.iso"
     extra_args="auto=true hostname=#{name}.local priority=critical url=http://#{opts.repo}/ks/./#{opts.type}.seed?host=#{name}.local"
     #extra_args="ks=http://#{opts.repo}/ks/#{opts.type}.ks?host=#{name}.local"
+    boot = "--location http://#{opts.repo}/osdisks/#{opts.type}"
+    #boot = "--cdrom #{iso}"
   end
   mkvm = <<-MKVM.gsub(/\s+/,' ')
     virt-install --name #{name}
@@ -122,10 +127,10 @@ ARGV.each do |name|
     --graphics none
     #{install_options.join(' ')}
     --network network=default
-    --location http://#{opts.repo}/osdisks/#{opts.type}
+    #{boot}
     --extra-args="#{extra_args} console=tty0 console=ttyS0,115200"
     --os-type=linux
-    --os-variant=#{variant}
+    #{variant}
   MKVM
   info "Building VM...\n"
   puts "Command:\n#{mkvm}"
