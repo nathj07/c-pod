@@ -1,13 +1,12 @@
 Summary: Redis
 Name: redis
-Version: 2.8.0
-%define candidate rc6
-Release: %{candidate}.1%{?dist}
+Version: 2.8.9
+Release: 0%{?dist}
 License: BSD-type
 Group: Networking/Utilities
 URL: http://redis.io
 Vendor: Redis
-Source: http://download.redis.io/releases/%{name}-%{version}-%{candidate}.tar.gz
+Source: http://download.redis.io/releases/%{name}-%{version}.tar.gz
 Source1: redis.init
 Source2: redis.conf
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -19,7 +18,7 @@ It is often referred to as a data structure server since keys can contain string
 hashes, lists, sets and sorted sets.
 
 %prep
-%setup -n %{name}-%{version}-%{candidate}
+%setup -n %{name}-%{version}
 
 %build
 %{__make}
@@ -59,5 +58,8 @@ fi
 %{_bindir}/redis-check-aof
 
 %changelog
+* Tue Apr 29 2014 Nick Townsend <nick.townsend@mac.com>
+- Release version 2.8.9-0
+
 * Thu Nov 21 2013 Nick Townsend <nick.townsend@mac.com>
 - Initial specfile
