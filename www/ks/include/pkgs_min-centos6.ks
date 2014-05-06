@@ -18,3 +18,4 @@ avahi
 nss-mdns
 git
 ruby
+chef
