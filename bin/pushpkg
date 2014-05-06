@@ -6,7 +6,7 @@
 require 'fileutils'
 require 'optparse'
 require 'ostruct'
-require 'resolv'
+require 'socket'
 
 def info msg
     print "\033[32m#{msg}\033[0m"
@@ -14,7 +14,7 @@ end
 
 types = [:stable, :unstable, :lifted]
 
-opts = OpenStruct.new(type: :unstable, debug: false, force: nil, repo: ENV['CPOD'] || 'c-pod.local')
+opts = OpenStruct.new(type: :unstable, debug: false, force: nil, repo: ENV['CPOD'] || 'cpod.local')
 
 OptionParser.new do |o|
     o.banner = "usage: #{o.program_name} [options] pkg ..."
@@ -43,14 +43,18 @@ OptionParser.new do |o|
     end
 end
 
-if opts.repo.end_with? '.local'
-    mdns = Resolv::MDNS.new rescue nil
-    if mdns
-        mdns.each_address(opts.repo) do |a|
-            opts.repo = a.to_s if a.is_a? Resolv::IPv4
+if opts.repo.end_with? '.local' # Convert to IP address as Curl doesn't do mDNS
+    repohost = opts.repo
+    opts.repo = nil
+    z = Socket.gethostbyname(repohost) rescue nil
+    if z
+        z.shift 3
+        z.each do |a|
+            opts.repo = a.unpack('CCCC').join('.') if a.size == 4
         end
-    else
-        puts "You need Ruby 2.1 for .local names to work!"
+    end
+    unless opts.repo
+        puts "Can't find address for host #{repohost}"
         exit
     end
 end
