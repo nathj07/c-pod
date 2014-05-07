@@ -4,6 +4,7 @@
 # time prior to the gem install. This shows an error but is benign as it works
 #
 include_recipe 'c-pod::apache'
+include_recipe 'c-pod::devtools'
 
 yum_package 'curl-devel'
 yum_package 'apr-devel'
@@ -11,22 +12,25 @@ yum_package 'httpd-devel'
 
 gem_package 'passenger' do
     options "--no-rdoc --no-ri"
-    notifies :run, "execute[passenger-install]", :immediate
+    notifies :run, "execute[passenger-install]", :immediately
 end
 
 execute 'passenger-install' do
-    creates "/etc/httpd/conf.d/_passenger.conf"
+    action  :nothing
     command "passenger-install-apache2-module --auto"
+    notifies :create, "template[/etc/httpd/conf.d/_passenger.conf]", :immediately
 end
-
-/EXECUTABLE:\s*(?<binary>\S+)/m =~ `gem environment`
 
 template "/etc/httpd/conf.d/_passenger.conf" do
     action  :create
     mode    0644
     owner   'apache'
     group   'apache'
-    variables( :base => File.absolute_path('..', File.dirname(`gem which phusion_passenger`)), :ruby => binary)
+    variables lazy {
+        /EXECUTABLE:\s*(?<binary>\S+)/m =~ `gem environment`
+        base = File.absolute_path('..', File.dirname(`gem which phusion_passenger`))
+        { :base => base, :ruby => binary }
+    }
     notifies :restart, "service[httpd]", :delayed
 end
 
