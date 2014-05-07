@@ -2,7 +2,7 @@
 #
 # A short script to get a specific version of the postgres packages
 
-VERSION='9.2.5'
+VERSION='9.2.7'
 RELEASE='1PGDG.rhel6'
 ARCH='x86_64'
 URL="http://yum.postgresql.org/9.2/redhat/rhel-6-#{ARCH}"
