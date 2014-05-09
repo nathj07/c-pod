@@ -15,6 +15,7 @@ kexec-tools
 fipscheck
 screen
 lynx
+wget
 
 avahi
 nss-mdns

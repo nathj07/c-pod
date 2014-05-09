@@ -15,5 +15,5 @@ YUMCONF
 # Note that these have to use IP address as yum won't resolve .local names
 
 mkdir /root/saved.repos.d
-mv /etc/yum.repos.d/*  /root/saved.repos.d/
-curl -o /etc/yum.repos.d/c-pod.repo http://<!--#echo var=SERVER_ADDR -->/samples/c-pod.repo
+mv /etc/yum.repos.d/CentOS*  /root/saved.repos.d/
+wget -O /etc/yum.repos.d/c-pod.repo http://<!--#echo var=SERVER_ADDR -->/samples/c-pod.repo
