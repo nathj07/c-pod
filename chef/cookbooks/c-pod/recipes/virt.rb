@@ -15,7 +15,7 @@ when 'rhel'
     end
 
 when 'debian'
-    packages = %w{ qemu-kvm libvirt-bin apache2 virtinst }
+    packages = %w{ qemu-kvm libvirt-bin virtinst }
     packages.each { |pkg| package pkg }
     service 'libvirt-bin' do
 	supports :restart => true, :reload => true

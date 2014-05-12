@@ -1,40 +1,51 @@
 # Apache configuration fragment for the C-Pod server
 #
-<Directory "<%= @params[:base] %>/">
+<Directory "<%= node[:cpod][:base] %>/">
     AllowOverride None
+    <% if node['apache']['version'] != "2.4" -%>
     Order deny,allow
     Deny from all
+    <% else -%>
+    Require all denied
+    <% end -%>
 </Directory>
 
-<Directory "<%= @params[:base] %>/c-pod/www">
+<Directory "<%= node[:cpod][:base] %>/c-pod/www">
     Options Includes Indexes FollowSymLinks
     IndexIgnore .htaccess *.bak *~ RCS
     IndexOptions FancyIndexing FoldersFirst
     AllowOverride None
+    <% if node['apache']['version'] != "2.4" -%>
     Order allow,deny
     Allow from all
+    <% else -%>
+    Require all granted
+    <% end -%>
 </Directory>
 
-<Directory "<%= @params[:base] %>/c-pod/bin/">
+<Directory "<%= node[:cpod][:base] %>/c-pod/bin/">
     Options +ExecCGI
     SetHandler cgi-script
     AllowOverride None
+    <% if node['apache']['version'] != "2.4" -%>
     Order allow,deny
     Allow from all
+    <% else -%>
+    Require all granted
+    <% end -%>
 </Directory>
-#
+
+ServerName <%= node[:cpod][:server_name] %>
+
 <VirtualHost *:80>
 
-#   Add this directive if multiple vhosts
-#   ServerName c-pod.myco.com:80
-
-    ScriptAlias /bin "<%= @params[:base] %>/c-pod/bin"
+    ScriptAlias /bin "<%= node[:cpod][:base] %>/c-pod/bin"
 
     ServerAdmin <%= node[:cpod][:admin_email] %>
     IndexIgnore .htaccess *.bak *~ RCS
-    DocumentRoot "<%= @params[:base] %>/c-pod/www"
-    ErrorLog logs/c-pod_error_log
-    CustomLog logs/c-pod_access_log combined
+    DocumentRoot <%= node[:cpod][:base] %>/c-pod/www
+    ErrorLog <%= node['apache']['log_dir'] %>/c-pod_error_log
+    CustomLog <%= node['apache']['log_dir'] %>/c-pod_access_log combined
     AddType text/plain .ks .seed
     AddType application/x-ns-proxy-autoconfig .pac
     AddHandler server-parsed .ks .seed .html .pac

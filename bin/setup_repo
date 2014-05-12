@@ -52,16 +52,6 @@ begin
     FileUtils.mkdir_p "#{base}/osdisks"
     FileUtils.mkdir_p "#{base}/isos"
 
-    # Link the Apache config (unless already done by Chef)
-    #
-    unless File.exist? "/etc/httpd/conf.d/_c-pod.conf"
-	erb = ERB.new(File.open("#{repo}/chef/cookbooks/c-pod/templates/default/_c-pod.conf.erb", "r", &:read))
-	File.open("/etc/httpd/conf.d/_c-pod.conf", "w") { |f| f.write erb.result(binding) }
-
-	FileUtils.chown_R(nil, 'apache', "/etc/httpd/conf.d/")
-	FileUtils.chmod("g+w", "/etc/httpd/conf.d/_c-pod.conf")
-    end
-
     # Setup permissions
     #
     FileUtils.chown_R('c-pod', 'c-pod', base)
