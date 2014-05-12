@@ -13,3 +13,4 @@ file_backup_path    root + '/backup'
 file_cache_path     root + '/cache'
 node_path           root + '/node'
 role_path           root + '/roles'
+verify_api_cert	    true
