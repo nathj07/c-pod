@@ -53,7 +53,7 @@ if $types.include? :yum
     repolist.each_pair do |desc, dir|
 	info "#{$verb} index for #{desc}\n"
 	flags = $force ? "": "-C"
-	system "createrepo #{flags} -s sha #{dir}"
+	system "createrepo #{flags} -s sha #{dir} -o ."
 	if $?.exitstatus != 0
 	    puts "createrepo command failed: #{$?}"
 	    puts "Did you install the 'createrepo' package? Check apache can write to the repo!"
