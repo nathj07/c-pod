@@ -2,11 +2,6 @@
 # Note use of setgid and c-pod group to allow sharing
 # Together with umask 0002
 #
-node.default[:cpod][:base] = '/data'
-node.default[:cpod][:owner_name] = 'c-pod'
-node.default[:cpod][:owner_id] = 606
-node.default[:cpod][:github_key] = 'townsen' # User to give public key access
-
 cpod_user = node[:cpod][:owner_name]
 
 BASE=node[:cpod][:base]
@@ -14,7 +9,7 @@ BASE=node[:cpod][:base]
 group cpod_user do
   action :create
   gid node[:cpod][:owner_id]
-  members 'apache'
+  members node['apache']['user']
   append true
 end
 
@@ -32,7 +27,7 @@ directory BASE do
     group cpod_user
     # Permissions:
     # * Don't make group writeable as stops ssh keys working
-    # * setgid so that all subdirs are created in the apache group
+    # * setgid so that all subdirs are created in the same group
     mode 02755
 end
 

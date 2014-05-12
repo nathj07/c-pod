@@ -1,12 +1,12 @@
 # Apache configuration fragment for the C-Pod server
 #
-<Directory "<%= @base %>/">
+<Directory "<%= @params[:base] %>/">
     AllowOverride None
     Order deny,allow
     Deny from all
 </Directory>
 
-<Directory "<%= @base %>/c-pod/www">
+<Directory "<%= @params[:base] %>/c-pod/www">
     Options Includes Indexes FollowSymLinks
     IndexIgnore .htaccess *.bak *~ RCS
     IndexOptions FancyIndexing FoldersFirst
@@ -15,7 +15,7 @@
     Allow from all
 </Directory>
 
-<Directory "<%= @base %>/c-pod/bin/">
+<Directory "<%= @params[:base] %>/c-pod/bin/">
     Options +ExecCGI
     SetHandler cgi-script
     AllowOverride None
@@ -28,11 +28,11 @@
 #   Add this directive if multiple vhosts
 #   ServerName c-pod.myco.com:80
 
-    ScriptAlias /bin "<%= @base %>/c-pod/bin"
+    ScriptAlias /bin "<%= @params[:base] %>/c-pod/bin"
 
-    ServerAdmin nick.townsend@mac.com
+    ServerAdmin <%= node[:cpod][:admin_email] %>
     IndexIgnore .htaccess *.bak *~ RCS
-    DocumentRoot "<%= @base %>/c-pod/www"
+    DocumentRoot "<%= @params[:base] %>/c-pod/www"
     ErrorLog logs/c-pod_error_log
     CustomLog logs/c-pod_access_log combined
     AddType text/plain .ks .seed

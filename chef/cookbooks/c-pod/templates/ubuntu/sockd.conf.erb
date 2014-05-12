@@ -1,0 +1,36 @@
+# Dante Socks server config for C-Pod server
+#
+logoutput: /var/log/sockd.log
+internal: <%= @public %> port = 1080
+external: <%= @private %>
+method: none
+iotimeout: 0
+
+# Let in all the private addresses
+#
+client pass {
+        from: 10.0.0.0/8 port 1-65535 to: 172.16.1.0/24
+}
+client pass {
+        from: 172.16.0.0/12 to: 172.16.1.0/24
+}
+client pass {
+        from: 192.168.0.0/16 to: 172.16.1.0/24
+}
+# Record everyone else and fail them
+#
+client block {
+        from: 0.0.0.0/0 to: 0.0.0.0/0
+        log: connect error
+}
+# Allow them to go to the KVM default network
+#
+pass {
+        from: 0.0.0.0/0 to: 192.168.122.0/24
+        log: connect disconnect
+        protocol: tcp udp
+}
+block {
+        from: 0.0.0.0/0 to: 0.0.0.0/0
+        log: connect
+}
