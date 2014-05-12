@@ -1,0 +1,12 @@
+[submodule "chef/cookbooks/sysctl"]
+	path = chef/cookbooks/sysctl
+	url = https://github.com/Youscribe/sysctl-cookbook.git
+[submodule "chef/cookbooks/apache2"]
+	path = chef/cookbooks/apache2
+	url = https://github.com/onehealth-cookbooks/apache2.git
+[submodule "chef/cookbooks/apt"]
+	path = chef/cookbooks/apt
+	url = https://github.com/opscode-cookbooks/apt.git
+[submodule "chef/cookbooks/yum"]
+	path = chef/cookbooks/yum
+	url = https://github.com/opscode-cookbooks/yum.git
