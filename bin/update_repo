@@ -6,7 +6,7 @@ require 'optparse'
 require 'ostruct'
 
 base = File.absolute_path('../..', File.dirname(__FILE__))
-opts = OpenStruct.new( repo: (ENV['C-POD'] || 'c-pod.local'), user: 'c-pod', delete: false )
+opts = OpenStruct.new( repo: (ENV['C-POD'] || 'cpod.local'), user: 'c-pod', delete: false, rbase: '' )
 
 if Process.euid == 0
     puts "Hey - don't run this as root"
@@ -14,43 +14,51 @@ if Process.euid == 0
 end
 
 OptionParser.new do |o|
-    o.banner = "Script to update a local copy of the yum_repos from a remote C-POD"
+    o.banner = "usage: #{o.program_name} [options]"
+    o.separator "Update local Gems, RPMs and downloads from a remote C-Pod. Options:"
 
-    o.on( '-?', '--help', 'Display this screen' ) do
-        puts o
+    o.on_tail( '-?', '--help', 'Display this screen' ) do
+        STDERR.puts o
         exit
     end
-    o.on('-u', '--user USER', String, "The user to use (default: #{opts.user})") do |u|
+    o.on('-u', '--user USER', String, "The remote user (default: #{opts.user})") do |u|
 	opts.user = u
     end
-    o.on('-r', '--repo REPO', String, "The C-POD repo site to use (default: #{opts.repo})") do |m|
+    o.on('-b', '--base BASEDIR', String, "Remote C-Pod base directory (default is home dir of remote user)") do |b|
+	opts.rbase = b
+    end
+    o.on('-r', '--repo REPO', String, "The C-Pod host to use (default: #{opts.repo})") do |m|
 	opts.repo = m
     end
     o.on('-d', '--[no-]delete', "Delete local items not present on remote (default: #{opts.delete})") do |d|
 	opts.delete = d
     end
-    o.parse!
-    if ARGV.size > 0
-	puts "You don't need arguments!"
-	puts o.help
-	exit 2
+    begin
+        o.parse!
+        raise "You don't need arguments!" if ARGV.size > 0
+        raise "Specifying a remote user requires remote base" if opts.user != 'c-pod' and opts.rbase == ''
+    rescue
+       STDERR.puts "Error: #{$!}"
+       STDERR.puts o
+       exit 1
     end
 end
 
 delete = opts.delete ? "--delete":""
+rsync  = "rsync -rltDOvz"
 
 puts "Updating GEM packages..."
-cmd = "rsync -rlDvz #{delete} --progress #{opts.user}@#{opts.repo}:/data/gem_repo #{base}/"
+cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}gem_repo #{base}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"
 puts "Updating RPM packages..."
-cmd = "rsync -rlDvz #{delete} --progress #{opts.user}@#{opts.repo}:/data/yum_repos #{base}/"
+cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}yum_repos #{base}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"
 puts "Updating Downloads packages..."
-cmd = "rsync -rlDvz #{delete} --progress #{opts.user}@#{opts.repo}:/data/downloads #{base}/"
+cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}downloads #{base}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"

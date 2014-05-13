@@ -14,13 +14,13 @@ end
 
 types = [:stable, :unstable, :lifted]
 
-opts = OpenStruct.new(type: :unstable, debug: false, force: nil, repo: ENV['CPOD'] || 'cpod.local')
+opts = OpenStruct.new(type: :unstable, debug: false, force: nil, repo: ENV['CPOD'] || 'cpod.local', keep: 3)
 
 OptionParser.new do |o|
     o.banner = "usage: #{o.program_name} [options] pkg ..."
     o.separator "Push RPM and GEM packages to C-Pod server and rebuild indices. Options:"
 
-    o.on( '-?', '--help', 'Display this screen' ) do
+    o.on_tail( '-?', '--help', 'Display this screen' ) do
         STDERR.puts o
         exit
     end
@@ -36,7 +36,10 @@ OptionParser.new do |o|
     o.on('-f', '--force', "Force complete metadata rebuild") do
         opts.force = true
     end
-    o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
+    o.on('-k', '--keep N', Integer, "Keep N releases (default #{opts.keep}, -1 to keep all, 0 to remove all)") do |k|
+        opts.keep = k
+    end
+    o.parse! rescue (STDERR.puts "Error: #{$!}"; STDERR.puts o; exit)
     if ARGV.size == 0 and not opts.force
         STDERR.puts o
         exit
@@ -63,6 +66,7 @@ base = File.absolute_path('../..', File.dirname(__FILE__))
 curlopts = ["-F type=#{opts.type}"]
 curlopts.push "-F debug=yes" if opts.debug
 curlopts.push "-F force=yes" if opts.force
+curlopts.push("-F keep=#{opts.keep}")
 
 info "Using C-Pod #{opts.repo}\n"
 files = ARGV.select { |f| File.exist?(f) ? true: ( puts "File #{f} not found"; false ) }
