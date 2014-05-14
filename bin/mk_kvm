@@ -93,15 +93,13 @@ ARGV.each do |name|
     info "Dropping the .local suffix on #{name} - not required\n"
   end
   status = `virsh domstate #{name}`.strip
-  if $? == 0 and status != "shut off"
-    if opts.force
-      `virsh destroy #{name}`
-      `virsh undefine #{name}`
-      info "The machine #{name} has been shut down and undefined\n"
-    else
-      info "The machine #{name} exists and -f not specified, exiting...\n"
-      exit 2
-    end
+  if $? == 0 and opts.force
+    `virsh destroy #{name}` if status != "shut off"
+    `virsh undefine #{name}`
+    info "Machine '#{name}' has been undefined\n"
+  else
+    info "Machine '#{name}' exists and -f not specified, exiting...\n"
+    exit 2
   end
   info "Creating Logical Volume...\n"
   lvsize = `lvs --units g -o lv_size --noheadings #{opts.vg}/#{name}`.strip
