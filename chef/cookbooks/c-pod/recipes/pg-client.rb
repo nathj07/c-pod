@@ -6,7 +6,7 @@ yum_package 'postgresql92-devel'
 # yum_package 'postgresql92-devel'
 
 template "/etc/profile.d/postgres.sh" do
-    mode        0777
+    mode        0644
     source      'postgres.sh.erb'
     variables(  :version => '9.2' )
 end
