@@ -30,3 +30,7 @@ sass-cache
 
 # Ignore textmate project files
 *.tmproj
+
+# Ignore our custom PAC file
+# (the default is c-pod.pac)
+www/cpod.pac
