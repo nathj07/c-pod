@@ -25,7 +25,7 @@ q.out 'text/plain' do
 
     host, domain = opts[:hostname].split('.',2)
 
-    if domain.end_with? '.local'
+    if domain.end_with? 'local'
 	opts[:bootproto] = 'dhcp'
     else
 	Resolv::DNS.open do |dns|
@@ -64,7 +64,7 @@ q.out 'text/plain' do
 	args.push "--bootproto #{opts[:bootproto]}"
         if opts[:bootproto] == 'static'
             args.push "--ip #{opts[:addr]} --netmask #{opts[:netmask]} --gateway #{opts[:gw]}"
-            args.push "--nameservers #{opts[:nameservers].join(',')}" if opts[:nameservers]
+            args.push "--nameserver #{opts[:nameservers].join(',')}" if opts[:nameservers]
         end
         args.join(' ')
     else
