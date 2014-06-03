@@ -7,6 +7,7 @@ require 'fileutils'
 require 'optparse'
 require 'ostruct'
 require 'socket'
+require_relative 'funcs'
 
 def info msg
     print "\033[32m#{msg}\033[0m"
@@ -71,9 +72,14 @@ curlopts.push("-F keep=#{opts.keep}")
 info "Using C-Pod #{opts.repo}\n"
 files = ARGV.select { |f| File.exist?(f) ? true: ( puts "File #{f} not found"; false ) }
 files.each do |f|
-    info "Uploading #{f}\n"
-    cmd = "curl -f -# -w '%{http_code}' #{curlopts.join(' ')} -F pkgfile=@#{f} http://#{opts.repo}/bin/rx_pkg.cgi"
-    puts `#{cmd}`
+    begin
+        parsepkg(File.basename(f))
+        info "Uploading #{f}\n"
+        cmd = "curl -f -# -w '%{http_code}' #{curlopts.join(' ')} -F pkgfile=@#{f} http://#{opts.repo}/bin/rx_pkg.cgi"
+        puts `#{cmd}`
+    rescue
+        puts "#{$!}, skipping...\n"
+    end
 end
 
 info "Rebuilding Indices\n"

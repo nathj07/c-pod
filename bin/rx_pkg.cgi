@@ -6,6 +6,7 @@ require 'cgi'
 require 'tempfile'
 require 'stringio'
 require 'fileutils'
+require_relative 'funcs.rb'
 
 File.umask(0002)
 $repo = File.absolute_path('..', File.dirname(__FILE__))
@@ -19,30 +20,20 @@ end
 #
 def repopath package, type
     type = 'unstable' if type == ''
-    raise "Can't parse #{package}" unless /(?<pkgname>^.*)-(?<ver>\d[0-9\.]+\d)(?<pkginfo>.*)$/ =~ package
-    pkgparts = pkginfo.split '.'
-    suffix = pkgparts.pop
-    path = case suffix
+    pkginfo = parsepkg package
+    path = case pkginfo[:format]
     when 'rpm'
-	arch = pkgparts.pop
-	rel = if pkgparts.select { |c| c =~ /^(rh)?el5(_.*)?$/ }.size > 0
-		   '5'
-	       elsif pkgparts.select { |c| c =~ /^(rh)?el6(_.*)?/ }.size > 0
-		   '6'
-	       else
-		   '5' # put unlabelled ones in 5
-	       end
-	yum_repos = File.absolute_path('../../yum_repos', File.dirname(__FILE__))
 	if ['stable','unstable'].include? type
-	    "#{$base}/yum_repos/custom/#{rel}/#{type}/#{arch}"
+	    "#{$base}/yum_repos/custom/#{pkginfo[:rhel]}/#{type}/#{pkginfo[:arch]}"
 	else
-	    "#{$base}/yum_repos/#{type}/#{rel}/#{arch}"
+	    "#{$base}/yum_repos/#{type}/#{pkginfo[:rhel]}/#{pkginfo[:arch]}"
 	end
     when 'gem'
 	"#{$base}/gem_repo/gems"
-    else raise "Suffix #{suffix} is not a recognized package type"
+    else
+        raise "Format #{pkginfo[:format]} is not a recognized package type"
     end
-    return path, pkgname
+    return path, pkginfo[:name]
 end
 
 # Retain only the latest copies of the packages
