@@ -59,19 +59,17 @@ if $types.include? :yum
 	    puts "Did you install the 'createrepo' package? Check apache can write to the repo!"
 	    exit 1
 	end
-	FileUtils.chown_R(nil, 'apache', dir) rescue nil
     end
 end
 if $types.include? :gem
     FileUtils.cd "#{base}/gem_repo"
     info "#{$verb} Custom Gem Index\n"
     flags = $force ? "": "--update"
-    system "gem generate_index #{flags} -d ."
+    system "gem generate_index --no-legacy #{flags} -d ."
     if $?.exitstatus != 0
 	puts "gem generate_index command failed"
 	exit 2
     end
-    FileUtils.chown_R(nil, 'apache', "#{base}/gem_repo") rescue nil
 end
 info "Complete\n"
 exit 0
