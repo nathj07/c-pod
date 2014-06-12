@@ -18,5 +18,6 @@ network --device eth0 <!--#exec cgi="/bin/netcfg.centos.cgi" -->
 <!--#include virtual="include/yum-repo.ks" -->
 <!--#include virtual="include/advertize.ks" -->
 <!--#include virtual="include/setuproot.ks" -->
+<!--#include virtual="include/rubygems.ks" -->
 <!--#include virtual="include/chef.ks" -->
 <!--#include virtual="include/chefpath.ks" -->
