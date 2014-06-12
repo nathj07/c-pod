@@ -1,14 +1,13 @@
-%define rubyver         2.0.0
-%define rubyminorver    p247
+%define rubyver         2.1.2
 
 Name:           ruby
-Version:        %{rubyver}%{rubyminorver}
-Release:        2%{?dist}.ip
+Version:        %{rubyver}
+Release:        0%{?dist}.ip
 License:        Ruby License/GPL - see COPYING
 URL:            http://www.ruby-lang.org/
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  readline readline-devel ncurses ncurses-devel gdbm gdbm-devel glibc-devel tcl-devel gcc unzip openssl-devel db4-devel byacc make libyaml libyaml-devel libffi libffi-devel
-Source0:        http://ftp.ruby-lang.org/pub/ruby/ruby-%{rubyver}-%{rubyminorver}.tar.gz
+Source0:        http://ftp.ruby-lang.org/pub/ruby/ruby-%{rubyver}.tar.gz
 Summary:        An interpreter of object-oriented scripting language
 Group:          Development/Languages
 Provides: ruby(abi) = 2.0
@@ -31,7 +30,7 @@ files and to do system management tasks (as in Perl).  It is simple,
 straight-forward, and extensible.
 
 %prep
-%setup -n ruby-%{rubyver}-%{rubyminorver}
+%setup -n ruby-%{rubyver}
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS -Wall -fno-strict-aliasing"
