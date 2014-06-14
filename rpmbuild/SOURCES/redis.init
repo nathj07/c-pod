@@ -29,7 +29,7 @@ case "$1" in
         else
                 PID=$(cat $PIDFILE)
                 echo "Stopping ..."
-                $CLIEXEC -p $REDISPORT shutdown
+                kill -TERM $PID # $CLIEXEC -p $REDISPORT shutdown won't work if password!
                 while [ -x /proc/${PID} ]
                 do
                     echo "Waiting for Redis to shutdown ..."
