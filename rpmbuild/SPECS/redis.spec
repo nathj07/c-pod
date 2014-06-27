@@ -1,6 +1,6 @@
 Summary: Redis
 Name: redis
-Version: 2.8.11
+Version: 2.8.12
 Release: 0%{?dist}
 License: BSD-type
 Group: Networking/Utilities
