@@ -64,8 +64,11 @@ end
 if $types.include? :gem
     FileUtils.cd "#{base}/gem_repo"
     info "#{$verb} Custom Gem Index\n"
-    flags = $force ? "": "--update"
-    system "gem generate_index --no-legacy #{flags} -d ."
+    flags = []
+    flags << $force ? "": "--update"
+    old = Gem::Requirement.new('< 2.0.0').satisfied_by? Gem::Version.new(Gem::VERSION)
+    flags << '--no-legacy' if old
+    system "gem generate_index #{flags.join(' ')} -d ."
     if $?.exitstatus != 0
 	puts "gem generate_index command failed"
 	exit 2
