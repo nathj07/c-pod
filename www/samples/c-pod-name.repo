@@ -30,3 +30,10 @@ baseurl=http://<!--#echo var="SERVER_NAME" -->/osdisks/centos$releasever
 enabled=1
 gpgcheck=1
 gpgkey=http://<!--#echo var="SERVER_NAME" -->/RPM-GPG-KEY-CentOS-$releasever
+
+[updates]
+name=CentOS $releasever Updates - x86_64
+baseurl=http://<!--#echo var="SERVER_NAME" -->/osdisks/updates
+enabled=1
+gpgcheck=1
+gpgkey=http://<!--#echo var="SERVER_NAME" -->/RPM-GPG-KEY-CentOS-$releasever
