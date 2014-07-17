@@ -7,5 +7,6 @@ version		    "0.1"
 depends             "apt", ">= 2.3.9"
 depends             "yum", ">= 3.2.1"
 depends             "sysctl", ">= 0.1.9"
+depends             "ulimit", ">= 0.3.2"
 depends             "apache2", ">= 1.10.5"
 # vim: sts=4 sw=4 ts=8 et

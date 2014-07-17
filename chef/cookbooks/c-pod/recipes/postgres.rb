@@ -17,6 +17,13 @@ yum_package 'postgresql92-server' do
     notifies :run, "execute[initdb]", :immediate
 end
 
+template "#{node[:postgres][:datadir]}/postgresql.conf" do
+    owner   node[:postgres][:user]
+    group   node[:postgres][:group]
+    mode    0600
+    notifies :restart, "service[postgresql-9.2]", :delayed
+end
+
 template "#{node[:postgres][:datadir]}/pg_hba.conf" do
     owner   node[:postgres][:user]
     group   node[:postgres][:group]
