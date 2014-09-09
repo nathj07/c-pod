@@ -2,15 +2,13 @@
 # Note use of setgid and c-pod group to allow sharing
 # Together with umask 0002
 #
-cpod_user = node[:cpod][:owner_name]
+cpod_user = node[:cpod][:owner_name] or 'c-pod'
 
-BASE=node[:cpod][:base]
+BASE=node[:cpod][:base] or "/home/#{cpod_user}"
 
 group cpod_user do
   action :create
   gid node[:cpod][:owner_id]
-  members node['apache']['user']
-  append true
 end
 
 user cpod_user do

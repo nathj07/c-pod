@@ -9,7 +9,6 @@ git "#{BASE}/c-pod" do
     action :checkout # don't sync - do this manually
     group cpod_user
     notifies :run, "execute[repo_permissions]", :immediate
-    notifies :restart, "service[apache2]", :delayed
 end
 
 # Git repos come out 644 and 755 so fix group permissions

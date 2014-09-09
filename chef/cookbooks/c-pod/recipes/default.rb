@@ -43,6 +43,11 @@ end
 
 include_recipe 'c-pod::user'
 
+group cpod_user do
+  members node['apache']['user']
+  append true
+end
+
 cpod_user = node[:cpod][:owner_name]
 base=node[:cpod][:base]
 
