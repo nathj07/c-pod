@@ -12,6 +12,7 @@ types = [:centos5, :centos6, :ubuntu14]
 
 opts = OpenStruct.new(
     type: :centos6,
+    bridge: 'br0',
     vcpus: 2,
     ram: 2,
     disk: 20,
@@ -48,6 +49,9 @@ OptionParser.new do |o|
         opts.repo = n
     end
     o.on('--vg VOLUMEGROUP', "LVM volume group (default #{opts.vg})") do |n|
+        opts.vg = n
+    end
+    o.on('--bridge BRIDGE', "Bridge device for networking (default #{opts.bridge})", "(Only used if name is an FQDN else the default network is used)") do |n|
         opts.vg = n
     end
     o.on('-v', '--verbose', "Enable console during build (default #{opts.verbose})") do |v|
@@ -87,11 +91,12 @@ end
 
 base = File.absolute_path('../..', File.dirname(__FILE__))
 
-ARGV.each do |name|
-  if /^(?<sname>\w+)\.local$/ =~ name
-    name = sname
-    info "Dropping the .local suffix on #{name} - not required\n"
+ARGV.each do |fqdn|
+  unless fqdn.index '.'
+    fqdn += '.local'
+    info "Adding the .local suffix to #{fqdn}\n"
   end
+  name = fqdn.partition('.')[0]
   status = `virsh domstate #{name} 2>/dev/null`.strip
   if $? == 0
      if  opts.force
@@ -118,20 +123,21 @@ ARGV.each do |name|
   install_options = []
   install_options << "--autostart"
   install_options << "--noautoconsole" unless opts.verbose
+  install_options << ((fqdn =~ /\.local$/) ? "--network network=default" : "--network bridge:#{opts.bridge}")
   case opts.type
   when :centos5
     variant = '--os-variant=rhel5.4'
-    extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{name}.local"
+    extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{fqdn}"
     boot = "--location http://#{opts.repo}/osdisks/#{opts.type}"
   when :centos6
     variant = '--os-variant=rhel6'
-    extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{name}.local"
+    extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{fqdn}"
     boot = "--location http://#{opts.repo}/osdisks/#{opts.type}"
   when :ubuntu14
     variant = ''
     iso = "#{base}/isos/ubuntu-14.04-server-amd64.iso"
-    extra_args="auto=true hostname=#{name}.local priority=critical url=http://#{opts.repo}/ks/./#{opts.type}.seed?host=#{name}.local"
-    #extra_args="ks=http://#{opts.repo}/ks/#{opts.type}.ks?host=#{name}.local"
+    extra_args="auto=true hostname=#{fqdn} priority=critical url=http://#{opts.repo}/ks/./#{opts.type}.seed?host=#{fqdn}"
+    #extra_args="ks=http://#{opts.repo}/ks/#{opts.type}.ks?host=#{fqdn}"
     boot = "--location http://#{opts.repo}/osdisks/#{opts.type}"
     #boot = "--cdrom #{iso}"
   end
@@ -142,7 +148,6 @@ ARGV.each do |name|
     --ram=#{(opts.ram*1024).to_s}
     --graphics none
     #{install_options.join(' ')}
-    --network network=default
     #{boot}
     --extra-args="#{extra_args} console=tty0 console=ttyS0,115200"
     --os-type=linux
