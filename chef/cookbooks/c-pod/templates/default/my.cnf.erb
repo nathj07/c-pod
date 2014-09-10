@@ -1,0 +1,12 @@
+[mysqld]
+datadir=<%= node['mysql']['datadir'] %>
+socket=<%= node['mysql']['socket'] %>
+port=3306
+user=mysql
+#bind-address=localhost
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
