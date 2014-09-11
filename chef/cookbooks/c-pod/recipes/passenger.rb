@@ -11,6 +11,7 @@ yum_package 'apr-devel'
 yum_package 'httpd-devel'
 
 gem_package 'passenger' do
+    version "4.0.46"
     options "--no-rdoc --no-ri"
     notifies :run, "execute[passenger-install]", :immediately
 end
