@@ -34,3 +34,6 @@ sass-cache
 # Ignore our custom PAC file
 # (the default is c-pod.pac)
 www/cpod.pac
+
+# Ignore custom netmasks
+bin/netmask_table

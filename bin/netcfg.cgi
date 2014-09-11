@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 #
 # Script to return the network parameters given a hostname
-# TODO derivation of the netmask and gateway is inherently flaky
+# Note that determination of the netmask from the IP must
+# be customized in the file netmask_table in this dir
 #
 # This script is invoked by SSI exec cgi from within other
 # Kickstart and Preseed files. SSI exec cgi must be used as it
@@ -16,6 +17,13 @@
 require 'cgi'
 require 'resolv'
 require 'ipaddr'
+
+masks = File.open(File.expand_path('../netmask_table', __FILE__), &:read).split(/\n/).grep(/^(?!\s*#)/) rescue []
+# Add the RFC1918 ones as fallback
+masks << '^10\.	        255.0.0.0'
+masks << '^172\.16\.	255.240.0.0'
+masks << '^192\.168\.	255.255.255.0'
+masks.map! {|m| am = m.split; [Regexp.new(am[0]), am[1]] }
 
 q = CGI.new
 opts = {}
@@ -34,12 +42,7 @@ q.out 'text/plain' do
 	    if addr
 		opts[:bootproto] = 'static'
 		ipaddr = IPAddr.new addr
-		netmask = case addr
-		    when /^10\./	then '255.0.0.0'
-		    when /^172\.16\./	then '255.240.0.0'
-		    when /^192\.168\./	then '255.255.255.0'
-		    else '255.255.255.0'
-		end
+		netmask = masks.find(['*','255.255.255.0']){|m| m[0].match addr }[1]
 		gw = ipaddr.mask(netmask).succ
                 opts[:addr] = addr
                 opts[:netmask] = netmask
