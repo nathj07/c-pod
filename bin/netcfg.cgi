@@ -18,7 +18,7 @@ require 'cgi'
 require 'resolv'
 require 'ipaddr'
 
-masks = File.open(File.expand_path('../netmask_table', __FILE__), &:read).split(/\n/).grep(/^(?!\s*#)/) rescue []
+masks = File.readlines(File.expand_path('../netmask_table', __FILE__)).grep(/^(?!\s*#)/) rescue []
 # Add the RFC1918 ones as fallback
 masks << '^10\.	        255.0.0.0'
 masks << '^172\.16\.	255.240.0.0'
