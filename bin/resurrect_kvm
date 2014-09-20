@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+# This does most things but the generated network interface will likely
+# not match the original. You should start up the machine and login using
+# the console ('virsh domname console') to determine it.
+#
+# (If you're locked out then add 'single' to the end of the Grub line)
+#
+# Then 'virsh edit domname' and change the allocated MAC.
+#
+#
+require 'optparse'
+require 'ostruct'
+
+def info msg
+    print "\033[32m#{msg}\033[0m"
+end
+
+opts = OpenStruct.new(
+    vcpus: 1,
+    ram: 1,
+    vg: 'vg00'
+)
+
+OptionParser.new do |o|
+    o.banner = "Usage: #{$0} [options] name"
+    o.separator ""
+    o.separator "Resurrect a KVM virtual machine"
+    o.separator "Options:"
+
+    o.on( '-?', '--help', 'Display this screen' ) do
+        puts o
+        exit
+    end
+    o.on('-r', '--ram GB', Integer, "Size of RAM in GB (default #{opts.ram})") do |n|
+        opts.ram = n
+    end
+    o.on('-c', '--vcpus N', Integer, "Number of CPUs (default #{opts.vcpus})") do |n|
+        opts.vcpus = n
+    end
+    o.on('--vg VOLUMEGROUP', "LVM volume group (default #{opts.vg})") do |n|
+        opts.vg = n
+    end
+    o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
+    if ARGV.size == 0
+	puts o.help
+	exit 2
+    end
+    `vgdisplay #{opts.vg}`
+    unless $? == 0
+	puts "Volume Group #{opts.vg} doesn't exist!"
+	puts o.help
+	exit 2
+    end
+end
+
+base = File.absolute_path('../..', File.dirname(__FILE__))
+
+ARGV.each do |name|
+  status = `virsh domstate #{name} 2>/dev/null`.strip
+  if $? == 0
+    info "Machine '#{name}' already exists, ignoring...\n"
+    next
+  end
+  lvsize = `lvs --units g -o lv_size --noheadings #{opts.vg}/#{name}`.strip
+  if $? == 0
+    info "The logical volume #{name} exists (size #{lvsize})\n"
+  else
+    info "The logical volume #{name} doesn't exists\n"
+  end
+  cmd = <<-RESURRECT.gsub(/\s+/,' ')
+    virt-install --name #{name}
+    --disk path=/dev/#{opts.vg}/#{name}
+    --vcpus=#{opts.vcpus}
+    --ram=#{(opts.ram*1024).to_s}
+    --graphics none
+    --import
+    --os-type=linux
+    --noautoconsole
+    --autostart
+  RESURRECT
+  puts "Command:\n#{cmd}"
+  system cmd
+end
+
+# vim: sts=2 sw=2 ts=8
