@@ -5,6 +5,7 @@ when 'rhel'
     include_recipe 'yum'
     package 'createrepo'
     package 'yum-utils'
+    package 'bsdtar'
     package 'ruby'
     node.default['apache']['version'] = '2.2'
 when 'debian'
@@ -62,20 +63,6 @@ directory "#{base}/cookbooks" do
     owner cpod_user
     group cpod_user
     mode 02775
-end
-
-git "#{base}/cookbooks/sysctl" do
-    repository "https://github.com/Youscribe/sysctl-cookbook.git"
-    reference "master"
-    action :checkout
-    group cpod_user
-end
-
-git "#{base}/cookbooks/ulimit" do
-    repository "https://github.com/bmhatfield/chef-ulimit.git"
-    reference "master"
-    action :checkout
-    group cpod_user
 end
 
 execute "setup_repo" do
