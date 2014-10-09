@@ -5,9 +5,11 @@ case node[:platform_family]
 when 'rhel'
     packages = %w{
 	kvm libvirt virt-manager virt-viewer libguestfs-tools
-	python-virtinst
-	libvirt-python 
     }
+    packages += case osver
+	when 5...7 then %w{ python-virtinst libvirt-python }
+	when 7...8 then %w{ virt-install }
+	end
     packages.each { |pkg| package pkg }
     service 'libvirtd' do
 	supports :restart => true, :reload => true

@@ -9,7 +9,10 @@ when 'rhel'
 	allow_downgrade true
     end
 
-    yum_package 'stallone >= 0.4.0'
+    case osver 
+    when 6...7 then yum_package 'stallone >= 0.4.0'
+    else warn "Don't have a package of stallone for Centos7 yet"
+    end
 
     template "/etc/sockd.conf" do
 	action  :create
