@@ -23,11 +23,7 @@ def repopath package, type
     pkginfo = parsepkg package
     path = case pkginfo[:format]
     when 'rpm'
-	if ['stable','unstable'].include? type
-	    "#{$base}/yum_repos/custom/#{pkginfo[:rhel]}/#{type}/#{pkginfo[:arch]}"
-	else
-	    "#{$base}/yum_repos/#{type}/#{pkginfo[:rhel]}/#{pkginfo[:arch]}"
-	end
+        "#{$base}/yum_repos/#{type}/#{pkginfo[:rhel]}/#{pkginfo[:arch]}"
     when 'gem'
 	"#{$base}/gem_repo/gems"
     else

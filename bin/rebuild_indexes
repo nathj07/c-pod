@@ -43,12 +43,15 @@ base = File.absolute_path('../..', File.dirname(__FILE__))
 if $types.include? :yum
     FileUtils.cd "#{base}/yum_repos"
     repolist = { 
-	    'Unstable Custom CentOS 5 Packages' => 'custom/5/unstable',
-	    'Custom CentOS 5 Packages'	    => 'custom/5/stable',
-	    'Unstable Custom CentOS 6 Packages' => 'custom/6/unstable',
-	    'Custom CentOS 6 Packages'	    => 'custom/6/stable',
+	    'Unstable Custom CentOS 5 Packages' => 'unstable/5',
+	    'Custom CentOS 5 Packages'	    => 'stable/5',
 	    'Lifted CentOS 5 Packages'	    => 'lifted/5',
+	    'Unstable Custom CentOS 6 Packages' => 'unstable/6',
+	    'Custom CentOS 6 Packages'	    => 'stable/6',
 	    'Lifted CentOS 6 Packages'	    => 'lifted/6',
+	    'Unstable Custom CentOS 7 Packages' => 'unstable/7',
+	    'Custom CentOS 7 Packages'	    => 'stable/7',
+	    'Lifted CentOS 7 Packages'	    => 'lifted/7',
     }	
     repolist.each_pair do |desc, dir|
 	info "#{$verb} index for #{desc}\n"

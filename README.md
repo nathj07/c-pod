@@ -7,12 +7,24 @@ capabilities it becomes a _C-Pod_. When running on hardware capable of
 virtualization it facilitates the easy creation and access to Virtual Machines
 using KVM.
 
+There are two distinct types of C-Pod:
+
+* A Repository Host.
+    This uses webserver to host Kickstart scripts, Yum and Gem repositories, and Chef Solo recipes
+    Build using the recipe 'c-pod::repo_host'
+
+* A Virtual Machine Host.
+    This uses KVM to host Virtual Machines. Note that it needs a Repository Host to create the VM's
+    Build using the recipe 'c-pod::kvm_host'
+
+These two functions may be combined together. Build this using the default recipe 'c-pod'
+
 ## Overview
 
-It is designed to be used in two ways:
+This repository is designed to be used in two ways:
 
-* As a *C-Pod* - a webserver to serve up various content (including this
-  README!)
+* As the source of the content and code for a *C-Pod*:
+    * This [README](README.md)!
     * [Kickstart](/ks) definitions for automated installs of standard CentOS
       configurations
     * The [CentOS 5](/osdisks/centos5) and [CentOS 6](/osdisks/centos6)
@@ -22,6 +34,7 @@ It is designed to be used in two ways:
     * [Chef cookbooks](/chef/cookbooks) for use with `chef-solo`. This is a
       simple way to use Chef without the complexity of a `chef-server` and
 `knife` style installation.
+
 * As a repository within which to develop and test extensions to the system. To
   assist with this it contains:
     * A `bin` directory containing scripts useful in building and deploying
@@ -48,10 +61,13 @@ Firstly you'll need to install Git and Ruby, so begin by
 Then follow the steps to [install chef](#chef_install). Then use `chef-solo`
 with the runlist override and remote recipe URL parameters:
 
-    chef-solo -o recipe[c-pod::setup] -r http://<%= cgi.server_name %>/bin/recipes.cgi
+    chef-solo -o recipe[c-pod] -r http://<%= cgi.server_name %>/bin/recipes.cgi
 
 You may be prompted to confirm the RSA Key fingerprint of GitHub if this is the
 first time it has been accessed from this host. 
+
+Note that this installs a dual-function C-Pod as described above. Use the recipes
+'c-pod::repo_host' or 'c-pod::kvm_host' if required.
 
 ### From a cloned repository
 

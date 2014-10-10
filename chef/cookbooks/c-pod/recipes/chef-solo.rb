@@ -1,4 +1,5 @@
 # Setup Chef config files to configure a C-Pod from the local clone
+# This means that issuing the command 'chef-solo' will just work
 #
 
 directory "/etc/chef" do

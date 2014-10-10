@@ -3,14 +3,14 @@
 #
 [unstable]
 name=Unstable Custom RPMs for CentOS $releasever - $basearch
-baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/custom/$releasever/unstable/
+baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/unstable/$releasever/
 enabled=0
 gpgcheck=0
 priority=10
 
 [stable]
 name=Custom RPMs for CentOS $releasever - $basearch
-baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/custom/$releasever/stable/
+baseurl=http://<!--#echo var="SERVER_NAME" -->/yum_repos/stable/$releasever/
 enabled=1
 gpgcheck=0
 priority=20
