@@ -52,7 +52,7 @@ OptionParser.new do |o|
         opts.vg = n
     end
     o.on('--bridge BRIDGE', "Bridge device for networking (default #{opts.bridge})", "(Only used if name is an FQDN else the default network is used)") do |n|
-        opts.vg = n
+        opts.bridge = n
     end
     o.on('-v', '--verbose', "Enable console during build (default #{opts.verbose})") do |v|
         opts.verbose = true
