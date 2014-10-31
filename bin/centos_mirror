@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+#
+# Update a local copy of the main repo
+#
+require 'optparse'
+require 'ostruct'
+
+base = File.absolute_path('../..', File.dirname(__FILE__))
+opts = OpenStruct.new( mirror: 'rsync://repos.lax.quadranet.com/centos/' )
+
+if Process.euid == 0
+    puts "Hey - don't run this as root"
+    exit 2
+end
+
+OptionParser.new do |o|
+    o.banner = "usage: #{o.program_name} [options]"
+    o.separator "Update local Yum repository from CentOS mirror. Options:"
+
+    o.on_tail( '-?', '--help', 'Display this screen' ) do
+        STDERR.puts o
+        exit
+    end
+    o.on('-m', '--mirror MIRROR', String, "The remote mirror (default: #{opts.mirror})") do |m|
+	opts.mirror = m
+    end
+    begin
+        o.parse!
+        raise "You don't need arguments!" if ARGV.size > 0
+    rescue
+       STDERR.puts "Error: #{$!}"
+       STDERR.puts o
+       exit 1
+    end
+end
+
+rsync  = "rsync -avSHP --progress --delete"
+
+cmd = "#{rsync} #{opts.mirror}/6/updates/x86_64/ #{base}/osdisks/centos6/updates"
+puts cmd
+system cmd
+puts ($? != 0) ? "Failed": "Done"
+
+# vim: set sts=4 sw=4 ts=8:
