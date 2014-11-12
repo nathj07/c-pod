@@ -42,7 +42,7 @@ q.out 'text/plain' do
 	    if addr
 		opts[:bootproto] = 'static'
 		ipaddr = IPAddr.new addr
-		netmask = masks.find(['*','255.255.255.0']){|m| m[0].match addr }[1]
+		netmask = masks.find(->{['*','255.255.255.0']}){|m| m[0].match addr }[1]
 		gw = ipaddr.mask(netmask).succ
                 opts[:addr] = addr
                 opts[:netmask] = netmask
