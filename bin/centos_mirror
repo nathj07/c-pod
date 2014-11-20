@@ -4,9 +4,12 @@
 #
 require 'optparse'
 require 'ostruct'
+require 'fileutils'
 
 base = File.absolute_path('../..', File.dirname(__FILE__))
-opts = OpenStruct.new( mirror: 'rsync://repos.lax.quadranet.com/centos/' )
+typelist = [:isos, :os, :updates, :extras]
+versions = ['5','6','7']
+opts = OpenStruct.new( mirror: 'rsync://repos.lax.quadranet.com/centos', version: 6, types: [:os, :updates] )
 
 if Process.euid == 0
     puts "Hey - don't run this as root"
@@ -24,6 +27,17 @@ OptionParser.new do |o|
     o.on('-m', '--mirror MIRROR', String, "The remote mirror (default: #{opts.mirror})") do |m|
 	opts.mirror = m
     end
+    o.on('-v', '--version VERSION', versions, "The required CentOS version (#{versions} default: #{opts.version})") do |v|
+        opts.version = v
+    end
+    o.on('-t', '--types TYPES', Array, "Types to Sync (default: #{opts.types})") do |types|
+        badtypes = types.reject{|t| typelist.include? t.to_sym }
+        if badtypes.size > 0
+            puts "#{badtypes.join(', ')} not valid type(s)"
+            exit 2
+        end
+	opts.types = types.map(&:to_sym)
+    end
     begin
         o.parse!
         raise "You don't need arguments!" if ARGV.size > 0
@@ -36,9 +50,12 @@ end
 
 rsync  = "rsync -avSHP --progress --delete"
 
-cmd = "#{rsync} #{opts.mirror}/6/updates/x86_64/ #{base}/osdisks/centos6/updates"
-puts cmd
-system cmd
-puts ($? != 0) ? "Failed": "Done"
+opts.types.each do |type|
+    FileUtils.mkdir_p "#{base}/osmirror/centos/#{opts.version}/#{type}/x86_64"
+    cmd = "#{rsync} #{opts.mirror}/#{opts.version}/#{type}/x86_64/ #{base}/osmirror/centos/#{opts.version}/#{type}/x86_64"
+    puts cmd
+    system cmd
+    puts ($? != 0) ? "Failed": "Done"
+end
 
 # vim: set sts=4 sw=4 ts=8:

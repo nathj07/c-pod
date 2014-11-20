@@ -3,6 +3,10 @@
 # Download and mount the disk images
 # Create appropriate links
 #
+# TODO This approach is probably no longer optimal. Now that we've copied the CentOS mirror
+# structure (in osmirror/centos) we could simply rsync what we need. This approach does have
+# the advantage of 'version' fixing more easily.
+#
 require 'optparse'
 require 'fileutils'
 
@@ -55,12 +59,12 @@ versionset.keys.each do |version|
     end
     # Now make the consolidated distribution directories
 
-    targetdir = "#{base}/osdisks/centos#{version}"
+    targetdir = "#{base}/osmirror/centos/#{version}/os/#{arch}"
     FileUtils.mkdir_p targetdir
     versionset[version].keys.select{|k| k.is_a? Integer}.sort.each do |shortname|
 	name = versionset[version][shortname]
 	imagefile = "CentOS-#{version}-#{arch}-#{name}.iso"
-	srcdir = "#{base}/osdisks/centos#{version}-#{shortname}"
+	srcdir = "#{base}/osmirror/centos/#{version}-#{shortname}"
 	FileUtils.mkdir_p srcdir
 	`mount -o loop -t iso9660 #{base}/isos/#{imagefile} #{srcdir}`
 	cmd = "rsync -rlt #{targetdir}-#{shortname}/* #{targetdir}"
@@ -70,7 +74,7 @@ versionset.keys.each do |version|
 	`umount #{srcdir}`
 	FileUtils.rmdir srcdir
     end
-    FileUtils.cd "#{base}/osdisks"
+    FileUtils.cd "#{base}/osmirror/"
     FileUtils.ln_sf "centos#{version}", "centos#{major}"
 end
 

@@ -27,8 +27,7 @@ This repository is designed to be used in two ways:
     * This [README](README.md)!
     * [Kickstart](/ks) definitions for automated installs of standard CentOS
       configurations
-    * The [CentOS 5](/osdisks/centos5) and [CentOS 6](/osdisks/centos6)
-      distribution DVDs
+    * A Mirror of the [CentOS](#os_mirror) distributions
     * [YUM repositories](/yum_repos) for distributed, lifted and custom RPMs
     * A [GEM repository](/gem_repo/gems)
     * [Chef cookbooks](/chef/cookbooks) for use with `chef-solo`. This is a
@@ -67,7 +66,7 @@ You may be prompted to confirm the RSA Key fingerprint of GitHub if this is the
 first time it has been accessed from this host. 
 
 Note that this installs a dual-function C-Pod as described above. Use the recipes
-'c-pod::repo_host' or 'c-pod::kvm_host' if required.
+'c-pod::repo\_host' or 'c-pod::kvm\_host' if required.
 
 ### From a cloned repository
 
@@ -161,7 +160,7 @@ name or an mDNS name (ending in `.local`). If the name exists in the DNS system
 then the IP address will be configured, otherwise the network will use DHCP.
 
 ### Notes on VM types
-* Prefixes indicate the CentOS version: `c6` for CentOS 6, and `c5` for CentOS 5
+* Prefixes indicate the CentOS version: `centos6` for CentOS 6, and `centos5` for CentOS 5
 * Kickstart definitions are suffixed to denote Virtualization technology:
     * `-kvm` denotes KVM based Virtual Machines (and uses device `vda`)
     * `-vm` denotes VMware, uses device `sda` and include an installation of VMware tools
@@ -184,6 +183,29 @@ To restrict access to only these GEMs, Kickstart automatically creates
     gem: --no-document --source http://<%= cgi.server_name %>/gem_repo
 
 Alternatively you can [download them directly](/gems) and install locally.
+
+<a name="os_mirror"></a>
+## OS Mirror
+
+The C-Pod server contains mirrors of the distributions to allow easy install and update
+
+### CentOS 5
+
+* The [CentOS 5](/osmirror/centos/5/os/x86_64) distribution DVD
+* The current [updates](/osmirror/centos/5/updates)
+* [ISO Images](/osmirror/centos/5/isos/x86_64)
+
+### CentOS 6
+
+* The [CentOS 6](/osmirror/centos/6/os/x86_64) distribution DVD
+* The current [updates](/osmirror/centos/6/updates)
+* [ISO Images](/osmirror/centos/6/isos/x86_64)
+
+### CentOS 7
+
+* The [CentOS 7](/osmirror/centos/7/os/x86_64) distribution DVD
+* The current [updates](/osmirror/centos/7/updates)
+* [ISO Images](/osmirror/centos/7/isos/x86_64)
 
 <a name="yum_setup"></a>
 ## YUM Repositories
@@ -238,7 +260,7 @@ are used as part of the base Kickstart builds.
 *  CentOS Distribution
 
    To save bandwidth and speed-up networked installs the Distribution repositories
-are available.
+are available, both original and updates.
 
 ### Naming Conventions
 
@@ -249,19 +271,17 @@ correct place.
 
 The repo names are of the form:
 
-    OSNAME/$releasever/TYPE
+    TYPE/$releasever
 
 Where:
 
-* OSNAME is one of:
-    * 'lifted': Lifted contains packages from Epel and RPMforge that we use
-    * 'centos': A copy of the distributed packages
-    * 'custom' is used for our custom packages
+* TYPE is one of:
+    * 'lifted': Useful and required packages from Epel and RPMforge
+    * 'stable': Custom packages tested and 'in production'
+    * 'unstable': Custom packages under development/testing
 * $releasever is supplied by the OS: 6Server, 5Server (for RedHat), 5, 6 (for
   Centos) etc.
-* TYPE is only used for the 'custom' packages:
-    * 'stable': tested and 'in production'
-    * 'unstable': under development/testing
+
 
 ### Missing Packages
 
@@ -493,8 +513,11 @@ The large binary content required for OS installations are kept outside of the
 repository and accessed via symbolic links. These links are coded to link to
 immediate peer directories of the main repo with the same name: eg. the
 `www/downloads` directory is linked to `../downloads` relative to the repo.  You
-can create these links,  mount the images and create the osdisks using the
-`bin/mk_osimages` command.
+can create these links,  mount the images and create the OS mirror using the
+`bin/mk_osmirror` command.
+
+Alternatively you can create this tree from a mirror site using rsync. See the
+`bin/centos_mirror` script for ideas.
 
 The Gem and Yum repository trees are also held outside the repo, and populated
 manually. In other words you need to copy the `.rpm` and `.gem` files into the

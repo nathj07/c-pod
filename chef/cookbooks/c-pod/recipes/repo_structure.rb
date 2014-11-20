@@ -50,7 +50,7 @@ end
 
 # Setup the other directories
 #
-%w{ cookbooks downloads osdisks isos }.each do |dir|
+%w{ cookbooks downloads osmirror }.each do |dir|
     directory File.join(node[:cpod][:base], dir) do
         action  :create
         mode    02770

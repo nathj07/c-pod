@@ -20,7 +20,7 @@ user --disabled
 install
 #Use CDROM installation media
 #cdrom
-url --url http://<!--#echo var=SERVER_ADDR -->/osdisks/ubuntu14/ubuntu
+url --url http://<!--#echo var=SERVER_ADDR -->/osmirror/ubuntu/14/ubuntu
 
 network --device eth0 <!--#exec cgi="/bin/netcfg.centos.cgi" -->
 

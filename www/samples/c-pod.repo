@@ -3,7 +3,7 @@
 #
 [unstable]
 name=Unstable Custom RPMs for CentOS $releasever - $basearch
-baseurl=http://<!--#echo var="SERVER_ADDR" -->/yum_repos/unstable/$releasever
+baseurl=http://<!--#echo var="SERVER_ADDR" -->/yum_repos/unstable/$releasever/
 enabled=0
 gpgcheck=0
 priority=10
@@ -25,15 +25,15 @@ priority=30
 # Don't put a priority on this so it matches with standard OS repos
 # (which don't have a priority)
 [centos]
-name=CentOS $releasever Linux Distribution DVD - x86_64
-baseurl=http://<!--#echo var="SERVER_ADDR" -->/osdisks/centos$releasever
+name=CentOS $releasever Linux Distribution DVD - $basearch
+baseurl=http://<!--#echo var="SERVER_ADDR" -->/osmirror/centos/$releasever/os/$basearch/
 enabled=1
 gpgcheck=1
 gpgkey=http://<!--#echo var="SERVER_ADDR" -->/RPM-GPG-KEY-CentOS-$releasever
 
 [updates]
 name=CentOS $releasever Updates - x86_64
-baseurl=http://<!--#echo var="SERVER_ADDR" -->/osdisks/$releasever/updates
+baseurl=http://<!--#echo var="SERVER_ADDR" -->/osmirror/centos/$releasever/updates/$basearch/
 enabled=1
 gpgcheck=1
 gpgkey=http://<!--#echo var="SERVER_ADDR" -->/RPM-GPG-KEY-CentOS-$releasever
