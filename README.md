@@ -43,8 +43,17 @@ This repository is designed to be used in two ways:
 
 ## Use as a C-Pod Webserver
 
-C-Pod be used to configure itself with a simple bootstrapping operation in two
+C-Pod be used to configure itself with a simple bootstrapping operation in three
 ways:
+
+### Using Vagrant
+
+To create a repository host install Vagrant with a provider of your choice and
+execute:
+
+    vagrant up
+
+You may need to add `--provider=vmware_fusion`
 
 ### From an existing C-Pod
 

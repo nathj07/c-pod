@@ -1,0 +1,81 @@
+# Vagrantfile for a C-Pod repository
+#
+# The cloned images will be copied to the .vagrant directory by default
+# Set VAGRANT_VMWARE_CLONE_DIRECTORY if you want to put them somewhere to avoid backups
+#
+#
+Vagrant.configure("2") do |config|
+
+  config.vm.define "cpod"
+
+  # See https://docs.vagrantup.com/v2/vmware/boxes.html to create own box
+  #
+  boxes = %w{ chef/centos-6.5 chef/centos-7.0 hashicorp/precise64 chef/ubuntu-14.04 }
+  config.vm.box = 'nick/centos7'
+  config.vm.hostname = 'cpod.local'
+
+  config.vm.box_check_update = true
+  # config.vm.box_url = 
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+
+  # If true, then any SSH connections made will enable agent forwarding.
+  # Default value: false
+  # config.ssh.forward_agent = true
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  config.vm.provider "vmware_fusion" do |vm, override|
+    vm.gui = false
+    vm.vmx["memsize"] = "1024"
+    vm.vmx["numvcpus"] = "2"
+    # override.vm.box = "hashicorp/precise64_fusion"
+  end
+  #
+  # View the documentation for the provider you're using for more
+  # information on available options.
+
+  # Install Chef
+  config.omnibus.chef_version = "11.4.0"
+
+  config.vm.provision "chef_solo" do |chef|
+     chef.cookbooks_path = "chef/cookbooks"
+  #  chef.roles_path = "../my-recipes/roles"
+  #  chef.data_bags_path = "../my-recipes/data_bags"
+     chef.add_recipe "c-pod::repo_host"
+  #  chef.add_role "web"
+     chef.json = { cpod: { github_key: "#{`logname`.strip}" } }
+     chef.arguments = '--log_level=debug'
+  end
+
+=begin
+  config.vm.provision "shell",
+    inline: <<-INLINE
+      install -d -m 700 /root/.ssh
+      thisuser=#{`logname`}
+      wget -q -O /root/.ssh/authorized_keys https://github.com/$thisuser.keys
+      chmod 0600 /root/.ssh/authorized_keys
+      echo Installed ${thisuser}\\'s keys for root access
+      INLINE
+=end
+end
+
+# vi: set ft=ruby :

@@ -3,8 +3,10 @@
 cpod_user = node[:cpod][:owner_name]
 BASE=node[:cpod][:base]
 
+package 'git'
+
 git "#{BASE}/c-pod" do
-    repository "git@github.com:townsen/c-pod.git"
+    repository "https://github.com/townsen/c-pod.git"
     reference "master"
     action :checkout # don't sync - do this manually
     group cpod_user

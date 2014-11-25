@@ -2,6 +2,7 @@
 # This does not include the KVM virtualization component and SOCKS proxy
 # Use the recipe c-pod::kvm_host for that
 #
+
 case node[:platform_family]
 when 'rhel'
     include_recipe 'yum'
@@ -9,16 +10,31 @@ when 'rhel'
     package 'yum-utils'
     package 'bsdtar'
     package 'ruby'
-    node.default['apache']['version'] = case osver
-                                        when 5...7 then '2.2'
-                                        when 7...8 then '2.4'
-                                        end
+    package 'ruby-devel'
+    case osver
+    when 5...7
+        node.default['apache']['version'] = '2.2'
+        package 'avahi-daemon'
+    when 7...8 
+        node.default['apache']['version'] = '2.4'
+        package 'avahi'
+    end
+
 when 'debian'
     include_recipe 'apt'
+    package 'avahi-daemon'
     package 'createrepo'
     package 'yum-utils'
-    package 'ruby-dev'
-    node.default['apache']['version'] = '2.4'
+    case osver
+    when 10...14
+        node.default['apache']['version'] = '2.2'
+        package 'ruby1.9.3'
+        package 'ruby1.9.1-dev'
+    else
+        node.default['apache']['version'] = '2.4'
+        package 'ruby1.9.3'
+        package 'ruby1.9.1-dev'
+    end
 
 when 'mac_os_x'
     error "Not supported yet!"
@@ -42,7 +58,7 @@ end
 
 include_recipe 'c-pod::user'
 
-group node[:cpod][:owner_name] do
+resources(:group => node[:cpod][:owner_name]) do
   members node['apache']['user']
   append true
 end

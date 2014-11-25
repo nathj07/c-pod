@@ -41,6 +41,13 @@ end
 
 # Setup the GEM repository directories
 #
+directory File.join(base,'gem_repo') do
+    action  :create
+    mode    02770
+    owner   user
+    group   user
+end
+
 directory File.join(base,'gem_repo', 'gems') do
     action  :create
     mode    02770
