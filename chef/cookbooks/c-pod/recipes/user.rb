@@ -4,7 +4,7 @@
 #
 cpod_user = node[:cpod][:owner_name] or 'c-pod'
 
-BASE=node[:cpod][:base] or "/home/#{cpod_user}"
+basedir=node[:cpod][:base] or "/home/#{cpod_user}"
 
 group cpod_user do
   action :create
@@ -14,14 +14,14 @@ end
 user cpod_user do
   action    :create
   comment   "C-Pod owner"
-  home	    BASE
+  home	    basedir
   gid node[:cpod][:owner_id]
   uid node[:cpod][:owner_id]
   password 'c-pod' unless node[:cpod][:ssh_key]
   supports :manage_home => false
 end
 
-directory BASE do
+directory basedir do
     owner cpod_user
     group cpod_user
     # Permissions:
@@ -30,14 +30,14 @@ directory BASE do
     mode 02755
 end
 
-cookbook_file "#{BASE}/README" do
+cookbook_file "#{basedir}/README" do
     source  'README.data'
     mode    0644
     owner   cpod_user
     group   cpod_user
 end
 
-template "#{BASE}/.gitconfig" do
+template "#{basedir}/.gitconfig" do
     action  :create
     source  'gitconfig.erb'
     mode    0664
@@ -48,7 +48,7 @@ template "#{BASE}/.gitconfig" do
     )
 end
 
-directory "#{BASE}/.ssh" do
+directory "#{basedir}/.ssh" do
     owner cpod_user
     group cpod_user
     mode 0750
