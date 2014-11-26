@@ -9,7 +9,7 @@
 	url = https://github.com/opscode-cookbooks/yum.git
 [submodule "chef/cookbooks/apache2"]
 	path = chef/cookbooks/apache2
-	url = git@github.com:townsen/apache2.git
+	url = git@github.com:viverae-cookbooks/apache2.git
 [submodule "chef/cookbooks/ulimit"]
 	path = chef/cookbooks/ulimit
 	url = https://github.com/bmhatfield/chef-ulimit
