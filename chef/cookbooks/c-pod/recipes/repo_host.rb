@@ -58,10 +58,9 @@ end
 
 include_recipe 'c-pod::user'
 
-resources(:group => node[:cpod][:owner_name]) do
-  members node['apache']['user']
-  append true
-end
+g = resources("group[#{node[:cpod][:owner_name]}]")
+g.members node['apache']['user']
+g.append true
 
 include_recipe 'c-pod::devtools'
 
