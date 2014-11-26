@@ -54,7 +54,17 @@ Vagrant.configure("2") do |config|
   # information on available options.
 
   # Install Chef
-  config.omnibus.chef_version = "11.4.0"
+  config.omnibus.chef_version = :latest # "11.4.0"
+
+  if (keys = File.open("#{ENV['HOME']}/.ssh/authorized_keys", &:read) rescue nil)
+    config.vm.provision "shell",
+      inline: <<-INLINE
+        install -d -m 700 /root/.ssh
+        echo "#{keys}" > /root/.ssh/authorized_keys
+        chmod 0600 /root/.ssh/authorized_keys
+        echo Installed your authorized keys for root access
+        INLINE
+  end
 
   config.vm.provision "chef_solo" do |chef|
      chef.cookbooks_path = "chef/cookbooks"
@@ -66,16 +76,6 @@ Vagrant.configure("2") do |config|
      chef.arguments = '--log_level=debug'
   end
 
-=begin
-  config.vm.provision "shell",
-    inline: <<-INLINE
-      install -d -m 700 /root/.ssh
-      thisuser=#{`logname`}
-      wget -q -O /root/.ssh/authorized_keys https://github.com/$thisuser.keys
-      chmod 0600 /root/.ssh/authorized_keys
-      echo Installed ${thisuser}\\'s keys for root access
-      INLINE
-=end
 end
 
 # vi: set ft=ruby :
