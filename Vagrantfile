@@ -55,6 +55,7 @@ Vagrant.configure("2") do |config|
   # Configure the C-Pod via Chef JSON attributes
   #
   cpod_config = { cpod: {} }
+  cpod_config[:cpod][:owner_name] = 'vagrant'
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
@@ -63,7 +64,7 @@ Vagrant.configure("2") do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
   #
   if Dir.exist? "../c-pod_data"
-    config.vm.synced_folder "../c-pod_data", "/cpoddata", group: 'c-pod', owner: 'c-pod'
+    config.vm.synced_folder "../c-pod_data", "/cpoddata"
     cpod_config[:cpod][:datadir] = "/cpoddata"
   end
   require 'open-uri'

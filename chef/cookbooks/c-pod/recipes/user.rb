@@ -8,15 +8,11 @@ basedir=node[:cpod][:base] or "/home/#{cpod_user}"
 
 group cpod_user do
   action :create
-  gid node[:cpod][:owner_id]
 end
 
 user cpod_user do
   action    :create
   comment   "C-Pod owner"
-  home	    basedir
-  gid node[:cpod][:owner_id]
-  uid node[:cpod][:owner_id]
   password 'c-pod' unless node[:cpod][:ssh_key]
   supports :manage_home => false
 end
