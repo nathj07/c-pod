@@ -10,8 +10,13 @@ Vagrant.configure("2") do |config|
 
   # See https://docs.vagrantup.com/v2/vmware/boxes.html to create own box
   #
-  boxes = %w{ chef/centos-6.5 chef/centos-7.0 hashicorp/precise64 chef/ubuntu-14.04 }
-  config.vm.box = 'nick/centos7'
+  boxes = { c6: 'chef/centos-6.5', 
+            c7: 'chef/centos-7.0', 
+            u14: 'chef/ubuntu-14.04',
+            p14: 'phusion/ubuntu-14.04-amd64',
+            n7: 'nick/centos7'
+          }
+  config.vm.box = boxes[:p14]
   config.vm.hostname = 'cpod.local'
 
   config.vm.box_check_update = true
@@ -43,11 +48,11 @@ Vagrant.configure("2") do |config|
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
+  # use 'override' as a config variable to override it
   config.vm.provider "vmware_fusion" do |vm, override|
     vm.gui = false
     vm.vmx["memsize"] = "1024"
     vm.vmx["numvcpus"] = "2"
-    # override.vm.box = "hashicorp/precise64_fusion"
   end
   #
   # View the documentation for the provider you're using for more
@@ -73,7 +78,7 @@ Vagrant.configure("2") do |config|
      chef.add_recipe "c-pod::repo_host"
   #  chef.add_role "web"
      chef.json = { cpod: { github_key: "#{`logname`.strip}" } }
-     chef.arguments = '--log_level=debug'
+  #  chef.arguments = '--log_level=debug'
   end
 
 end
