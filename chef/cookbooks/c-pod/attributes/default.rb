@@ -9,5 +9,5 @@ default[:cpod][:base] = case node[:platform_family]
 default[:cpod][:datadir] = File.join(node[:cpod][:base],'repo')
 default[:cpod][:owner_name] = 'c-pod'
 default[:cpod][:owner_id]   = 606
-default[:cpod][:github_key] = 'townsen' # User to give public key access
-default[:cpod][:admin_email] = 'nick.townsend@mac.com'
+default[:cpod][:ssh_key] = nil
+default[:cpod][:admin_email] = 'someone.else@here.com'

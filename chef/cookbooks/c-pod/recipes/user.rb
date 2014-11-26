@@ -17,6 +17,7 @@ user cpod_user do
   home	    BASE
   gid node[:cpod][:owner_id]
   uid node[:cpod][:owner_id]
+  password 'c-pod' unless node[:cpod][:ssh_key]
   supports :manage_home => false
 end
 
@@ -53,9 +54,10 @@ directory "#{BASE}/.ssh" do
     mode 0750
 end
 
-remote_file "#{BASE}/.ssh/authorized_keys" do
+file "#{basedir}/.ssh/authorized_keys" do
     action  :create_if_missing
-    source "https://github.com/#{node[:cpod][:github_key]}.keys"
+    only_if { node[:cpod][:ssh_key] }
+    content node[:cpod][:ssh_key]
     mode    0644
     owner   cpod_user
     group   cpod_user
