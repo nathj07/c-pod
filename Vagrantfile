@@ -13,14 +13,13 @@ Vagrant.configure("2") do |config|
   boxes = { c6: 'chef/centos-6.5', 
             c7: 'chef/centos-7.0', 
             u14: 'chef/ubuntu-14.04',
-            p14: 'phusion/ubuntu-14.04-amd64',
+            p14: 'phusion/ubuntu-14.04-amd64', # tested OK 26/11/2014
             n7: 'nick/centos7'
           }
   config.vm.box = boxes[:p14]
-  config.vm.hostname = 'cpod.local'
-
   config.vm.box_check_update = true
-  # config.vm.box_url = 
+
+  config.vm.hostname = 'cpod.local'
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -40,15 +39,7 @@ Vagrant.configure("2") do |config|
   # Default value: false
   # config.ssh.forward_agent = true
 
-  # Share an additional folder to the guest VM. The first argument is
-  # the path on the host to the actual folder. The second argument is
-  # the path on the guest to mount the folder. And the optional third
-  # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
-
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # use 'override' as a config variable to override it
+  # Use 'override' to override the 'config' variable
   config.vm.provider "vmware_fusion" do |vm, override|
     vm.gui = false
     vm.vmx["memsize"] = "1024"
@@ -61,6 +52,25 @@ Vagrant.configure("2") do |config|
   # Install Chef
   config.omnibus.chef_version = :latest # "11.4.0"
 
+  # Configure the C-Pod via Chef JSON attributes
+  #
+  cpod_config = { cpod: {} }
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+  #
+  if Dir.exist? "../c-pod_data"
+    config.vm.synced_folder "../c-pod_data", "/cpoddata", group: 'c-pod', owner: 'c-pod'
+    cpod_config[:cpod][:datadir] = "/cpoddata"
+  end
+  require 'open-uri'
+  if (userkey = File.open("https://github.com/#{`logname`.strip}", &:read) rescue nil)
+     cpod_config[:cpod][:ssh_key] = userkey
+  end
+  #
   if (keys = File.open("#{ENV['HOME']}/.ssh/authorized_keys", &:read) rescue nil)
     config.vm.provision "shell",
       inline: <<-INLINE
@@ -73,14 +83,11 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "chef_solo" do |chef|
      chef.cookbooks_path = "chef/cookbooks"
-  #  chef.roles_path = "../my-recipes/roles"
-  #  chef.data_bags_path = "../my-recipes/data_bags"
      chef.add_recipe "c-pod::repo_host"
-  #  chef.add_role "web"
-     chef.json = { cpod: { github_key: "#{`logname`.strip}" } }
+     chef.json = cpod_config
   #  chef.arguments = '--log_level=debug'
   end
 
 end
 
-# vi: set ft=ruby :
+# vim: ft=ruby sts=2 sw=2 ts=8

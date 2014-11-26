@@ -1,24 +1,25 @@
 # Setup the filesystem structure for a C-Pod Repository webserver
 #
-base = node[:cpod][:base]
+datadir = node[:cpod][:datadir]
+basedir = node[:cpod][:base]
 user = node[:cpod][:owner_name]
 
 # Setup the YUM repository directories
 #
 %w{ yum_repos}.each do |a|
-    directory File.join(base,a) do
+    directory File.join(datadir,a) do
         mode    02770
         owner   user
         group   user
     end
     %w{ lifted stable unstable }.each do |b|
-        directory File.join(base,a,b) do
+        directory File.join(datadir,a,b) do
             mode    02770
             owner   user
             group   user
         end
         %w{ 5 6 7 }.each do |c|
-            dir = File.join(base,a,b,c)
+            dir = File.join(datadir,a,b,c)
             directory dir do
                 mode    02770
                 owner   user
@@ -41,14 +42,14 @@ end
 
 # Setup the GEM repository directories
 #
-directory File.join(base,'gem_repo') do
+directory File.join(datadir,'gem_repo') do
     action  :create
     mode    02770
     owner   user
     group   user
 end
 
-directory File.join(base,'gem_repo', 'gems') do
+directory File.join(datadir,'gem_repo', 'gems') do
     action  :create
     mode    02770
     owner   user
@@ -58,7 +59,7 @@ end
 # Setup the other directories
 #
 %w{ cookbooks downloads osmirror }.each do |dir|
-    directory File.join(node[:cpod][:base], dir) do
+    directory File.join(node[:cpod][:datadir], dir) do
         action  :create
         mode    02770
         owner   node[:cpod][:owner_name]
@@ -66,18 +67,15 @@ end
     end
 end
 
-=begin
-execute "set ownership" do
-    command "chown -R #{user}.#{user} #{base}"
+# Setup the links
+#
+%w{ downloads gem_repo isos osmirror yum_repos }.each do |dir|
+    link "#{basedir}/c-pod/www/#{dir}" do
+        to  "#{datadir}/#{dir}"
+    end
 end
-execute "set group write" do
-    command "chmod -R g+rw #{base}/*"
+link "#{basedir}/c-pod/www/gems" do
+    to  "#{datadir}/gem_repo/gems"
 end
-execute "set sticky on yum_repos" do
-    command "find #{base}/yum_repos -type d -exec chmod 2770 {} \\;"
-end
-execute "set u=rw,g=rw on yum_repos" do
-    command "find #{base}/yum_repos -type f -exec chmod 660 {} \\;"
-end
-=end
+
 # vim: sts=4 sw=4 ts=8

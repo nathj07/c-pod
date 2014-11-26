@@ -1,0 +1,6 @@
+# Ignore these symlinks added at deploy time
+downloads
+gem_repo
+gems
+osmirror
+yum_repos

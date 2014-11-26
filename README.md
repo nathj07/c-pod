@@ -30,7 +30,7 @@ This repository is designed to be used in two ways:
     * A Mirror of the [CentOS](#os_mirror) distributions
     * [YUM repositories](/yum_repos) for distributed, lifted and custom RPMs
     * A [GEM repository](/gem_repo/gems)
-    * [Chef cookbooks](/chef/cookbooks) for use with `chef-solo`. This is a
+    * Chef cookbooks for use with `chef-solo`. This is a
       simple way to use Chef without the complexity of a `chef-server` and
 `knife` style installation.
 
