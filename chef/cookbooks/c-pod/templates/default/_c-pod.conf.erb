@@ -41,7 +41,6 @@ ServerName <%= node[:cpod][:server_name] %>
 
     ScriptAlias /bin "<%= node[:cpod][:base] %>/c-pod/bin"
 
-    ServerAdmin <%= node[:cpod][:admin_email] %>
     IndexIgnore .htaccess *.bak *~ RCS
     DocumentRoot <%= node[:cpod][:base] %>/c-pod/www
     ErrorLog <%= node['apache']['log_dir'] %>/c-pod_error_log
