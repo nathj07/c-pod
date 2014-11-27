@@ -4,6 +4,12 @@ datadir = node[:cpod][:datadir]
 basedir = node[:cpod][:base]
 user = node[:cpod][:owner_name]
 
+directory datadir do
+    mode    02770
+    owner   user
+    group   user
+end
+
 # Setup the YUM repository directories
 #
 %w{ yum_repos}.each do |a|
