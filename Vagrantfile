@@ -10,12 +10,14 @@ Vagrant.configure("2") do |config|
 
   # See https://docs.vagrantup.com/v2/vmware/boxes.html to create own box
   #
-  boxes = { c6: 'chef/centos-6.5', # Can't find bsdtar
-            c7: 'chef/centos-7.0', # Broken as at 26/11/14: waits for HGFS to load
-            u14: 'chef/ubuntu-14.04',
-            p14: 'phusion/ubuntu-14.04-amd64', # tested OK 26/11/2014, required apache restart
-            n7: 'nick/centos7'
-          }
+  boxes = { 
+    c6:   'chef/centos-6.5', # Can't find bsdtar
+    c7:   'chef/centos-7.0', # Broken as at 26/11/14: waits for HGFS to load
+    u14:  'chef/ubuntu-14.04',
+    p14:  'phusion/ubuntu-14.04-amd64', # tested OK 26/11/2014, required apache restart
+    n14:  'nick/ubuntu14',
+    n7:   'nick/centos7' # Working!
+  }
   config.vm.box = boxes[:n7]
   config.vm.box_check_update = true
 
@@ -35,15 +37,13 @@ Vagrant.configure("2") do |config|
   # your network.
   # config.vm.network "public_network"
 
-  # If true, then any SSH connections made will enable agent forwarding.
-  # Default value: false
-  # config.ssh.forward_agent = true
+  config.ssh.forward_agent = true
 
   # Use 'override' to override the 'config' variable
   config.vm.provider "vmware_fusion" do |vm, override|
     vm.gui = false
-    vm.vmx["memsize"] = "1024"
-    vm.vmx["numvcpus"] = "2"
+    vm.vmx["memsize"] = "512"
+    vm.vmx["numvcpus"] = "1"
   end
   #
   # View the documentation for the provider you're using for more
