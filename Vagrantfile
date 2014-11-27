@@ -10,13 +10,13 @@ Vagrant.configure("2") do |config|
 
   # See https://docs.vagrantup.com/v2/vmware/boxes.html to create own box
   #
-  boxes = { c6: 'chef/centos-6.5', 
-            c7: 'chef/centos-7.0', 
+  boxes = { c6: 'chef/centos-6.5', # Can't find bsdtar
+            c7: 'chef/centos-7.0', # Broken as at 26/11/14: waits for HGFS to load
             u14: 'chef/ubuntu-14.04',
-            p14: 'phusion/ubuntu-14.04-amd64', # tested OK 26/11/2014
+            p14: 'phusion/ubuntu-14.04-amd64', # tested OK 26/11/2014, required apache restart
             n7: 'nick/centos7'
           }
-  config.vm.box = boxes[:p14]
+  config.vm.box = boxes[:n7]
   config.vm.box_check_update = true
 
   config.vm.hostname = 'cpod.local'
