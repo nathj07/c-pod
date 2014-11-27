@@ -18,6 +18,8 @@ when 'rhel'
     when 7...8 
         node.default['apache']['version'] = '2.4'
         package 'avahi'
+    else
+        error "CentOS #{osver} is not supported yet!"
     end
 
 when 'debian'
@@ -30,10 +32,16 @@ when 'debian'
         node.default['apache']['version'] = '2.2'
         package 'ruby1.9.3'
         package 'ruby1.9.1-dev'
-    else
+    when 14.04
         node.default['apache']['version'] = '2.4'
         package 'ruby1.9.3'
         package 'ruby1.9.1-dev'
+    when 14.10
+        node.default['apache']['version'] = '2.4'
+        package 'ruby2.1'
+        package 'ruby2.1-dev'
+    else
+        error "Ubuntu #{osver} is not supported yet!"
     end
 
 when 'mac_os_x'
