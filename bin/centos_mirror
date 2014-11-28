@@ -6,10 +6,12 @@ require 'optparse'
 require 'ostruct'
 require 'fileutils'
 
-base = File.absolute_path('../..', File.dirname(__FILE__))
 typelist = [:isos, :os, :updates, :extras]
 versions = ['5','6','7']
-opts = OpenStruct.new( mirror: 'rsync://repos.lax.quadranet.com/centos', version: 6, types: [:os, :updates] )
+opts = OpenStruct.new(mirror: 'rsync://repos.lax.quadranet.com/centos',
+                      version: 6, types: [:updates],
+                      base: File.absolute_path('../../cpoddata', File.dirname(__FILE__))
+                     )
 
 if Process.euid == 0
     puts "Hey - don't run this as root"
@@ -24,11 +26,14 @@ OptionParser.new do |o|
         STDERR.puts o
         exit
     end
-    o.on('-m', '--mirror MIRROR', String, "The remote mirror (default: #{opts.mirror})") do |m|
+    o.on('-m', '--mirror MIRROR', "Remote mirror (default: #{opts.mirror})") do |m|
 	opts.mirror = m
     end
-    o.on('-v', '--version VERSION', versions, "The required CentOS version (#{versions} default: #{opts.version})") do |v|
+    o.on('-v', '--version VERSION', versions, "CentOS version (#{versions} default: #{opts.version})") do |v|
         opts.version = v
+    end
+    o.on('-b', '--base BASEDIR', "Local mirror directory (default #{opts.base})") do |b|
+        opts.base = b
     end
     o.on('-t', '--types TYPES', Array, "Types to Sync (default: #{opts.types})") do |types|
         badtypes = types.reject{|t| typelist.include? t.to_sym }
@@ -40,6 +45,7 @@ OptionParser.new do |o|
     end
     begin
         o.parse!
+        raise "Base directory doesn't contain 'osmirror'" unless Dir.exist? "#{opts.base}/osmirror"
         raise "You don't need arguments!" if ARGV.size > 0
     rescue
        STDERR.puts "Error: #{$!}"
@@ -51,8 +57,8 @@ end
 rsync  = "rsync -avSHP --progress --delete"
 
 opts.types.each do |type|
-    FileUtils.mkdir_p "#{base}/osmirror/centos/#{opts.version}/#{type}/x86_64"
-    cmd = "#{rsync} #{opts.mirror}/#{opts.version}/#{type}/x86_64/ #{base}/osmirror/centos/#{opts.version}/#{type}/x86_64"
+    FileUtils.mkdir_p "#{opts.base}/osmirror/centos/#{opts.version}/#{type}/x86_64"
+    cmd = "#{rsync} #{opts.mirror}/#{opts.version}/#{type}/x86_64/ #{opts.base}/osmirror/centos/#{opts.version}/#{type}/x86_64"
     puts cmd
     system cmd
     puts ($? != 0) ? "Failed": "Done"

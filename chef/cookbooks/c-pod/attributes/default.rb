@@ -6,5 +6,5 @@ default[:cpod][:base] = case node[:platform_family]
 			     when 'debian' then '/srv'
 			     else error "Not supported"
 			     end
-default[:cpod][:datadir] = File.join(node[:cpod][:base],'repo')
+default[:cpod][:datadir] = File.join(node[:cpod][:base],'cpoddata')
 default[:cpod][:owner_name] = 'c-pod'

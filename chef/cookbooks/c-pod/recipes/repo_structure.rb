@@ -26,7 +26,7 @@ end
 
 # Setup the links
 #
-%w{ downloads gem_repo isos osmirror yum_repos }.each do |dir|
+%w{ downloads gem_repo osmirror yum_repos }.each do |dir|
     link "#{basedir}/c-pod/www/#{dir}" do
         to  "#{datadir}/#{dir}"
     end

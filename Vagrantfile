@@ -29,14 +29,14 @@ Vagrant.configure("2") do |config|
 
   # Mount the data if it exists, otherwise it will be created in the VM
   #
-  if Dir.exist? "../c-pod_data"
-    config.vm.synced_folder "../c-pod_data", "/cpoddata"
+  if Dir.exist? "../cpoddata"
+    config.vm.synced_folder "../cpoddata", "/cpoddata"
     cpod_config[:cpod][:datadir] = "/cpoddata"
   end
 
   config.vm.hostname = cpod_config[:cpod][:server_name]
 
-  # config.vm.network "public_network"
+  config.vm.network "public_network"
 
   config.ssh.forward_agent = true
 
