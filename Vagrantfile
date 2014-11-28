@@ -15,10 +15,10 @@ Vagrant.configure("2") do |config|
     c7:   'chef/centos-7.0', # Broken as at 26/11/14: waits for HGFS to load
     u14:  'chef/ubuntu-14.04',
     p14:  'phusion/ubuntu-14.04-amd64', # tested OK 26/11/2014, required apache restart
-    n14:  'nick/ubuntu14',
-    n7:   'nick/centos7' # Working!
+    n7:   'nick/centos7',   # Installs but public_network requires manual intervention
+    n14:  'nick/ubuntu14'   # Working!
   }
-  config.vm.box = boxes[:n7]
+  config.vm.box = boxes[:n14]
   config.vm.box_check_update = true
 
   # Configure the C-Pod via Chef JSON attributes

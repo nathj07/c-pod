@@ -69,6 +69,7 @@ include_recipe 'c-pod::user'
 g = resources("group[#{node[:cpod][:owner_name]}]")
 g.members node['apache']['user']
 g.append true
+g.notifies :restart, "service[apache2]", :immediate
 
 include_recipe 'c-pod::devtools'
 
