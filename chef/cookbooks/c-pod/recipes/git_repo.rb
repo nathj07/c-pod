@@ -8,6 +8,7 @@ package 'git'
 git "#{basedir}/c-pod" do
     repository "https://github.com/townsen/c-pod.git"
     reference "master"
+    enable_submodules true
     action :checkout # don't sync - do this manually
     group cpod_user
     notifies :run, "execute[repo_permissions]", :immediate

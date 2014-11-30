@@ -26,6 +26,7 @@ when 'debian'
     include_recipe 'apt'
     package 'avahi-daemon'
     package 'createrepo'
+    package 'bsdtar'
     package 'yum-utils'
     case osver
     when 10...14
