@@ -1,0 +1,1 @@
+{ "cpod": { "server_name": "<!--#echo var="SERVER_NAME" -->" } }
