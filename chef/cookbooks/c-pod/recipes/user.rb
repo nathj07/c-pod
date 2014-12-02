@@ -10,6 +10,7 @@ user cpod_user do
   action    :create
   comment   "C-Pod owner"
   supports  :manage_home => false
+  gid       cpod_user
 end
 
 # vim: sts=4 sw=4 ts=8

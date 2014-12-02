@@ -6,6 +6,7 @@
 case node[:platform_family]
 when 'rhel'
     include_recipe 'yum'
+    package 'avahi'
     package 'createrepo'
     package 'yum-utils'
     package 'bsdtar'
@@ -14,10 +15,8 @@ when 'rhel'
     case osver
     when 5...7
         node.default['apache']['version'] = '2.2'
-        package 'avahi-daemon'
     when 7...8 
         node.default['apache']['version'] = '2.4'
-        package 'avahi'
     else
         error "CentOS #{osver} is not supported yet!"
     end
