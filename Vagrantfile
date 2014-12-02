@@ -21,8 +21,8 @@ Vagrant.configure("2") do |config|
   # Mount the data if it exists, otherwise it will be created in the VM
   #
   if Dir.exist? "../cpoddata"
-    config.vm.synced_folder "../cpoddata", "/cpoddata"
-    cpod_config[:cpod][:datadir] = "/cpoddata"
+    cpod_config[:cpod][:datadir] = "/srv/cpoddata"
+    config.vm.synced_folder "../cpoddata", cpod_config[:cpod][:datadir]
   end
 
   config.vm.hostname = cpod_config[:cpod][:server_name]
