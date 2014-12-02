@@ -38,5 +38,8 @@ sass-cache
 # (the default is c-pod.pac)
 www/cpod.pac
 
+# Ignore installation JSON
+www/cpod.json
+
 # Ignore custom netmasks
 bin/netmask_table

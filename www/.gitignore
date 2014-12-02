@@ -1,4 +1,5 @@
 # Ignore these symlinks added at deploy time
+cookbooks
 downloads
 gem_repo
 gems

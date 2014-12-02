@@ -1,5 +1,7 @@
 # Setup the filesystem structure for a C-Pod Repository webserver
 #
+require 'json'
+
 datadir = node[:cpod][:datadir]
 repodir = node[:cpod][:repodir]
 user    = node[:cpod][:owner_name]
@@ -46,8 +48,27 @@ end
         to  "#{datadir}/#{dir}"
     end
 end
+
 link "#{repodir}/www/gems" do
     to  "#{datadir}/gem_repo/gems"
+end
+
+link "#{repodir}/bin/netmask_table" do
+    to  "#{datadir}/netmask_table"
+end
+
+link "#{repodir}/www/cpod.pac" do
+    to  "#{datadir}/cpod.pac"
+end
+
+file "#{datadir}/cpod.json" do
+    content node[:cpod].to_hash.to_json # this only gets one level! CHEF-3857
+    mode    0664
+    group   node[:cpod][:owner_name]
+end
+
+link "#{repodir}/www/cpod.json" do
+    to  "#{datadir}/cpod.json"
 end
 
 datalink = File.absolute_path("../cpoddata", repodir)

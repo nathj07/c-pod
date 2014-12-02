@@ -7,7 +7,7 @@ directory "/etc/chef" do
     group   node[:cpod][:owner_name]
 end
 
-template "/etc/chef/c-pod.json" do
+template "/etc/chef/cpod.json" do
     mode    0664
     group   node[:cpod][:owner_name]
 end

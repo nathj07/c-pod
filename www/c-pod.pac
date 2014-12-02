@@ -1,4 +1,7 @@
-/* Configure this in your Network preferences
+/* This file is a sample. To make site customizations copy this
+ * to 'cpod.pac' which is gitignored.
+ * Configure this in your Browser Network preferences to obtain
+ * access to webservers within a C-Pod
  * Note:
  *  SOCKS5 works for Chrome (with FoxyProxy) and Firefox
  *  SOCKS fallback works for Safari (tested under Mavericks)
