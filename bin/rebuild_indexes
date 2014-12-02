@@ -38,10 +38,10 @@ end
 ENV['PATH'] ="/usr/local/bin:#{ENV['PATH']}"
 
 puts "Running Incremental Build - Use -f if you want to force rebuild" unless $force
-base = File.absolute_path('../..', File.dirname(__FILE__))
+data = File.absolute_path('../../cpoddata', File.dirname(__FILE__))
 
 if $types.include? :yum
-    FileUtils.cd "#{base}/yum_repos"
+    FileUtils.cd "#{data}/yum_repos"
     repolist = { 
 	    'Unstable Custom CentOS 5 Packages' => 'unstable/5',
 	    'Custom CentOS 5 Packages'	    => 'stable/5',
@@ -65,7 +65,7 @@ if $types.include? :yum
     end
 end
 if $types.include? :gem
-    FileUtils.cd "#{base}/gem_repo"
+    FileUtils.cd "#{data}/gem_repo"
     info "#{$verb} Custom Gem Index\n"
     flags = []
     flags << $force ? "": "--update"

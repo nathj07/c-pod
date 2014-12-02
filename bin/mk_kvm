@@ -89,7 +89,7 @@ if opts.repo.end_with? '.local' # Convert to IP address
     end
 end
 
-base = File.absolute_path('../..', File.dirname(__FILE__))
+data = File.absolute_path('../../cpoddata', File.dirname(__FILE__))
 
 ARGV.each do |fqdn|
   unless fqdn.index '.'
@@ -139,7 +139,7 @@ ARGV.each do |fqdn|
     boot = "--location http://#{opts.repo}/osmirror/#{opts.type}"
   when :ubuntu14
     variant = ''
-    iso = "#{base}/isos/ubuntu-14.04-server-amd64.iso"
+    iso = "#{data}/osmirror/ubuntu/14/isos/ubuntu-14.10-server-amd64.iso"
     extra_args="auto=true hostname=#{fqdn} priority=critical url=http://#{opts.repo}/ks/./#{opts.type}.seed?host=#{fqdn}"
     #extra_args="ks=http://#{opts.repo}/ks/#{opts.type}.ks?host=#{fqdn}"
     boot = "--location http://#{opts.repo}/osmirror/#{opts.type}"

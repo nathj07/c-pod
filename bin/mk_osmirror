@@ -11,7 +11,7 @@ require 'optparse'
 require 'fileutils'
 
 File.umask(0002)
-base = File.absolute_path('../..', File.dirname(__FILE__))
+data = File.absolute_path('../../cpoddata', File.dirname(__FILE__))
 arch = 'x86_64'
 mirror='http://centos.mirror.freedomvoice.com'
 force = false
@@ -51,7 +51,7 @@ versionset.keys.each do |version|
     major = version.to_i
     versionset[version].each do |shortname,name|
 	imagefile = "CentOS-#{version}-#{arch}-#{name}.iso"
-	FileUtils.cd "#{base}/isos"
+	FileUtils.cd "#{data}/osmirror/centos/#{major}/isos/#{arch}"
 	unless File.exist? imagefile
 		puts "Downloading #{imagefile}..."
 		`curl -O -# #{mirror}/#{version}/isos/#{arch}/#{imagefile}`
@@ -59,7 +59,7 @@ versionset.keys.each do |version|
     end
     # Now make the consolidated distribution directories
 
-    targetdir = "#{base}/osmirror/centos/#{version}/os/#{arch}"
+    targetdir = "#{data}/osmirror/centos/#{version}/os/#{arch}"
     FileUtils.mkdir_p targetdir
     versionset[version].keys.select{|k| k.is_a? Integer}.sort.each do |shortname|
 	name = versionset[version][shortname]
@@ -74,7 +74,7 @@ versionset.keys.each do |version|
 	`umount #{srcdir}`
 	FileUtils.rmdir srcdir
     end
-    FileUtils.cd "#{base}/osmirror/"
+    FileUtils.cd "#{data}/osmirror/"
     FileUtils.ln_sf "centos#{version}", "centos#{major}"
 end
 

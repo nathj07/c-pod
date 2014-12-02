@@ -5,19 +5,19 @@
 require 'fileutils'
 require 'find'
 
-base = ARGV[0] || File.absolute_path('../..', File.dirname(__FILE__))
+data = ARGV[0] || File.absolute_path('../../cpoddata', File.dirname(__FILE__))
 
-unless File.directory? "#{base}/yum_repos"
-    puts "Can't find a yum_repos directory at #{base}, supply base as parameter"
+unless File.directory? "#{data}/yum_repos"
+    puts "Can't find a yum_repos directory at #{data}, supply base as parameter"
     exit 2
 end
 
 count = 0
-Find.find("#{base}/yum_repos/custom") do |path|
+Find.find("#{data}/yum_repos/custom") do |path|
     next unless path.end_with?('.rpm')
     bits = path.split('/')
     bits.shift 4
-    FileUtils.mv path, "#{base}/yum_repos/#{bits[1]}/#{bits[0]}/#{bits[2]}/"
+    FileUtils.mv path, "#{data}/yum_repos/#{bits[1]}/#{bits[0]}/#{bits[2]}/"
     count += 1
 end
 puts "#{count} RPMs were moved"

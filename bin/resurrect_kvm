@@ -53,8 +53,6 @@ OptionParser.new do |o|
     end
 end
 
-base = File.absolute_path('../..', File.dirname(__FILE__))
-
 ARGV.each do |name|
   status = `virsh domstate #{name} 2>/dev/null`.strip
   if $? == 0

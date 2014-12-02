@@ -10,7 +10,7 @@ require_relative 'funcs.rb'
 
 File.umask(0002)
 $repo = File.absolute_path('..', File.dirname(__FILE__))
-$base = File.absolute_path('../..', File.dirname(__FILE__))
+$data = File.absolute_path('../../cpoddata', File.dirname(__FILE__))
 
 def warn msg
     "\033[31m#{msg}\033[0m"
@@ -23,9 +23,9 @@ def repopath package, type
     pkginfo = parsepkg package
     path = case pkginfo[:format]
     when 'rpm'
-        "#{$base}/yum_repos/#{type}/#{pkginfo[:rhel]}/#{pkginfo[:arch]}"
+        "#{$data}/yum_repos/#{type}/#{pkginfo[:rhel]}/#{pkginfo[:arch]}"
     when 'gem'
-	"#{$base}/gem_repo/gems"
+	"#{$data}/gem_repo/gems"
     else
         raise "Format #{pkginfo[:format]} is not a recognized package type"
     end

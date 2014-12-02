@@ -16,20 +16,21 @@
 require 'cgi'
 require 'shellwords'
 
-base = File.absolute_path('../..', File.dirname(__FILE__))
+repo = File.absolute_path('..', File.dirname(__FILE__))
+data = File.absolute_path('../../cpoddata', File.dirname(__FILE__))
 cgi = CGI.new
 if /\/(?<pathinfo>.+)/ =~ cgi.path_info
     treeish = pathinfo.shellescape
-    unless system("cd #{base}/cookbooks && git rev-parse --verify #{treeish} > /dev/null 2>&1")
+    unless system("cd #{data}/cookbooks && git rev-parse --verify #{treeish} > /dev/null 2>&1")
 	cgi.out('status' => 'NOT_FOUND', 'Content-Type' => 'text/plain') do
-	  "git tree-ish '#{treeish}' not found in #{base}/cookbooks"
+	  "git tree-ish '#{treeish}' not found in #{data}/cookbooks"
 	end
 	exit 2
     end
-    archive_cmd = "cd #{base}/cookbooks && git archive --prefix=cookbooks/ --format=tgz #{treeish} 2>/dev/null"
-    cmd = "(#{archive_cmd}) | bsdtar -cz --exclude='*/.git*' -f - -C #{base}/c-pod/chef cookbooks @-"
+    archive_cmd = "cd #{data}/cookbooks && git archive --prefix=cookbooks/ --format=tgz #{treeish} 2>/dev/null"
+    cmd = "(#{archive_cmd}) | bsdtar -cz --exclude='*/.git*' -f - -C #{repo}/chef cookbooks @-"
 else
-    cmd = "bsdtar -cz --exclude='*/.git*' -f- -C #{base}/c-pod/chef cookbooks -C #{base} cookbooks"
+    cmd = "bsdtar -cz --exclude='*/.git*' -f- -C #{repo}/chef cookbooks -C #{data} cookbooks"
 end
 cgi.out('Content-Disposition' => 'attachment; filename=recipes.tgz',
 	'Content-Type' => 'application/octet-stream') do

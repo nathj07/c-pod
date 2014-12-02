@@ -5,7 +5,7 @@
 require 'optparse'
 require 'ostruct'
 
-base = File.absolute_path('../..', File.dirname(__FILE__))
+data = File.absolute_path('../../cpoddata', File.dirname(__FILE__))
 opts = OpenStruct.new( repo: (ENV['C-POD'] || 'cpod.local'), user: 'c-pod', delete: false, rbase: '' )
 
 if Process.euid == 0
@@ -48,17 +48,17 @@ delete = opts.delete ? "--delete":""
 rsync  = "rsync -rltDOvz"
 
 puts "Updating GEM packages..."
-cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}gem_repo #{base}/"
+cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}gem_repo #{data}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"
 puts "Updating RPM packages..."
-cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}yum_repos #{base}/"
+cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}yum_repos #{data}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"
 puts "Updating Downloads packages..."
-cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}downloads #{base}/"
+cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}downloads #{data}/"
 puts cmd
 system cmd
 puts ($? != 0) ? "Failed": "Done"

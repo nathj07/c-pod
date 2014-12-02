@@ -63,7 +63,6 @@ if opts.repo.end_with? '.local' # Convert to IP address as Curl doesn't do mDNS
     end
 end
 
-base = File.absolute_path('../..', File.dirname(__FILE__))
 curlopts = ["-F type=#{opts.type}"]
 curlopts.push "-F debug=yes" if opts.debug
 curlopts.push "-F force=yes" if opts.force
