@@ -128,21 +128,21 @@ ARGV.each do |fqdn|
   when :centos5
     variant = '--os-variant=rhel5.4'
     extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{fqdn}"
-    boot = "--location http://#{opts.repo}/osmirror/#{opts.type}"
+    boot = "--location http://#{opts.repo}/osmirror/centos/5/os/x86_64"
   when :centos6
     variant = '--os-variant=rhel6'
     extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{fqdn}"
-    boot = "--location http://#{opts.repo}/osmirror/#{opts.type}"
+    boot = "--location http://#{opts.repo}/osmirror/centos/6/os/x86_64"
   when :centos7
     variant = '--os-variant=rhel7'
     extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{fqdn}"
-    boot = "--location http://#{opts.repo}/osmirror/#{opts.type}"
+    boot = "--location http://#{opts.repo}/osmirror/centos/7/os/x86_64"
   when :ubuntu14
     variant = ''
-    iso = "#{data}/osmirror/ubuntu/14/isos/ubuntu-14.10-server-amd64.iso"
+    iso = "#{data}/osmirror/ubuntu/14/isos/ubuntu-14.04-server-amd64.iso"
     extra_args="auto=true hostname=#{fqdn} priority=critical url=http://#{opts.repo}/ks/./#{opts.type}.seed?host=#{fqdn}"
     #extra_args="ks=http://#{opts.repo}/ks/#{opts.type}.ks?host=#{fqdn}"
-    boot = "--location http://#{opts.repo}/osmirror/#{opts.type}"
+    boot = "--location http://#{opts.repo}/osmirror/ubuntu/14/isos/boot1404.iso"
     #boot = "--cdrom #{iso}"
   end
   mkvm = <<-MKVM.gsub(/\s+/,' ')
