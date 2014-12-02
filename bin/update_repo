@@ -2,11 +2,12 @@
 #
 # Update a local copy of the main repo
 #
+require 'json'
 require 'optparse'
 require 'ostruct'
 
-data = File.absolute_path('../../cpoddata', File.dirname(__FILE__))
-opts = OpenStruct.new( repo: (ENV['C-POD'] || 'cpod.local'), user: 'c-pod', delete: false, rbase: '' )
+$data = File.absolute_path('../../cpoddata', File.dirname(__FILE__))
+$opts = OpenStruct.new( repo: (ENV['C-POD'] || 'cpod.local'), user: 'c-pod', delete: false, rbase: nil )
 
 if Process.euid == 0
     puts "Hey - don't run this as root"
@@ -21,46 +22,53 @@ OptionParser.new do |o|
         STDERR.puts o
         exit
     end
-    o.on('-u', '--user USER', String, "The remote user (default: #{opts.user})") do |u|
-	opts.user = u
+    o.on('-u', '--user USER', String, "Remote user (default: #{$opts.user})") do |u|
+	$opts.user = u
     end
-    o.on('-b', '--base BASEDIR', String, "Remote C-Pod base directory (default is home dir of remote user)") do |b|
-	opts.rbase = b
+    o.on('-b', '--base BASEDIR', String, "Path to remote C-Pod data directory (Default is to query remote server)") do |b|
+	$opts.rbase = b
     end
-    o.on('-r', '--repo REPO', String, "The C-Pod host to use (default: #{opts.repo})") do |m|
-	opts.repo = m
+    o.on('-r', '--repo REPO', String, "The C-Pod host to use (default: #{$opts.repo})") do |m|
+	$opts.repo = m
     end
-    o.on('-d', '--[no-]delete', "Delete local items not present on remote (default: #{opts.delete})") do |d|
-	opts.delete = d
+    o.on('-d', '--[no-]delete', "Delete local items not present on remote (default: #{$opts.delete})") do |d|
+	$opts.delete = d
     end
     begin
         o.parse!
         raise "You don't need arguments!" if ARGV.size > 0
-        raise "Specifying a remote user requires remote base" if opts.user != 'c-pod' and opts.rbase == ''
+        raise "Specifying a remote user requires remote base" if $opts.user != 'c-pod' and $opts.rbase == ''
+	raise "Data directory '#{$data}' not found!" unless Dir.exist? $data
+	unless $opts.rbase
+	    require 'open-uri'
+	    config = JSON.parse(open("http://#{$opts.repo}/cpod.json",&:read))
+	    $opts.rbase = config['cpod']['datadir']
+	    $opts.rbase += "/" unless $opts.rbase.end_with? '/'
+	end
     rescue
        STDERR.puts "Error: #{$!}"
+	STDERR.puts $!.backtrace
        STDERR.puts o
        exit 1
     end
 end
 
-delete = opts.delete ? "--delete":""
-rsync  = "rsync -rltDOvz"
+def transfer msg, obj
+    delete = $opts.delete ? "--delete":""
+    rsync  = "rsync -rltDOvz"
 
-puts "Updating GEM packages..."
-cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}gem_repo #{data}/"
-puts cmd
-system cmd
-puts ($? != 0) ? "Failed": "Done"
-puts "Updating RPM packages..."
-cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}yum_repos #{data}/"
-puts cmd
-system cmd
-puts ($? != 0) ? "Failed": "Done"
-puts "Updating Downloads packages..."
-cmd = "#{rsync} #{delete} --progress #{opts.user}@#{opts.repo}:#{opts.rbase}downloads #{data}/"
-puts cmd
-system cmd
-puts ($? != 0) ? "Failed": "Done"
+    puts "Updating #{msg}..."
+    cmd = "#{rsync} #{delete} --progress #{$opts.user}@#{$opts.repo}:#{$opts.rbase}#{obj} #{$data}/"
+    puts cmd
+    system cmd
+    puts ($? != 0) ? "Failed": "Done"
+end
+
+transfer "OS Mirrors", "osmirror"
+transfer "Downloads packages", "downloads"
+transfer "RPM packages", "yum_repos"
+transfer "GEM packages", "gem_repo"
+transfer "Custom PAC file", "cpod.pac"
+transfer "Custom Netmask file", "netmask_table"
 
 # vim: set sts=4 sw=4 ts=8:
