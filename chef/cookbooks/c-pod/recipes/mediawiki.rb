@@ -3,10 +3,9 @@
 include_recipe "repo::apache"
 include_recipe "repo::postgres"
 
-node.default[:base] = '/data'
-node.default[:mediawiki][:user] = 'packager'
-node.default[:mediawiki][:group] = 'apache'
-node.default[:mediawiki][:home] = "#{node[:base]}/mediawiki"
+node.default[:mediawiki][:user]     = node[:cpod][:owner_name]
+node.default[:mediawiki][:group]    = node[:cpod][:owner_name]
+node.default[:mediawiki][:home]     = "#{node[:cpod][:datadir]}/mediawiki"
 
 wikihome = node[:mediawiki][:home]
 
@@ -52,14 +51,14 @@ link "#{wikihome}/cache" do
     to "/var/cache/mediawiki"
 end
 
-directory "#{node[:base]}/upload" do
+directory "#{node[:cpod][:datadir]}/upload" do
     owner   node[:mediawiki][:user]
     group   node[:mediawiki][:group]
     mode    02770
 end
 
 link "#{wikihome}/upload" do
-    to "#{node[:base]}/upload"
+    to "#{node[:cpod][:datadir]}/upload"
 end
 
 # Setup the DB access

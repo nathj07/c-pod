@@ -1,6 +1,6 @@
 # Apache configuration fragment for the C-Pod server
 #
-<Directory "<%= node[:cpod][:base] %>/">
+<Directory "<%= node[:cpod][:datadir] %>/">
     AllowOverride None
     <% if node['apache']['version'] != "2.4" -%>
     Order deny,allow
@@ -10,7 +10,7 @@
     <% end -%>
 </Directory>
 
-<Directory "<%= node[:cpod][:base] %>/c-pod/www">
+<Directory "<%= node[:cpod][:repodir] %>/www">
     Options Includes Indexes FollowSymLinks
     IndexIgnore .htaccess *.bak *~ RCS
     IndexOptions FancyIndexing FoldersFirst
@@ -23,7 +23,7 @@
     <% end -%>
 </Directory>
 
-<Directory "<%= node[:cpod][:base] %>/c-pod/bin/">
+<Directory "<%= node[:cpod][:repodir] %>/bin/">
     Options +ExecCGI
     SetHandler cgi-script
     AllowOverride None
@@ -39,10 +39,10 @@ ServerName <%= node[:cpod][:server_name] %>
 
 <VirtualHost *:80>
 
-    ScriptAlias /bin "<%= node[:cpod][:base] %>/c-pod/bin"
+    ScriptAlias /bin "<%= node[:cpod][:repodir] %>/bin"
 
     IndexIgnore .htaccess *.bak *~ RCS
-    DocumentRoot <%= node[:cpod][:base] %>/c-pod/www
+    DocumentRoot <%= node[:cpod][:repodir] %>/www
     ErrorLog <%= node['apache']['log_dir'] %>/c-pod_error_log
     CustomLog <%= node['apache']['log_dir'] %>/c-pod_access_log combined
     AddType text/plain .ks .seed

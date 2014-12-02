@@ -1,8 +1,23 @@
 # Setup the filesystem structure for a C-Pod Repository webserver
 #
 datadir = node[:cpod][:datadir]
-basedir = node[:cpod][:base]
-user = node[:cpod][:owner_name]
+repodir = node[:cpod][:repodir]
+user    = node[:cpod][:owner_name]
+
+# Setup the datadir
+#
+directory datadir do
+    owner cpod_user
+    group cpod_user
+    mode 02775
+end
+
+cookbook_file "#{datadir}/README" do
+    source  'README.data'
+    mode    0644
+    owner   cpod_user
+    group   cpod_user
+end
 
 # Setup the YUM repository directories
 #
@@ -27,11 +42,11 @@ end
 # Setup the links
 #
 %w{ downloads gem_repo osmirror yum_repos }.each do |dir|
-    link "#{basedir}/c-pod/www/#{dir}" do
+    link "#{repodir}/www/#{dir}" do
         to  "#{datadir}/#{dir}"
     end
 end
-link "#{basedir}/c-pod/www/gems" do
+link "#{repodir}/www/gems" do
     to  "#{datadir}/gem_repo/gems"
 end
 

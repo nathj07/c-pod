@@ -14,8 +14,9 @@ Vagrant.configure("2") do |config|
   # Configure the C-Pod via Chef JSON attributes
   #
   cpod_config = { cpod: {} }
-  cpod_config[:cpod][:owner_name] = 'vagrant'
-  cpod_config[:cpod][:server_name] = 'cpod.local'
+  cpod_config[:cpod][:owner_name]   = 'vagrant'
+  cpod_config[:cpod][:server_name]  = 'cpodtest.local'
+  cpod_config[:cpod][:repodir]      = '/vagrant'
 
   # Mount the data if it exists, otherwise it will be created in the VM
   #
