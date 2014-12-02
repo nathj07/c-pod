@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
   #
   cpod_config = { cpod: {} }
   cpod_config[:cpod][:owner_name]   = 'vagrant'
-  cpod_config[:cpod][:server_name]  = 'cpodtest.local'
+  cpod_config[:cpod][:server_name]  = 'cpod.local'
   cpod_config[:cpod][:repodir]      = '/vagrant'
 
   # Mount the data if it exists, otherwise it will be created in the VM
@@ -61,7 +61,9 @@ Vagrant.configure("2") do |config|
 
   # Chef
 
-  config.omnibus.chef_version = :latest # "11.4.0"
+  # Note if the chef site is down this can hang vagrant up
+  # and return invalid version errors
+  config.omnibus.chef_version = :latest
 
   config.vm.provision "chef_solo" do |chef|
      chef.cookbooks_path = "chef/cookbooks"
