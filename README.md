@@ -17,7 +17,11 @@ There are two distinct types of C-Pod:
     This uses KVM to host Virtual Machines. Note that it needs a Repository Host to create the VM's
     Build using the recipe 'c-pod::kvm_host'
 
-These two functions may be combined together. Build this using the default recipe 'c-pod'
+* A Docker Container Host.
+    This uses [Docker](http://docker.com) to host LXC Containers.
+    Currently this is automatically done by the Vagrant provisioning. Chef recipe to follow.
+
+These functions may be combined together. Build this using the default recipe 'c-pod'
 
 ## Overview
 
@@ -48,12 +52,21 @@ ways:
 
 ### Using Vagrant
 
-To create a repository host install Vagrant with a provider of your choice and
-execute:
+Currently the base boxes exist for VMware Fusion only. So you will need to install:
+* VMware Fusion, and 
+* the Vagrant VMware Fusion provider.
+
+To create a repository host execute:
 
     vagrant up
 
 You may need to add `--provider=vmware_fusion`
+
+Note that in the Vagrantfile the hostname must be specified. If you want to use
+a `.local` name then use just a simple name with no dots. This will
+automatically be suffixed by Avahi. If you do suffix it a loopback interface
+entry will be generated in `/etc/hosts`. That will interfere with Docker
+container setup on the same machine.
 
 ### From an existing C-Pod
 
