@@ -76,6 +76,15 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: "service avahi-daemon restart"
 
+  config.vm.provision "shell", inline: "cp /vagrant/docker.defaults /etc/default/docker"
+
+  config.vm.provision :docker do |d|
+    d.version = :latest
+    d.images  = ['centos:centos6']
+    d.build_image "/vagrant", args: "-t 'townsen/rpmbuild'"
+    d.run "townsen/rpmbuild", cmd: "bash -l", args: "-i -t -h rpmbuilder -v '/vagrant:/home/townsen/c-pod'"
+  end
+
 end
 
 # vim: ft=ruby sts=2 sw=2 ts=8
