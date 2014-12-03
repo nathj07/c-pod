@@ -69,6 +69,7 @@ Vagrant.configure("2") do |config|
      chef.cookbooks_path = "chef/cookbooks"
      chef.add_recipe "c-pod::repo_host"
      chef.json = cpod_config
+     chef.custom_config_path = "chef/vagrant_solo.conf"
   #  chef.arguments = '--log_level=debug'
   end
 
