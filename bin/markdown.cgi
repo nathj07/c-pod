@@ -30,7 +30,7 @@ cgi.out 'text/html' do
                 ERROR
 	    end
 	    rtxt = Redcarpet::Render::HTML.new(:with_toc_data => true)
-	    mdtxt = Redcarpet::Markdown.new(rtxt, :fenced_code_blocks => true)
+	    mdtxt = Redcarpet::Markdown.new(rtxt, :fenced_code_blocks => true, :no_intra_emphasis => true)
 	    out = <<-TOC
 	    <div id="section_wrapper" >
                 <article>
