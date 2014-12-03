@@ -9,12 +9,14 @@ user    = node[:cpod][:owner_name]
 # Setup the datadir
 #
 directory datadir do
+    not_if { Dir.exist? datadir }
     owner user
     group user
     mode 02775
 end
 
 cookbook_file "#{datadir}/README" do
+    action :create_if_missing
     source  'README.data'
     mode    0644
     owner   user
@@ -62,9 +64,11 @@ link "#{repodir}/www/cpod.pac" do
 end
 
 file "#{datadir}/cpod.json" do
+    action :create
     content node[:cpod].to_hash.to_json # this only gets one level! CHEF-3857
     mode    0664
-    group   node[:cpod][:owner_name]
+    owner   user
+    group   user
 end
 
 link "#{repodir}/www/cpod.json" do
