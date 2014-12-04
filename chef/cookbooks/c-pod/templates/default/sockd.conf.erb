@@ -1,4 +1,7 @@
 # Dante Socks server config for C-Pod server
+# This is for version 1.3 (CentOS)
+# Public interface: <%= @public %>
+# Private interface: <%= @private %>
 #
 logoutput: syslog/daemon
 internal: <%= @public %> port = 1080
@@ -23,10 +26,10 @@ client block {
         from: 0.0.0.0/0 to: 0.0.0.0/0
         log: connect error
 }
-# Allow them to go to the KVM default network
+# Allow them to go to the private network
 #
 socks pass {
-        from: 0.0.0.0/0 to: <%= node[:network][:interfaces][@private.to_sym][:routes].detect {|r| r[:family] == "inet"}[:destination] %>
+        from: 0.0.0.0/0 to: <%= @private_cidr %>
         log: connect disconnect
         protocol: tcp udp
 }

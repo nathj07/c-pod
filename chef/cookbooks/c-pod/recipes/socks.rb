@@ -1,6 +1,7 @@
 # A Recipe to setup the Proxy server on a repo
 # Also adds the NATPMP facility
 #
+
 case node[:platform_family]
 when 'rhel'
 
@@ -20,9 +21,11 @@ when 'rhel'
 	mode    0644
 	owner   'root'
 	group   'root'
-	variables( 
-	    :public => 'eth0',
-	    :private => 'virbr0'
+	variables(
+	    :public => node[:cpod][:socks][:public_if],
+            :public_cidr => cidr(node[:cpod][:socks][:public_if]),
+	    :private => node[:cpod][:socks][:private_if],
+            :private_cidr => cidr(node[:cpod][:socks][:private_if])
 	)
 	notifies :restart, "service[sockd]", :delayed
     end
@@ -48,9 +51,11 @@ when 'debian'
 	mode    0644
 	owner   'root'
 	group   'root'
-	variables( 
-	    :public => 'eth0',
-	    :private => 'virbr0'
+	variables(
+	    :public => node[:cpod][:socks][:public_if],
+            :public_cidr => cidr(node[:cpod][:socks][:public_if]),
+	    :private => node[:cpod][:socks][:private_if],
+            :private_cidr => cidr(node[:cpod][:socks][:private_if])
 	)
 	notifies :restart, "service[danted]", :delayed
     end

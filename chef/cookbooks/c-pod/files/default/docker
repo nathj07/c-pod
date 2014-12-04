@@ -1,0 +1,7 @@
+# Docker defaults
+
+DOCKER_OPTS="--host=tcp://0.0.0.0:2375 --host=unix:///var/run/docker.sock"
+
+# This is also a handy place to tweak where Docker's temporary files go.
+# export TMPDIR="/mnt/bigdrive/docker-tmp"
+DOCKER_OPTS="-r=true ${DOCKER_OPTS}"
