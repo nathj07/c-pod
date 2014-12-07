@@ -63,7 +63,7 @@ Vagrant.configure("2") do |config|
 
   # Note if the chef site is down this can hang vagrant up
   # and return invalid version errors
-  config.omnibus.chef_version = :latest
+  config.omnibus.chef_version = '11.16.4' #  or :latest
 
   config.vm.provision "chef_solo" do |chef|
      chef.cookbooks_path = "chef/cookbooks"
