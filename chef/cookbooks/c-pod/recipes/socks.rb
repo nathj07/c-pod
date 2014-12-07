@@ -1,19 +1,12 @@
-# A Recipe to setup the Proxy server on a repo
-# Also adds the NATPMP facility
+# A Recipe to setup a SOCKS Proxy server
+# This is called from the Docker recipe
+# to allow communication with containers
 #
 
 case node[:platform_family]
 when 'rhel'
 
-    yum_package 'dante-server >= 1.4.0' do
-	action  :upgrade
-	allow_downgrade true
-    end
-
-    case osver 
-    when 6...7 then yum_package 'stallone >= 0.4.0'
-    else warn "Don't have a package of stallone for Centos7 yet"
-    end
+    yum_package 'dante-server'
 
     template "/etc/sockd.conf" do
 	action  :create
@@ -22,24 +15,33 @@ when 'rhel'
 	owner   'root'
 	group   'root'
 	variables(
-	    :public => node[:cpod][:socks][:public_if],
-            :public_cidr => cidr(node[:cpod][:socks][:public_if]),
-	    :private => node[:cpod][:socks][:private_if],
-            :private_cidr => cidr(node[:cpod][:socks][:private_if])
+            public_if:  node[:cpod][:socks][:public_if],
+            private_if: (node[:cpod][:socks][:private_if] or node[:cpod][:docker][:interface])
 	)
 	notifies :restart, "service[sockd]", :delayed
     end
 
-    cookbook_file "/etc/rc.d/rc.local" do
-	action  :create
-	mode    0755
-	owner   'root'
-	group   'root'
-    end
+      case osver
+      when 5...7
+        cookbook_file "/etc/rc.d/rc.local" do
+            action  :create
+            mode    0755
+            owner   'root'
+            group   'root'
+        end
+      when 7...8
+        cookbook_file "/lib/systemd/system/sockd.service" do
+            source  'danted.service'
+            action  :create
+            mode    0755
+            owner   'root'
+            group   'root'
+        end
+      end
 
     service 'sockd' do
 	supports :restart => true, :reload => true
-	action [:disable, :start]
+	action [:enable, :start]
     end
 
 when 'debian'
@@ -52,10 +54,8 @@ when 'debian'
 	owner   'root'
 	group   'root'
 	variables(
-	    :public => node[:cpod][:socks][:public_if],
-            :public_cidr => cidr(node[:cpod][:socks][:public_if]),
-	    :private => node[:cpod][:socks][:private_if],
-            :private_cidr => cidr(node[:cpod][:socks][:private_if])
+            public_if:  node[:cpod][:socks][:public_if],
+            private_if: (node[:cpod][:socks][:private_if] or node[:cpod][:docker][:interface])
 	)
 	notifies :restart, "service[danted]", :delayed
     end
