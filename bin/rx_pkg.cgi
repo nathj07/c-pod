@@ -18,9 +18,9 @@ end
 
 # Return the path on disk for this package and the base name
 #
-def repopath package, type
+def repopath package, type, rhel
     type = 'unstable' if type == ''
-    pkginfo = parsepkg package
+    pkginfo = parsepkg package, rhel
     path = case pkginfo[:format]
     when 'rpm'
         "#{$data}/yum_repos/#{type}/#{pkginfo[:rhel]}/#{pkginfo[:arch]}"
@@ -51,7 +51,7 @@ begin
     if q.include?('pkgfile')
 	t = q['pkgfile']
 	filename = t.original_filename
-	opath, pkgname = repopath(filename, q['type'])
+	opath, pkgname = repopath(filename, q['type'],q['rhel'])
         copies = q.include?('keep') ? q['keep'].to_i : -1
         delmsg = cleanup opath, pkgname, copies
         if copies == 0
