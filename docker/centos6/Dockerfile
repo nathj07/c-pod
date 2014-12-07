@@ -1,4 +1,4 @@
-# Container for running rpmbuild on things...
+# Container for running rpmbuild on CentOS 6
 
 FROM centos:centos6
 MAINTAINER "Nick Townsend" <nick.townsend@mac.com>
@@ -28,6 +28,8 @@ RUN yum makecache && yum install -y \
 ADD http://cpod.local/samples/solo.rb /etc/chef/
 ADD http://cpod.local/samples/cpod.json /etc/chef/
 RUN chef-solo -o recipe[devuser::townsen]
+RUN curl -o /usr/bin/gosu -sSL https://github.com/tianon/gosu/releases/download/1.2/gosu-amd64 \
+  && chmod +x /usr/bin/gosu
 # The external path /vagrant is mapped from the host
 # with owner and group id 1000 (vagrant) but there
 # is no actual vagrant user or group. This causes

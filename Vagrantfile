@@ -75,15 +75,25 @@ Vagrant.configure("2") do |config|
 
   # Avahi needs a kick as the '.local' name isn't advertized...
 
-  config.vm.provision "shell", inline: "service avahi-daemon restart"
+  config.vm.provision "shell", inline: "service avahi-daemon restart && echo Avahi restarted"
 
-  config.vm.provision "shell", inline: "cp /vagrant/docker.defaults /etc/default/docker"
+  config.vm.provision "shell",
+    inline: <<-DOCKER
+      cp /vagrant/docker/docker.defaults /etc/default/docker
+      echo Use DOCKER_HOST=tcp://#{cpod_config[:cpod][:server_name]}.local:2375
+    DOCKER
 
   config.vm.provision :docker do |d|
     d.version = :latest
-    d.images  = ['centos:centos6']
-    d.build_image "/vagrant", args: "-t 'townsen/rpmbuild'"
-    d.run "townsen/rpmbuild", cmd: "bash -l", args: "-i -t -h rpmbuilder -v '/vagrant:/home/townsen/c-pod'"
+    d.images  = ['centos:centos6','centos:centos7']
+    d.build_image "/vagrant/docker/centos6", args: "-t 'townsen/rpmbuild:centos6'"
+    d.build_image "/vagrant/docker/centos7", args: "-t 'townsen/rpmbuild:centos7'"
+    d.run "townsen/rpmbuild6",
+      image: "townsen/rpmbuild:centos6", cmd: "bash -l",
+      args: "-i -t -h rpmbuilder6 -v '/vagrant:/home/townsen/c-pod'"
+    d.run "townsen/rpmbuild7",
+      image: "townsen/rpmbuild:centos7", cmd: "bash -l",
+      args: "-i -t -h rpmbuilder7 -v '/vagrant:/home/rpmbuilder/c-pod'"
   end
 
 end

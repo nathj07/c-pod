@@ -1,0 +1,42 @@
+" Useful VIM settings
+" 
+set nocompatible
+set encoding=utf-8
+syntax on
+filetype plugin indent on
+set modelines=5
+runtime macros/matchit.vim
+set wildmenu
+set wildmode=list:longest
+set ve=block
+set title
+set path=**
+
+" On a Macbook Air 11 the esc key is tiny so use ;;
+map! ;; <Esc>
+
+" Use these settings for the statusline
+highlight User1 guifg=green guibg=darkslategray term=inverse,bold cterm=bold ctermfg=green ctermbg=black
+set statusline=%<%f%h%m%r%=%1*%*\ %b\ 0x%B\ \ %l,%c%V\ %P
+set laststatus=2
+set sta
+set ts=8 sw=2 sts=2 et
+
+let mapleader = ","
+set listchars=tab:>-,trail:·,eol:$
+nmap <silent> <leader>s :set nolist!<CR>
+
+" fix grep
+:let Grep_Find_Use_Xargs = 0
+:let Grep_Skip_Files = 'tags *.swp'
+:let Grep_Skip_Dirs = '.git vendor'
+
+" Ack
+set grepprg=ack
+:command! -nargs=1 Ack grep <args>
+
+set autowrite
+
+map <F13> :cp<CR>
+map <F14> :cn<CR>
+

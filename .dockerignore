@@ -1,8 +1,0 @@
-.vagrant
-.git
-bin
-chef
-collateral
-gembuild
-rpmbuild
-www
