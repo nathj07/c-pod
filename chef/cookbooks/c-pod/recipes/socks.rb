@@ -6,6 +6,19 @@
 ohai "getnetifs" do
   action :reload
   plugin "network"
+  only_if do # wait for the private interface
+    private_if = node[:cpod][:socks][:private_if]
+    up = false
+    5.times {
+        `ifconfig #{private_if} 1>/dev/null 2>&1`
+        up = $?.exitstatus == 0
+        break if up
+        STDERR.puts "Waiting for interface #{private_if}..."
+        sleep 2
+    }
+    raise "Interface #{private_if} not found!" unless up
+    up
+  end
 end
 
 sysctl 'net.ipv4.ip_forward' do
