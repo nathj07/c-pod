@@ -48,22 +48,48 @@ describe "parsepkg" do
             pkginfo[:rhel].must_equal '6'
         end
         it "a noarch RPM" do
-            pkg = "epel-release-6-8.noarch.rpm"
+            pkg = "python-urlgrabber-3.10-4.el7.noarch.rpm"
             pkginfo = parsepkg pkg
             pkginfo[:format].must_equal 'rpm'
-            pkginfo[:name].must_equal 'epel-release'
-            pkginfo[:version].must_equal '6'
+            pkginfo[:name].must_equal 'python-urlgrabber'
+            pkginfo[:version].must_equal '3.10'
             pkginfo[:arch].must_equal 'noarch'
+            pkginfo[:rhel].must_equal '7'
+        end
+        it "a CentOS 7 RPM" do
+            pkg = "nss-mdns-0.10-12.el7.x86_64.rpm"
+            pkginfo = parsepkg pkg
+            pkginfo[:format].must_equal 'rpm'
+            pkginfo[:name].must_equal 'nss-mdns'
+            pkginfo[:version].must_equal '0.10'
+            pkginfo[:arch].must_equal 'x86_64'
+            pkginfo[:rhel].must_equal '7'
+        end
+        it "a RedHat 6 RPM" do
+            pkg = "nss-mdns-0.10-12.rhel6.x86_64.rpm"
+            pkginfo = parsepkg pkg
+            pkginfo[:format].must_equal 'rpm'
+            pkginfo[:name].must_equal 'nss-mdns'
+            pkginfo[:version].must_equal '0.10'
+            pkginfo[:arch].must_equal 'x86_64'
             pkginfo[:rhel].must_equal '6'
         end
-        it "an RPM with minus separators" do
+    end
+    describe "handles unknown CentOS versions" do
+        it "raises an error when 'elN' or 'rhelN' is missing" do
+            pkg = "epel-release-6-8.noarch.rpm"
+            lambda {
+                pkginfo = parsepkg pkg
+            }.must_raise RuntimeError
+        end
+        it "accepts an OS version override on an RPM it can't identify" do
             pkg = "splunk-6.1.1-207789-linux-2.6-x86_64.rpm"
-            pkginfo = parsepkg pkg
+            pkginfo = parsepkg pkg, '6'
             pkginfo[:format].must_equal 'rpm'
             pkginfo[:name].must_equal 'splunk'
             pkginfo[:version].must_equal '6.1.1'
             pkginfo[:arch].must_equal 'x86_64'
-            pkginfo[:rhel].must_equal '6' # defaulted
+            pkginfo[:rhel].must_equal '6'
         end
     end
     describe "refuses to parse" do
@@ -73,7 +99,7 @@ describe "parsepkg" do
                 pkginfo = parsepkg pkg
             }.must_raise RuntimeError
         end
-        it "a SRPM" do
+        it "an SRPM" do
             pkg = "bacula-5.0.0-12.el6.src.rpm"
             proc {
                 pkginfo = parsepkg pkg
