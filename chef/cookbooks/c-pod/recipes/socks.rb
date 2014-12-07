@@ -3,6 +3,15 @@
 # to allow communication with containers
 #
 
+ohai "getnetifs" do
+  action :reload
+  plugin "network"
+end
+
+sysctl 'net.ipv4.ip_forward' do
+  value '1'
+end
+
 case node[:platform_family]
 when 'rhel'
 
@@ -16,7 +25,7 @@ when 'rhel'
 	group   'root'
 	variables(
             public_if:  node[:cpod][:socks][:public_if],
-            private_if: (node[:cpod][:socks][:private_if] or node[:cpod][:docker][:interface])
+            private_if: node[:cpod][:socks][:private_if]
 	)
 	notifies :restart, "service[sockd]", :delayed
     end
@@ -66,7 +75,7 @@ when 'debian'
     end
 
 when 'mac_os_x'
-    error "This will never likely to be supported!"
+    error "This is never likely to be supported!"
 
 end
 
