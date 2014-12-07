@@ -73,6 +73,10 @@ when 'mac_os_x'
 
 end
 
+service 'NetworkManager' do
+  action [:disable, :stop]
+end
+
 service 'docker' do
   supports :restart => true, :reload => true
   action [:enable, :start]
