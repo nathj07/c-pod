@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
   #
   cpod_config = { cpod: {} }
   cpod_config[:cpod][:owner_name]   = 'vagrant'
-  cpod_config[:cpod][:server_name]  = 'cpod' # DON'T ADD .local
+  cpod_config[:cpod][:server_name]  = 'cpod.local'
   cpod_config[:cpod][:repodir]      = '/vagrant'
 
   # Mount the data if it exists, otherwise it will be created in the VM
@@ -25,7 +25,9 @@ Vagrant.configure("2") do |config|
     config.vm.synced_folder "../cpoddata", cpod_config[:cpod][:datadir]
   end
 
-  config.vm.hostname = cpod_config[:cpod][:server_name]
+  # DON'T ADD .local as it then puts it in /etc/hosts as loopback address
+  # which interferes with mDNS resolution
+  config.vm.hostname = cpod_config[:cpod][:server_name].rpartition('.')[0]
 
   config.vm.network "public_network"
 
