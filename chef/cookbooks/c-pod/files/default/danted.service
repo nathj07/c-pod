@@ -1,11 +1,9 @@
 [Unit]
 Description=Dante SOCKS Server
 After=syslog.target
-After=libvirtd.target
 After=multi-user.target
 
 [Service]
-ExecStartPre=/usr/bin/sleep 5
 ExecStart=/usr/sbin/sockd -f /etc/sockd.conf
 Type=simple
 StandardOutput=syslog

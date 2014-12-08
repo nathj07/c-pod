@@ -3,8 +3,7 @@
 # Public interface: <%= @public_if %>
 # Private interface: <%= @private_if %>
 #
-# logoutput: syslog/daemon
-logoutput: stdout
+logoutput: syslog/daemon
 internal: <%= @public_if %> port = 1080
 external: <%= @private_if %>
 socksmethod: none
