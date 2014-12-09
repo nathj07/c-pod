@@ -5,9 +5,16 @@
 require 'json'
 require 'optparse'
 require 'ostruct'
+require 'uri'
 
 $data = File.absolute_path('../../cpoddata', File.dirname(__FILE__))
-$opts = OpenStruct.new( repo: (ENV['C-POD'] || 'cpod.local'), user: 'c-pod', delete: false, rbase: nil )
+
+$types = [:downloads, :rpms, :gems, :osmirror, :conf, :all, :nomirror]
+
+$opts = OpenStruct.new(
+             cpod: (ENV['CPOD_URL'] || 'http://cpod.local'), user: 'c-pod',
+             delete: false, rbase: nil, dry: false, type: :rpms
+        )
 
 if Process.euid == 0
     puts "Hey - don't run this as root"
@@ -22,53 +29,61 @@ OptionParser.new do |o|
         STDERR.puts o
         exit
     end
-    o.on('-u', '--user USER', String, "Remote user (default: #{$opts.user})") do |u|
-	$opts.user = u
-    end
     o.on('-b', '--base BASEDIR', String, "Path to remote C-Pod data directory (Default is to query remote server)") do |b|
 	$opts.rbase = b
     end
-    o.on('-r', '--repo REPO', String, "The C-Pod host to use (default: #{$opts.repo})") do |m|
-	$opts.repo = m
+    o.on('-c', '--cpod URL', String, "The C-Pod URL to use (default: #{$opts.cpod})") do |m|
+	$opts.cpod = m
     end
     o.on('-d', '--[no-]delete', "Delete local items not present on remote (default: #{$opts.delete})") do |d|
 	$opts.delete = d
     end
+    o.on('-n', '--[no-]dry', "Dry run (default: #{$opts.dry})") do |t|
+        $opts.dry = t
+    end
+    o.on('-t', '--type TYPE', $types, "Type: #{$types.join(', ')} (default: #{$opts.type})") do |t|
+        $opts.type = t.to_sym
+    end
+    o.on('-u', '--user USER', String, "Remote user (default: #{$opts.user})") do |u|
+	$opts.user = u
+    end
     begin
         o.parse!
+        $opts.uri = URI($opts.cpod)
+        raise "Invalid URL #{$opts.cpod}" unless $opts.uri.scheme =~ /http/
         raise "You don't need arguments!" if ARGV.size > 0
         raise "Specifying a remote user requires remote base" if $opts.user != 'c-pod' and $opts.rbase == ''
-	raise "Data directory '#{$data}' not found!" unless Dir.exist? $data
-	unless $opts.rbase
-	    require 'open-uri'
-	    config = JSON.parse(open("http://#{$opts.repo}/cpod.json",&:read))
-	    $opts.rbase = config['cpod']['datadir']
-	    $opts.rbase += "/" unless $opts.rbase.end_with? '/'
-	end
+        raise "Data directory '#{$data}' not found!" unless Dir.exist? $data
+        unless $opts.rbase
+            require 'open-uri'
+            config = JSON.parse(open("#{$opts.cpod}/cpod.json",&:read))
+            puts "#{config.inspect}"
+            $opts.rbase = config['datadir']
+            $opts.rbase += "/" unless $opts.rbase.end_with? '/'
+        end
     rescue
-       STDERR.puts "Error: #{$!}"
-	STDERR.puts $!.backtrace
-       STDERR.puts o
-       exit 1
+        STDERR.puts "Error: #{$!} at #{$!.backtrace[0..3]}"
+        STDERR.puts o
+        exit 1
     end
 end
 
 def transfer msg, obj
-    delete = $opts.delete ? "--delete":""
-    rsync  = "rsync -rltDOvz"
-
+    options = ["-rltDOvz"]
+    options << "--delete" if $opts.delete
+    options << "--dry-run" if $opts.dry
     puts "Updating #{msg}..."
-    cmd = "#{rsync} #{delete} --progress #{$opts.user}@#{$opts.repo}:#{$opts.rbase}#{obj} #{$data}/"
+    cmd = "rsync #{options.join(' ')} --progress #{$opts.user}@#{$opts.uri.hostname}:#{$opts.rbase}#{obj} #{$data}/"
     puts cmd
     system cmd
     puts ($? != 0) ? "Failed": "Done"
 end
 
-transfer "OS Mirrors", "osmirror"
-transfer "Downloads packages", "downloads"
-transfer "RPM packages", "yum_repos"
-transfer "GEM packages", "gem_repo"
-transfer "Custom PAC file", "cpod.pac"
-transfer "Custom Netmask file", "netmask_table"
+transfer "OS Mirrors", "osmirror" if [:osmirror, :all].include? $opts.type
+transfer "Downloads packages", "downloads" if [:downloads, :nomirror, :all].include? $opts.type
+transfer "RPM packages", "yum_repos" if [:rpms, :nomirror, :all].include? $opts.type
+transfer "GEM packages", "gem_repo" if [:gems, :nomirror, :all].include? $opts.type
+transfer "Custom PAC file", "cpod.pac" if [:conf, :nomirror, :all].include? $opts.type
+transfer "Custom Netmask file", "netmask_table" if [:conf, :nomirror, :all].include? $opts.type
 
 # vim: set sts=4 sw=4 ts=8:
