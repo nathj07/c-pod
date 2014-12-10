@@ -26,22 +26,23 @@ OptionParser.new do |o|
         STDERR.puts o
         exit
     end
+    o.on('-b', '--base BASEDIR', "Local mirror directory (default: #{opts.base})") do |b|
+        opts.base = b
+    end
     o.on('-m', '--mirror MIRROR', "Remote mirror (default: #{opts.mirror})") do |m|
 	opts.mirror = m
     end
-    o.on('-v', '--version VERSION', versions, "CentOS version (#{versions} default: #{opts.version})") do |v|
-        opts.version = v
-    end
-    o.on('-b', '--base BASEDIR', "Local mirror directory (default #{opts.base})") do |b|
-        opts.base = b
-    end
-    o.on('-t', '--types TYPES', Array, "Types to Sync (default: #{opts.types})") do |types|
+    o.on('-t', '--types TYPES', Array,
+        "Types to sync: [#{typelist.join(',')}] (default: #{opts.types.join(',')})") do |types|
         badtypes = types.reject{|t| typelist.include? t.to_sym }
         if badtypes.size > 0
             puts "#{badtypes.join(', ')} not valid type(s)"
             exit 2
         end
 	opts.types = types.map(&:to_sym)
+    end
+    o.on('-v', '--version VERSION', versions, "CentOS version: [#{versions.join(',')}] (default: #{opts.version})") do |v|
+        opts.version = v
     end
     begin
         o.parse!
