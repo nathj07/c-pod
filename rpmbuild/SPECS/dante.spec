@@ -4,7 +4,7 @@ Name: dante
 %define prefix /usr
 Prefix: %{prefix}
 Version: 1.4.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD-type
 Group: Networking/Utilities
 URL: http://www.inet.no/dante/
@@ -128,8 +128,7 @@ exit $RETVAL
 EOF
 
 %build
-#%serverbuild
-%configure --without-glibc-secure %{_extraflags}
+%{_configure} --without-glibc-secure
 %{__make}
 
 %install

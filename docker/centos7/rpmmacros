@@ -1,0 +1,5 @@
+# RPM macros for building in a Docker container
+#
+%_topdir /home/rpmbuilder/c-pod/rpmbuild
+%dist .el7
+%centos 7

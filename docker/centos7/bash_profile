@@ -1,0 +1,12 @@
+# ~/.bash_profile
+#
+umask 002 # So that we can use groups etc.
+set -o vi
+export PATH=~/c-pod/bin:$PATH
+export LESS=-R
+export RI=-fansi
+export HISTIGNORE="&:ls:[bf]g:exit"
+
+[ -f ~/.bashrc ] && . ~/.bashrc
+
+# vim:ts=4:sw=4

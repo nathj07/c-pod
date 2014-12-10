@@ -7,6 +7,7 @@ require 'fileutils'
 require 'optparse'
 require 'ostruct'
 require 'socket'
+require 'uri'
 require_relative 'funcs'
 
 def info msg
@@ -15,7 +16,9 @@ end
 
 types = [:stable, :unstable, :lifted]
 
-opts = OpenStruct.new(type: :unstable, debug: false, force: nil, repo: ENV['CPOD'] || 'cpod.local', keep: 3)
+opts = OpenStruct.new(type: :unstable, debug: false, 
+                      force: nil, keep: 3, rhel: nil, 
+                      repo: ENV['CPOD_URL'] || 'http://cpod.local')
 
 OptionParser.new do |o|
     o.banner = "usage: #{o.program_name} [options] pkg ..."
@@ -34,6 +37,9 @@ OptionParser.new do |o|
     o.on('-r', '--repo HOST', "The C-Pod server (default #{opts.repo})") do |n|
         opts.repo = n
     end
+    o.on('-c', '--centos VERSION', [:'5',:'6',:'7'], "Force CentOS version 5,6,7 (default is auto-detect)") do |v|
+        opts.rhel = v.to_s
+    end
     o.on('-f', '--force', "Force complete metadata rebuild") do
         opts.force = true
     end
@@ -48,7 +54,8 @@ OptionParser.new do |o|
 end
 
 if opts.repo.end_with? '.local' # Convert to IP address as Curl doesn't do mDNS
-    repohost = opts.repo
+    repo_uri = URI(opts.repo)
+    repohost = repo_uri.host
     opts.repo = nil
     z = Socket.gethostbyname(repohost) rescue nil
     if z
@@ -61,20 +68,23 @@ if opts.repo.end_with? '.local' # Convert to IP address as Curl doesn't do mDNS
         puts "Can't find address for host #{repohost}"
         exit
     end
+    repo_uri.host = opts.repo
+    opts.repo = repo_uri.to_s
 end
 
 curlopts = ["-F type=#{opts.type}"]
 curlopts.push "-F debug=yes" if opts.debug
 curlopts.push "-F force=yes" if opts.force
+curlopts.push "-F rhel=#{opts.rhel}" if opts.rhel
 curlopts.push("-F keep=#{opts.keep}")
 
 info "Using C-Pod #{opts.repo}\n"
 files = ARGV.select { |f| File.exist?(f) ? true: ( puts "File #{f} not found"; false ) }
 files.each do |f|
     begin
-        parsepkg(File.basename(f))
+        parsepkg(File.basename(f), opts.rhel)
         info "Uploading #{f}\n"
-        cmd = "curl -f -# -w '%{http_code}' #{curlopts.join(' ')} -F pkgfile=@#{f} http://#{opts.repo}/bin/rx_pkg.cgi"
+        cmd = "curl -f -# -w '%{http_code}' #{curlopts.join(' ')} -F pkgfile=@#{f} #{opts.repo}/bin/rx_pkg.cgi"
         puts `#{cmd}`
     rescue
         puts "#{$!}, skipping...\n"
@@ -83,6 +93,6 @@ end
 
 info "Rebuilding Indices\n"
 curlopts.push("-F rebuild=yes")
-system("curl -f --silent #{curlopts.join(' ')} http://#{opts.repo}/bin/rx_pkg.cgi")
+system("curl -f --silent #{curlopts.join(' ')} #{opts.repo}/bin/rx_pkg.cgi")
 
 # vim: ft=ruby sts=4 sw=4 ts=8

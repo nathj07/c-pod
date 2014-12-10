@@ -2,26 +2,24 @@
 #
 # Parses name, version etc from a package name
 #
-def parsepkg package
+def parsepkg package, force_rhel = nil
     raise "Can't parse package name '#{package}'" unless /(?<pkgname>^.*?)-(?<ver>[0-9\.]*\d)[.-](?<pkginfo>.*)$/ =~ package
 
     info = { name: pkgname, version: ver }
     pkgparts = pkginfo.split /[.-]/
-    info[:format] = pkgparts.pop
-    case info[:format]
+    case info[:format] = pkgparts.pop
     when 'rpm'
-	info[:arch] = pkgparts.pop
+        info[:arch] = pkgparts.pop
         raise "Architecture '#{info[:arch]}' is not supported" unless ['x86_64','noarch'].include? info[:arch]
-	info[:rhel] = if pkgparts.select { |c| c =~ /^(rh)?el5(_.*)?$/ }.size > 0
-		   '5'
-	       elsif pkgparts.select { |c| c =~ /^(rh)?el6(_.*)?/ }.size > 0
-		   '6'
-	       else
-		   '6' # put unlabelled ones in 5
-	       end
+        if pkgparts.detect { |c| /^(?:rh)?el(\d)(_.*)?$/ =~ c }
+            info[:rhel] = $~[1]
+        else
+            raise "Can't determine CentOS release for '#{package}'. Force with -c option" unless force_rhel
+            info[:rhel] = force_rhel
+        end
     when 'gem'
     else
-        raise "Suffix #{suffix} is not a recognized package type"
+        raise "Suffix #{info[:format]} is not a recognized package type"
     end
     return info
 end

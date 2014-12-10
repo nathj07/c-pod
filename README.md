@@ -2,26 +2,30 @@
 ------------------
 
 This GIT repository contains a system for automatically installing, configuring
-and running CentOS machines. When the repository is configured with webserving
+and running CentOS and Ubuntu machines. When the repository is configured with webserving
 capabilities it becomes a _C-Pod_. When running on hardware capable of
 virtualization it facilitates the easy creation and access to Virtual Machines
-using KVM.
+using KVM and LXC Containers using Docker.
 
-There are two distinct types of C-Pod:
+There are three flavours of C-Pod:
 
-* A Repository Host.
+* A Repository Host:
     This uses webserver to host Kickstart scripts, Yum and Gem repositories, and Chef Solo recipes
     Build using the recipe 'c-pod::repo_host'
 
-* A Virtual Machine Host.
+* A Virtual Machine Host:
     This uses KVM to host Virtual Machines. Note that it needs a Repository Host to create the VM's
     Build using the recipe 'c-pod::kvm_host'
 
-These two functions may be combined together. Build this using the default recipe 'c-pod'
+* A Docker Container Host:
+    This uses [Docker](http://docker.com) to host LXC Containers.
+    Currently this is automatically done by the Vagrant provisioning. Chef recipe to follow.
+
+These may be combined together as shown by the default Chef recipe 'c-pod'
 
 ## Overview
 
-This repository is designed to be used in two ways:
+The Git repository is designed to be used in two ways:
 
 * As the source of the content and code for a *C-Pod*:
     * This [README](README.md)!
@@ -41,6 +45,9 @@ This repository is designed to be used in two ways:
     * A `gembuild` directory for packaging Ruby GEMs
     * A `chef` directory for creating Chef cookbooks and recipes
 
+This latter function is greatly facilitated by the provision of a [Docker
+container](DOCKER.md) for RPM building: `townsen-rpmbuild`.
+
 ## Use as a C-Pod Webserver
 
 C-Pod be used to configure itself with a simple bootstrapping operation in three
@@ -48,12 +55,21 @@ ways:
 
 ### Using Vagrant
 
-To create a repository host install Vagrant with a provider of your choice and
-execute:
+Currently the base boxes exist for VMware Fusion only. So you will need to install:
+* VMware Fusion, and 
+* the Vagrant VMware Fusion provider.
+
+To create a repository host execute:
 
     vagrant up
 
 You may need to add `--provider=vmware_fusion`
+
+Note that in the Vagrantfile the hostname must be specified. If you want to use
+a `.local` name then use just a simple name with no dots. This will
+automatically be suffixed by Avahi. If you do suffix it a loopback interface
+entry will be generated in `/etc/hosts`. That will interfere with Docker
+container setup on the same machine.
 
 ### From an existing C-Pod
 
@@ -82,10 +98,11 @@ Note that this installs a dual-function C-Pod as described above. Use the recipe
 Use `chef-solo` with the runlist override and local cookbooks, from the root of
 the cloned repository:
 
-    cd chef chef-solo -c config.rb -o recipe[c-pod::setup]
+    cd chef && chef-solo -c solo.rb -o recipe[c-pod::repo_host]
 
-Note that after this configuration you still have to configure the large
-binaries. See the [Notes](#binaries) section at the end
+Note that after this configuration you still have to configure the data
+directory that contains large binaries, recipes and packages. See the
+[Notes](#cpoddata) section at the end
 
 ## Use for Building Packages
 
@@ -147,7 +164,10 @@ Note that the package release is dot-delimited to match they style of RPMforge
 and EPEL. If the *ip* was part of the release number that would signify that we
 actually changed something in the package.
 
-## Install Using Kickstart
+## Creating Machine Images
+Note that the use of Docker containers is recommended but legacy methods of creating machine images are provided.
+
+### Remote Install Using Kickstart
 
 First download an image file to boot the OS for a networked install. These image
 files are available in the [downloads](/downloads/) directory for each supported
@@ -168,11 +188,30 @@ In both cases the desired FQDN (fully qualified domain name) can be an existing
 name or an mDNS name (ending in `.local`). If the name exists in the DNS system
 then the IP address will be configured, otherwise the network will use DHCP.
 
-### Notes on VM types
+Notes on VM types:
+
 * Prefixes indicate the CentOS version: `centos6` for CentOS 6, and `centos5` for CentOS 5
 * Kickstart definitions are suffixed to denote Virtualization technology:
     * `-kvm` denotes KVM based Virtual Machines (and uses device `vda`)
     * `-vm` denotes VMware, uses device `sda` and include an installation of VMware tools
+
+### Creating Virtual Machines
+
+The script `mk_kvm` can be used by the root user on a C-Pod host to create a
+KVM.  In order to correctly determine the network parameters from the hostname
+given, a site-specific mapping table must be provided in the file
+`bin/netmask_table`. A sample file is provided. Note that this file is backed
+up by the `update_repo` script.
+
+
+### Creating Docker Containers
+
+By default the C-Pod runs a Docker server unsecured on port 2375. To access this
+use:
+
+    export DOCKER_HOST=tcp://<c-pod-server-fqdn>:2375
+
+See [the Docker notes](DOCKER.md) for details
 
 <a name="gem_setup"></a>
 ## GEM Repository
@@ -440,9 +479,12 @@ your browser proxy to use:
     http://<%= cgi.server_name %>/c-pod.pac
 
 Safari, Firefox and Chrome have all be tested. Note that at time of writing
-Cisco AnyConnect VPN is incompatible with the native Mavericks proxy support.
+Cisco AnyConnect VPN is incompatible with the native Mac OS X proxy support.
 Use Firefox as a workaround.
 
+Note that this is a *default* file. The recommended practice is for the site
+maintainer to construct a `cpod.pac` file. This file will be ignored by git,
+and will be replicated by `update_repo`.
 
 ### Advanced Web Proxying
 
@@ -498,10 +540,13 @@ built with changes appropriate to the C-Pod's use of libvirtd's network setup.
 
 ### Supported OS Versions
 
-ONE point release of each major release of CentOS is supported at any given
-time.  Currently these are Centos 5.9 and Centos 6.4
+One point release of each major release of various Operating Systems is supported at any given
+time. Currently these are:
 
-Support for Ubuntu is being considered.
+* Centos 5.9
+* Centos 6.6
+* Centos 7.0
+* Ubuntu 14.10
 
 ### Apache Configuration
 
@@ -512,25 +557,56 @@ as part of the recipe:
   `c-pod.conf.erb` which is processed by ERB to create the file
 `/etc/httpd/conf.d/_c-pod.conf`. The _DocumentRoot_ used is determined by the
 current repository location
+
 * Set the permissions of the tree to be owned by the Apache user: `chown -R
   apache.apache /data/c-pod`
 
-<a id=binaries></a>
-### Large Binaries
+<a id=cpoddata></a>
+### C-Pod Data
 
-The large binary content required for OS installations are kept outside of the
-repository and accessed via symbolic links. These links are coded to link to
-immediate peer directories of the main repo with the same name: eg. the
-`www/downloads` directory is linked to `../downloads` relative to the repo.  You
-can create these links,  mount the images and create the OS mirror using the
-`bin/mk_osmirror` command.
+The bulk of a C-Pod installation consists of site-specific Chef recipes,
+downloads, RPM and GEM packages, ISO images and OS installation trees etc.
+This data is kept outside of the repository in a separat directory by default
+named '/srv/cpoddata', although this can be changed.  It contains the following
+subdirectories:
 
-Alternatively you can create this tree from a mirror site using rsync. See the
-`bin/centos_mirror` script for ideas.
+* `cookbooks`: Chef recipes.
+* `downloads`: Any sort of useful file
+* `gem_repo`: A GEM repository
+* `osmirror`: A mirror of various Operating Systems
+* `yum_repos`: YUM repositories
 
-The Gem and Yum repository trees are also held outside the repo, and populated
-manually. In other words you need to copy the `.rpm` and `.gem` files into the
-appropriate directory after building them and then run the command
-`bin/rebuild_indexes`. The utility `bin/pushpkg` will do this using HTTP
-allowing you to push locally made packages directly to the (remote) C-Pod,
-automatically rebuilding the indexes.
+These are accessed from the webserver via symbolic links that are setup by the
+`c-pod::repo_structure` recipe at installation time. For example the repository
+`www/downloads` directory is linked to `/srv/cpoddata/downloads`.
+
+Although the structure is setup at installation, the content isn't. If you have an existing C-Pod
+that you wish to keep up to date with use the `update_repo` script.
+
+Content is added in the following ways:
+
+#### Chef Recipes
+
+Clone a Git repository containing cookbooks into `/srv/cpoddata`. The first
+level will be the cookbook name.
+
+#### OS Mirror
+
+Create the OS mirror using the `bin/mk_osmirror` command. Which requires you
+have ISO images.  Alternatively you can create this tree from a mirror site
+using the `centos_mirror` script.
+
+#### GEM and YUM Repositories
+
+These can be populated manually in two ways:
+
+* On the server by copying the `.rpm` and `.gem` files into the appropriate
+  directory (after building them) and then running the script
+`rebuild_indexes`.
+
+* On your local machine by using the script `bin/pushpkg` to upload packages
+  using HTTP.  This will initiate an index rebuild automatically after upload.
+
+#### Downloads
+
+These must be copied manually into the downloads directory.

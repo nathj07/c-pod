@@ -25,7 +25,9 @@ Vagrant.configure("2") do |config|
     config.vm.synced_folder "../cpoddata", cpod_config[:cpod][:datadir]
   end
 
-  config.vm.hostname = cpod_config[:cpod][:server_name]
+  # DON'T ADD .local as it then puts it in /etc/hosts as loopback address
+  # which interferes with mDNS resolution
+  config.vm.hostname = cpod_config[:cpod][:server_name].rpartition('.')[0]
 
   config.vm.network "public_network"
 
@@ -63,18 +65,38 @@ Vagrant.configure("2") do |config|
 
   # Note if the chef site is down this can hang vagrant up
   # and return invalid version errors
-  config.omnibus.chef_version = :latest
+  config.omnibus.chef_version = '11.16.4' #  or :latest
 
   config.vm.provision "chef_solo" do |chef|
      chef.cookbooks_path = "chef/cookbooks"
      chef.add_recipe "c-pod::repo_host"
      chef.json = cpod_config
+     chef.custom_config_path = "chef/vagrant_solo.conf"
   #  chef.arguments = '--log_level=debug'
   end
 
   # Avahi needs a kick as the '.local' name isn't advertized...
 
-  config.vm.provision "shell", inline: "service avahi-daemon restart"
+  config.vm.provision "shell", inline: "service avahi-daemon restart && echo Avahi restarted"
+
+  config.vm.provision "shell",
+    inline: <<-DOCKER
+      cp /vagrant/docker/docker.defaults /etc/default/docker
+      echo Use DOCKER_HOST=tcp://#{cpod_config[:cpod][:server_name]}.local:2375
+    DOCKER
+
+  config.vm.provision :docker do |d|
+    d.version = :latest
+    d.images  = ['centos:centos6','centos:centos7']
+    d.build_image "/vagrant/docker/centos6", args: "-t 'townsen/rpmbuild:centos6'"
+    d.build_image "/vagrant/docker/centos7", args: "-t 'townsen/rpmbuild:centos7'"
+    d.run "townsen/rpmbuild6",
+      image: "townsen/rpmbuild:centos6", cmd: "bash -l",
+      args: "-i -t -h rpmbuilder6 -v '/vagrant:/home/townsen/c-pod'"
+    d.run "townsen/rpmbuild7",
+      image: "townsen/rpmbuild:centos7", cmd: "bash -l",
+      args: "-i -t -h rpmbuilder7 -v '/vagrant:/home/rpmbuilder/c-pod'"
+  end
 
 end
 

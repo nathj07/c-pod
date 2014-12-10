@@ -1,0 +1,9 @@
+# Docker defaults
+# Note that Ubuntu packages use DOCKER_OPTS, whereas current
+# RPM packages use OPTIONS. Since we use Chef to install binary
+# version on CentOS then we can adopt a common one.
+
+DOCKER_OPTS="--host=tcp://0.0.0.0:2375 --host=unix:///var/run/docker.sock --icc=true"
+
+# Tweak where Docker's temporary files go.
+# export TMPDIR="/mnt/bigdrive/docker-tmp"

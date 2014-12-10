@@ -35,4 +35,10 @@ def value_for_version hash
     hash[key]
 end
 
+# Translate an interface into a CIDR address
+#
+def cidr interface
+    node[:network][:interfaces][interface.to_sym][:routes].detect {|r| r[:family] == "inet" and r[:destination] != "default" }[:destination]
+end
+
 # vim: sts=4 sw=4 ts=8
