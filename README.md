@@ -19,7 +19,7 @@ There are three flavours of C-Pod:
 
 * A Docker Container Host:
     This uses [Docker](http://docker.com) to host LXC Containers.
-    Currently this is automatically done by the Vagrant provisioning. Chef recipe to follow.
+    Currently this is automatically done by the Vagrant provisioning, and a Chef recipe 'c-pod::docker_host'.
 
 These may be combined together as shown by the default Chef recipe 'c-pod'
 
@@ -28,12 +28,14 @@ These may be combined together as shown by the default Chef recipe 'c-pod'
 The Git repository is designed to be used in two ways:
 
 * As the source of the content and code for a *C-Pod*:
-    * This [README](README.md)!
+    * This [README](README.md)
     * [Kickstart](/ks) definitions for automated installs of standard CentOS
       configurations
-    * A Mirror of the [CentOS](#os_mirror) distributions
-    * [YUM repositories](/yum_repos) for distributed, lifted and custom RPMs
-    * A [GEM repository](/gem_repo/gems)
+    * A Mirror of the [CentOS](#os_mirror) distributions together with a script
+      `centos_mirror` to keep it up-to-date. 
+    * [YUM repositories](/yum_repos) for distributed, lifted and custom RPMs. There
+      is a script `pushpkg` to keep these up-to-date.
+    * A [GEM repository](/gem_repo/gems) (`pushpkg` also works for Gems).
     * Chef cookbooks for use with `chef-solo`. This is a
       simple way to use Chef without the complexity of a `chef-server` and
 `knife` style installation.
@@ -45,8 +47,8 @@ The Git repository is designed to be used in two ways:
     * A `gembuild` directory for packaging Ruby GEMs
     * A `chef` directory for creating Chef cookbooks and recipes
 
-This latter function is greatly facilitated by the provision of a [Docker
-container](DOCKER.md) for RPM building: `townsen-rpmbuild`.
+This latter function is greatly facilitated by the provision of a
+[Docker image](DOCKER.md) for RPM building: `townsen-rpmbuild`.
 
 ## Use as a C-Pod Webserver
 
@@ -107,13 +109,19 @@ directory that contains large binaries, recipes and packages. See the
 ## Use for Building Packages
 
 Clone the repository and develop and test the packages on your 'home' machine.
-When they are ready and have been tested locally, commit the changes and spin up
-an empty VM. Then try the packaging again, so that it takes place in a 'pure'
-environment, highlighting any packaging or runtime dependencies.
+You can easily do this by doing `vagrant up` to start a VM, and then creating
+one of the provided Docker Images. These are structured so that the rpmbuild
+directory is mounted all the way to the container, so changes that are made
+during the packaging are easy to commit back.
 
 To avoid storing build artifacts in the repo (despite the fact that the Gem and
 RPM build trees are held within it), there are `.gitignore` files that exclude
 the built binaries and packaging by-products.
+
+When the packages are ready you can `pushpkg` them to the C-Pod itself, spin up
+a fresh container and install them in a 'clean' environment, highlighting any
+packaging or runtime dependencies.
+
 
 ### How to build a GEM
 
@@ -144,15 +152,22 @@ to obtain this.
 When creating new specfiles that have different structure depending on CentOS 5
 or 6, use the following conditional macro structure:
 
-        %if 0%{?centos} == 6 Do CentOS 6 specific stuff %else Do CentOS 5
-specific stuff %endif
+```
+%if 0%{?centos} == 6 Do CentOS 6 specific stuff %else Do CentOS 5 specific stuff %endif
+```
 
 #### RPM Package Names
 
 To distinguish between packages such as ruby or openssh, which are simply
 repackages of existing ones, and truly custom stuff we will adopt the RPMforge
 convention of using a dot-delimited release qualifier for the former. So our
-repackaged builds will be 'el6.ip'. and custom packages will be 1ip.el6.
+repackaged builds will contain 'el6.cp'. and custom packages '_N_cp.el6' (where
+N is the release number).
+
+A convention with many RPM packages is to use '.el6' or '.rhel5' in the name to
+indicate which OS release. This value is used by `pushpkg` to determine the right
+repository tree. For packages that don't contain such an indicator you can now
+specify the version as an option.
 
 #### Building RPM Packages
 
@@ -190,7 +205,7 @@ then the IP address will be configured, otherwise the network will use DHCP.
 
 Notes on VM types:
 
-* Prefixes indicate the CentOS version: `centos6` for CentOS 6, and `centos5` for CentOS 5
+* Prefixes indicate the CentOS version: `centosN` where N is the major release.
 * Kickstart definitions are suffixed to denote Virtualization technology:
     * `-kvm` denotes KVM based Virtual Machines (and uses device `vda`)
     * `-vm` denotes VMware, uses device `sda` and include an installation of VMware tools
@@ -286,7 +301,7 @@ packages to enable this:
 A C-Pod has at least four repositories (and more may be added for installation
 specific packages outside the scope of C-Pod). These are:
 
-*  Unstable Custom RPMs
+*  Custom RPMs (Unstable)
 
    When developing a new release of a custom RPM this repository is used. This
 repository is disabled by default and should only be enabled on test machines.
@@ -305,7 +320,7 @@ repository. It also contains packages that may not be customized or altered in
 any way, but are just built and deployed here. They are considered stable and
 are used as part of the base Kickstart builds.
 
-*  CentOS Distribution
+*  CentOS Distribution and Updates
 
    To save bandwidth and speed-up networked installs the Distribution repositories
 are available, both original and updates.
@@ -317,7 +332,7 @@ the $releasever variable.  This enables us to have a single repository
 configuration [file](/samples/c-pod.repo) that automatically points to the
 correct place.
 
-The repo names are of the form:
+The repo names are modeled on the CentOS mirror layout and are of the form:
 
     TYPE/$releasever
 
@@ -327,8 +342,8 @@ Where:
     * 'lifted': Useful and required packages from Epel and RPMforge
     * 'stable': Custom packages tested and 'in production'
     * 'unstable': Custom packages under development/testing
-* $releasever is supplied by the OS: 6Server, 5Server (for RedHat), 5, 6 (for
-  Centos) etc.
+* $releasever is supplied by the OS: 5Server, 6Server, 7Server (for RedHat), 5, 6, 7
+    (for CentOS).
 
 
 ### Missing Packages
@@ -401,12 +416,11 @@ use by the `recipe_url` parameter of `chef-solo`.
 <a name="chef_install"></a>
 ### Manual Installation
 
-A pre-built binary version of the Chef GEM is available in the C-Pod GEM
-Repository. So first [set this up](#gem_setup) then type:
+The easiest way is to download and install a pre-built package from [Chef](https://downloads.chef.io).
+
+Note that the gem `ruby-shadow` is required to allow Chef to set passwords.
 
     gem install ruby-shadow chef
-
-(Note `ruby-shadow` is required to allow Chef to set passwords).
 
 Create a configuration file [/etc/chef/solo.rb](/samples/solo.rb):
 
@@ -414,25 +428,13 @@ Create a configuration file [/etc/chef/solo.rb](/samples/solo.rb):
     file_cache_path '/var/chef/cache'
     cookbook_path   '/var/chef/cookbooks'
     recipe_url      'http://<%= cgi.server_name %>/bin/recipes.cgi'
-    json_attribs '/etc/chef/default.json'
+    json_attribs '/etc/chef/cpod.json'
 ```
-Create a simple JSON configuration file [/etc/chef/default.json](/samples/default.json):
+Create a simple JSON configuration file [/etc/chef/cpod.json](/samples/cpod.json):
 
 ``` json
     { "run_list": [ "recipe[c-pod::client]" ] }
 ```
-
-### Upgrading
-
-Since chef has many GEM dependencies that are binary and require compilation you
-will need to firstly install development tools. Then modify `/etc/gemrc` to
-allow access to Rubyforge as the default [/etc/gemrc](/samples/gemrc) created by
-Kickstart restricts you to the C-Pod GEM repository:
-
-    gem: --no-document --source http://<%= cgi.server_name %>/gem_repo
-
-Then you can install the latest version of the GEM, note that this takes a while
-- it is a big package!
 
 ### Running Chef Solo
 
