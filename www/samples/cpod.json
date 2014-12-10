@@ -1,4 +1,3 @@
 {
-  "cpod": { "server_name": "<!--#echo var="SERVER_NAME" -->" },
-  "yum": { "main": { "multilib_policy": "best" } }
+  "cpod": { "url": "http://<!--#echo var="SERVER_NAME" -->" },
 }

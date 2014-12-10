@@ -13,3 +13,6 @@
 [submodule "chef/cookbooks/ulimit"]
 	path = chef/cookbooks/ulimit
 	url = https://github.com/bmhatfield/chef-ulimit
+[submodule "chef/cookbooks/c-pod"]
+	path = chef/cookbooks/c-pod
+	url = ../c-pod-chef
