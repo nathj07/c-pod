@@ -28,9 +28,9 @@ if /\/(?<pathinfo>.+)/ =~ cgi.path_info
 	exit 2
     end
     archive_cmd = "cd #{data}/cookbooks && git archive --prefix=cookbooks/ --format=tgz #{treeish} 2>/dev/null"
-    cmd = "(#{archive_cmd}) | bsdtar -cz --exclude='*/.git*' -f - -C #{repo}/chef cookbooks @-"
+    cmd = "(#{archive_cmd}) | bsdtar -czL --exclude='*/.git*' -f - -C #{repo}/chef cookbooks @-"
 else
-    cmd = "bsdtar -cz --exclude='*/.git*' -f- -C #{repo}/chef cookbooks -C #{data} cookbooks"
+    cmd = "bsdtar -czL --exclude='*/.git*' -f- -C #{repo}/chef cookbooks -C #{data} cookbooks"
 end
 cgi.out('Content-Disposition' => 'attachment; filename=recipes.tgz',
 	'Content-Type' => 'application/octet-stream') do
