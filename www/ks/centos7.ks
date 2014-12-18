@@ -4,7 +4,7 @@
 install
 lang en_GB.UTF-8
 keyboard us
-timezone America/LosAngeles
+timezone America/Los_Angeles
 auth --useshadow --enablemd5
 selinux --disabled
 firewall --disabled
