@@ -16,4 +16,4 @@ YUMCONF
 
 mkdir /root/saved.repos.d
 mv /etc/yum.repos.d/CentOS*  /root/saved.repos.d/
-wget -O /etc/yum.repos.d/c-pod.repo http://<!--#echo var=SERVER_ADDR -->/samples/c-pod.repo
+curl -f http://<!--#echo var=SERVER_ADDR -->/samples/c-pod.repo -o /etc/yum.repos.d/c-pod.repo

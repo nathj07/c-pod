@@ -14,6 +14,8 @@ eula --agreed
 ignoredisk --only-use=sda
 reboot
  
+user --name=vagrant --password=vagrant --plaintext
+
 network --device eth0 <!--#exec cgi="/bin/netcfg.centos.cgi" -->
 
 zerombr
@@ -32,6 +34,17 @@ bootloader --location=mbr --append="console=tty0 net.ifnames=0"
 %packages --nobase --ignoremissing
 @core
 net-tools
+avahi-daemon
+nss-mdns
+perl
+ruby
+ruby-devel
 %end
 
-<!--#include virtual="include/yum-repo.ks" -->
+%post --interpreter /bin/bash
+
+<!--#include virtual="include/advertize.ks" -->
+<!--#include virtual="include/vmware_tools.ks" -->
+<!--#include virtual="include/vagrant.ks" -->
+
+%end

@@ -22,5 +22,4 @@ zerombr
 <!--#include virtual="include/advertize.ks" -->
 <!--#include virtual="include/vmware_tools.ks" -->
 <!--#include virtual="include/setuproot.ks" -->
-<!--#include virtual="include/rubygems.ks" -->
 <!--#include virtual="include/chef.ks" -->

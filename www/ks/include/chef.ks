@@ -1,5 +1,6 @@
 # Setup Chef in the post-install phase
-# Note that the installation of Chef is now done prior to this via RPM
+# Note that the installation of Chef is done separately
+# (By an Omnibus RPM or Vagrant etc.)
 
 mkdir /etc/chef
 
@@ -15,8 +16,8 @@ CONFIG
 cat <<'JSON' > /etc/chef/cpod.json
 {
   "cpod": {
-    "server_name": "<!--#echo var="SERVER_NAME" -->"
+    "url": "http://<!--#echo var="SERVER_NAME" -->"
   },
-  "run_list": [ "recipe[c-pod::client]" ]
+  "run_list": [ "recipe[c-pod::client_yum_repo]" ]
 }
 JSON
