@@ -1,6 +1,7 @@
 # Minimal file for CentOS 7
 # Without Network Manager or firewall or SE Linux
 
+text
 install
 lang en_GB.UTF-8
 keyboard us
@@ -8,8 +9,7 @@ timezone America/Los_Angeles
 auth --useshadow --enablemd5
 selinux --disabled
 firewall --disabled
-#services --enabled=NetworkManager,sshd
-services --enabled=sshd
+services --disabled=NetworkManager --enabled=network,sshd
 eula --agreed
 ignoredisk --only-use=sda
 reboot
@@ -17,6 +17,10 @@ reboot
 network --device eth0 <!--#exec cgi="/bin/netcfg.centos.cgi" -->
 
 zerombr
+
+# Setup bootloader disabling 'Predictable Network Names'
+#
+bootloader --location=mbr --append="console=tty0 net.ifnames=0"
 <!--#include virtual="include/disk_lvm_7.ks" -->
  
 <!--#include virtual="include/rootpw_secret.ks" -->
@@ -27,4 +31,5 @@ zerombr
  
 %packages --nobase --ignoremissing
 @core
+net-tools
 %end
