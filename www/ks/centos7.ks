@@ -1,4 +1,4 @@
-# Minimal file for CentOS 7
+# Minimal file for CentOS 7 with MBR and classic partitions
 # Without Network Manager or firewall or SE Linux
 
 text
