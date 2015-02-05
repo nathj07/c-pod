@@ -61,6 +61,10 @@ Vagrant.configure("2") do |config|
         INLINE
   end
 
+  # Avahi needs a kick as the '.local' name isn't advertized...
+
+  config.vm.provision "shell", inline: "service avahi-daemon restart && echo Avahi restarted"
+
   # Chef
 
   config.vm.provision "chef_solo" do |chef|
@@ -72,10 +76,6 @@ Vagrant.configure("2") do |config|
      chef.custom_config_path = "chef/vagrant_solo.conf"
   #  chef.arguments = '--log_level=debug'
   end
-
-  # Avahi needs a kick as the '.local' name isn't advertized...
-
-  config.vm.provision "shell", inline: "service avahi-daemon restart && echo Avahi restarted"
 
   config.vm.provision "shell",
     inline: <<-DOCKER
