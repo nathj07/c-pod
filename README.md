@@ -460,6 +460,15 @@ local `.ssh/config` file as follows:
     Host ds*.local cpod*.local
     ProxyCommand /usr/bin/nc -X 5 -x <%= cgi.server_name %>:1080 %h %p
 
+If you want most `.local` names to reside on the C-Pod, but have some that do not
+(for example a C-Pod running inside a virtual machine `cpod.local`) you can invert this using:
+
+    Host cpod.local
+    ProxyCommand none
+
+    Host *.local
+    ProxyCommand /usr/bin/nc -X 5 -x <%= cgi.server_name %>:1080 %h %p
+
 The `nc` command is standard under MacOS - you may need to install it if using
 another OS.
 
