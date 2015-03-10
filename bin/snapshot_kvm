@@ -1,0 +1,127 @@
+#!/usr/bin/env ruby
+#
+# For Windows
+# Create a snapshot: lvcreate -s ssd/windemo -n win01 -L 10G
+# Import: virt-install --ram=8192 --vcpus=2 --name win01 --disk path=/dev/ssd/win01 --graphics vnc,listen=0.0.0.0,password=secret --import --os-type=windows --os-variant=win7 --noautoconsole --wait=0
+#
+#
+require 'optparse'
+require 'ostruct'
+
+def info msg
+    print "\033[32m#{msg}\033[0m"
+end
+
+types = [:centos5, :centos6, :centos7, :ubuntu14, :win7]
+
+opts = OpenStruct.new(
+    type: :win7,
+    vcpus: 2,
+    delta: 2,
+    ram: 2,
+    vg: 'vg00',
+    snapshot: ''
+)
+
+OptionParser.new do |o|
+    o.banner = "Usage: #{$0} [options] name"
+    o.separator ""
+    o.separator "Snapshot a KVM virtual machine"
+    o.separator "Options:"
+
+    o.on_tail( '-?', '--help', 'Display this screen' ) do
+        puts o
+        exit
+    end
+    o.on('-c', '--vcpus N', Integer, "Number of CPUs (default #{opts.vcpus})") do |n|
+        opts.vcpus = n
+    end
+    o.on('-d', '--delta N', Integer, "Size of delta in GB (default #{opts.delta})") do |d|
+        opts.delta = d
+    end
+    o.on('-r', '--ram GB', Integer, "Size of RAM in GB (default #{opts.ram})") do |n|
+        opts.ram = n
+    end
+    o.on('-s', '--snapshot LV', "Logical Volume to Snapshot") do |s|
+        opts.snapshot = s
+    end
+    o.on('-t', '--type TYPE', types, "OS type: #{types.join(', ')} (default: #{opts.type})") do |t|
+        opts.type = t
+    end
+    o.on('--vg VOLUMEGROUP', "LVM volume group (default #{opts.vg})") do |n|
+        opts.vg = n
+    end
+    o.parse! rescue (puts "Error: #{$!}"; puts o; exit)
+    if ARGV.size == 0
+	puts o.help
+	exit 2
+    end
+    `vgdisplay #{opts.vg}`
+    unless $? == 0
+	puts "Volume Group #{opts.vg} doesn't exist!"
+	puts o.help
+	exit 2
+    end
+    if opts.snapshot.empty?
+	puts "Snapshot Volume must be supplied!"
+	puts o.help
+	exit 2
+    else
+        lvsize = `lvs --units g -o lv_size --noheadings #{opts.vg}/#{opts.snapshot}`.strip
+        if $? == 0
+            info "The Snapshot volume #{opts.snapshot} exists (size #{lvsize})\n"
+            info "Maximum Delta is #{opts.delta}gb\n"
+        else
+            puts "Snapshot Volume #{opts.vg}/#{opts.snapshot} doesn't exist"
+            exit 2
+        end
+    end
+end
+
+ARGV.each do |name|
+
+  status = `virsh domstate #{name} 2>/dev/null`.strip
+  if $? == 0
+    info "Machine '#{name}' already exists, ignoring...\n"
+    next
+  end
+  system "lvcreate -s #{opts.vg}/#{opts.snapshot} -n #{name} -L #{opts.delta}G"
+  unless $? == 0
+    puts "Snapshot creation failed: #{$!}"
+    exit 2
+  end
+
+  install_options = ['--import']
+
+  case opts.type
+  when /^(centos|ubuntu)/
+    install_options << '--os-type=linux'
+    install_options << '--graphics none'
+    install_options << "--noautoconsole"
+  when /^win/
+    install_options << '--os-type=windows'
+    install_options << "--os-variant=#{opts.type}"
+    install_options << "--noautoconsole"
+    install_options << "--wait=0"
+    install_options << '--graphics vnc,listen=0.0.0.0,password=secret'
+  end
+
+  cmd = <<-RESURRECT.gsub(/\s+/,' ')
+    virt-install --name #{name}
+    --disk path=/dev/#{opts.vg}/#{name}
+    --vcpus=#{opts.vcpus}
+    --ram=#{(opts.ram*1024).to_s}
+    #{install_options.join(" ")}
+  RESURRECT
+  puts "Command:\n#{cmd}"
+  system cmd
+
+  case opts.type
+  when /^win/
+      port = `virsh vncdisplay #{name} 2>/dev/null`.strip.slice(1..-1).to_i + 5900
+      puts "#{name} now booting, use command 'open vnc://#{`hostname`.strip}:#{port}' on your Mac"
+  end
+
+end
+
+# vim: sts=2 sw=2 ts=8
