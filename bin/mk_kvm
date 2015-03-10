@@ -3,20 +3,22 @@
 require 'optparse'
 require 'ostruct'
 require 'socket'
+require 'uri'
 
 def info msg
     print "\033[32m#{msg}\033[0m"
 end
 
-types = [:centos5, :centos6, :centos7, :ubuntu14]
+types = [:centos5, :centos6, :centos7, :ubuntu14, :win7]
 
 opts = OpenStruct.new(
     type: :centos6,
     bridge: 'br0',
+    isopath: '/data/downloads',
     vcpus: 2,
     ram: 2,
     disk: 20,
-    repo: Socket.gethostname,
+    repo_url: ENV['CPOD_URL'] || "http://#{Socket.gethostname}",
     vg: 'vg00',
     force: nil,
     verbose: false
@@ -45,8 +47,8 @@ OptionParser.new do |o|
     o.on('-d', '--disk GB', Integer, "Size of disk in GB (default #{opts.disk})") do |n|
         opts.disk = n
     end
-    o.on('--cpod CPOD', "CPOD server for Kickstart (default #{opts.repo})") do |n|
-        opts.repo = n
+    o.on('--cpod CPOD', "C-POD Server URL (default #{opts.repo_url})") do |n|
+        opts.repo_url = n
     end
     o.on('--vg VOLUMEGROUP', "LVM volume group (default #{opts.vg})") do |n|
         opts.vg = n
@@ -71,20 +73,21 @@ OptionParser.new do |o|
 	puts o.help
 	exit 2
     end
+    opts.repo_url = URI(opts.repo_url)
 end
 
-if opts.repo.end_with? '.local' # Convert to IP address
-    repohost = opts.repo
-    opts.repo = nil
-    z = Socket.gethostbyname(repohost) rescue nil
-    if z
+if opts.repo_url.hostname.end_with? '.local' # Convert to IP address
+    name = opts.repo_url.hostname
+    if z = Socket.gethostbyname(name) rescue nil
         z.shift 3
         z.each do |a|
-            opts.repo = a.unpack('CCCC').join('.') if a.size == 4
+            name = a.unpack('CCCC').join('.') if a.size == 4
         end
     end
-    unless opts.repo
-        puts "Can't find address for host #{repohost}"
+    if name != opts.repo_url.hostname
+        opts.repo_url.hostname = name
+    else
+        puts "Can't find address for host #{name}"
         exit
     end
 end
@@ -122,44 +125,67 @@ ARGV.each do |fqdn|
   end
   install_options = []
   install_options << "--autostart"
-  install_options << "--noautoconsole" unless opts.verbose
   install_options << ((fqdn =~ /\.local$/) ? "--network network=default" : "--network bridge:#{opts.bridge}")
   case opts.type
   when :centos5
-    variant = '--os-variant=rhel5.4'
-    extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{fqdn}"
-    boot = "--location http://#{opts.repo}/osmirror/centos/5/os/x86_64"
+    variant = 'rhel5.4'
+    install_options << "--location #{opts.repo_url}/osmirror/centos/5/os/x86_64"
   when :centos6
-    variant = '--os-variant=rhel6'
-    extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{fqdn}"
-    boot = "--location http://#{opts.repo}/osmirror/centos/6/os/x86_64"
+    variant = 'rhel6'
+    install_options << "--location #{opts.repo_url}/osmirror/centos/6/os/x86_64"
   when :centos7
-    variant = '--os-variant=rhel7'
-    extra_args = "ks=http://#{opts.repo}/ks/#{opts.type}-kvm.ks?host=#{fqdn}"
-    boot = "--location http://#{opts.repo}/osmirror/centos/7/os/x86_64"
+    variant = 'rhel7'
+    install_options << "--location #{opts.repo_url}/osmirror/centos/7/os/x86_64"
   when :ubuntu14
-    variant = ''
-    iso = "#{data}/osmirror/ubuntu/14/isos/ubuntu-14.04-server-amd64.iso"
-    extra_args="auto=true hostname=#{fqdn} priority=critical url=http://#{opts.repo}/ks/./#{opts.type}.seed?host=#{fqdn}"
-    #extra_args="ks=http://#{opts.repo}/ks/#{opts.type}.ks?host=#{fqdn}"
-    boot = "--location http://#{opts.repo}/osmirror/ubuntu/14/isos/boot1404.iso"
-    #boot = "--cdrom #{iso}"
+    variant = 'generic'
+    install_options << "iso = #{data}/osmirror/ubuntu/14/isos/ubuntu-14.04-server-amd64.iso"
+    install_options << "--location #{opts.repo_url}/osmirror/ubuntu/14/isos/boot1404.iso"
+  when :win7
+    variant = 'win7'
+    `install -m 0775 -d #{opts.isopath}`
+    `curl -o #{opts.isopath}/win7.iso -z #{opts.isopath}/win7.iso #{opts.repo_url}/downloads/win7.iso`
+    install_options << "--cdrom #{opts.isopath}/win7.iso"
   end
+
+  case opts.type
+  when /^centos/
+    install_options << '--os-type=linux'
+    install_options << '--graphics none'
+    install_options << "--noautoconsole" unless opts.verbose
+    install_options << %{--extra-args="ks=#{opts.repo_url}/ks/#{opts.type}-kvm.ks?host=#{fqdn} console=tty0 console=ttyS0,115200"}
+  when /^ubuntu/
+    install_options << '--os-type=linux'
+    install_options << '--graphics none'
+    install_options << "--noautoconsole" unless opts.verbose
+    install_options << %{--extra_args="auto=true hostname=#{fqdn} priority=critical url=#{opts.repo_url}/ks/./#{opts.type}.seed?host=#{fqdn}"}
+  when /^win/
+    install_options << '--os-type=windows'
+    install_options << "--noautoconsole"
+    install_options << "--wait=0"
+    install_options << '--graphics vnc,listen=0.0.0.0,password=secret'
+    # These drivers don't seem to be necessary with libvirt 0.10.2 using QEMU hypervisor 0.12.1
+    # `curl -o #{opts.isopath}/virtio-win.iso -z #{opts.isopath}/virtio-win.iso #{opts.repo_url}/downloads/virtio-win.iso`
+    # install_options << "--disk path=#{opts.isopath}/virtio-win.iso,device=cdrom"
+  end
+
   mkvm = <<-MKVM.gsub(/\s+/,' ')
     virt-install --name #{name}
     --disk path=/dev/#{opts.vg}/#{name}
     --vcpus=#{opts.vcpus}
     --ram=#{(opts.ram*1024).to_s}
-    --graphics none
     #{install_options.join(' ')}
-    #{boot}
-    --extra-args="#{extra_args} console=tty0 console=ttyS0,115200"
-    --os-type=linux
-    #{variant}
+    --os-variant=#{variant}
   MKVM
   info "Building VM...\n"
   puts "Command:\n#{mkvm}"
   system mkvm
+
+  case opts.type
+  when /^win/
+      port = `virsh vncdisplay #{name} 2>/dev/null`.strip.slice(1..-1).to_i + 5900
+      puts "#{name} now booting, use command 'open vnc://#{`hostname`.strip}:#{port}' on your Mac"
+  end
+
 end
 
-# vim: sts=2 sw=2 ts=8
+# vim: ft=ruby sts=2 sw=2 ts=8
