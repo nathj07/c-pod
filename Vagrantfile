@@ -18,6 +18,9 @@ Vagrant.configure("2") do |config|
   cpod_config[:cpod][:server_name]  = 'cpod.local'
   cpod_config[:cpod][:repodir]      = '/vagrant'
 
+  # Disable default synced_folder
+  # config.vm.synced_folder "./", "/vagrant", disabled: true
+
   # Mount the data if it exists, otherwise it will be created in the VM
   #
   if Dir.exist? "../cpoddata"
