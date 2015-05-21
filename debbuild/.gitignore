@@ -1,0 +1,4 @@
+*.tar.gz
+dante-*/*
+!dante-*/debian
+dante-*/debian/dante-server*

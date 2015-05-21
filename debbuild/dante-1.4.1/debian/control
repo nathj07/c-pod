@@ -1,0 +1,27 @@
+Source: dante
+Section: universe/net
+Priority: optional
+Maintainer: Nick Townsend <nick.townsend@mac.com>
+Build-Depends: debhelper (>= 9), autotools-dev, bison, flex, libpam0g-dev
+Standards-Version: 3.9.5
+Homepage: http://www.inet.no/dante/
+
+Package: dante-server
+Version: 1.4.1-1
+Architecture: amd64
+Depends: gawk, libgl1-mesa-glx:amd64, cpio, file, mime-support, libfl-dev:amd64, \
+         libfakeroot:amd64, perl, libmagic1:amd64, m4, libsigsegv2:amd64, \
+	 libreadline6:amd64, flex
+Description: A free SOCKS v4/v5 client implementation
+  Dante is a free implementation of the SOCKS proxy protocol, version 4,
+  and version 5 (rfc1928). It can be used as a firewall between
+  networks. It is being developed by Inferno Nettverk A/S, a Norwegian
+  consulting company. Commercial support is available.
+  .
+  This package contains the dynamic libraries required to "socksify"
+  existing applications, allowing them to automatically use the SOCKS
+  protocol.
+#Package: dante-devel
+#Architecture: amd64
+#Depends: ${shlibs:Depends}, ${misc:Depends}
+#Description: Additional libraries required to compile programs that use SOCKS
