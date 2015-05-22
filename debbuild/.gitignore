@@ -2,3 +2,6 @@
 dante-*/*
 !dante-*/debian
 dante-*/debian/dante-server*
+dante-*/debian/dante-client*
+dante-*/debian/dante-devel*
+dante-*/debian/tmp/
