@@ -1,0 +1,5 @@
+# Automatically added by dh_installinit
+if [ -x "/etc/init.d/dante-server" ] || [ -e "/etc/init/dante-server.conf" ]; then
+	invoke-rc.d dante-server stop || exit $?
+fi
+# End automatically added section

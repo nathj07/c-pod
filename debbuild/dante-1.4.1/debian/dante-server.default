@@ -1,0 +1,4 @@
+# Defaults for the Dante SOCKS server
+# execute in daemon mode
+#
+DAEMON_ARGS="-D"

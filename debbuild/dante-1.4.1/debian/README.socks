@@ -1,0 +1,17 @@
+# Some notes on using SOCKS
+
+This package was built specifically for use by Docker servers
+
+# Systemd
+
+On Ubuntu 14.10 the systemd service is not used by default.
+
+# Errors
+
+## ConnectError:4
+
+This is when the SOCKS server cannot find a route to the target host.
+
+### ConnectError:8
+
+This is when the Docker server cannot connect to the given hostname.
